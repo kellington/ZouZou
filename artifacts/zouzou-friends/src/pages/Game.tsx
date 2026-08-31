@@ -126,36 +126,41 @@ export function Game() {
     if (puzzle.prefilled[r] === c) return;
 
     const current = grid[r][c];
-    let next: CellState = 'blank';
-    if (current === 'blank') next = 'note';
-    else if (current === 'note') next = 'cat';
-    else next = 'blank';
-
-    if (next === 'cat') {
-      if (puzzle.solution[r] !== c) {
-        const newLives = lives - 1;
-        setLives(newLives);
-        setMistakeCell({ r, c });
-        setTimeout(() => setMistakeCell(null), 600);
-        
-        const newGrid = [...grid];
-        newGrid[r] = [...grid[r]];
-        newGrid[r][c] = 'note';
-        setGrid(newGrid);
-
-        if (newLives <= 0) {
-          setGameState('lost');
-          if (safeMode === 'daily') {
-            resetStreak();
-          }
-        }
-        return;
-      }
-    }
+    const next: CellState = current === 'blank' ? 'note' : 'blank';
 
     const newGrid = [...grid];
     newGrid[r] = [...grid[r]];
     newGrid[r][c] = next;
+    setGrid(newGrid);
+  };
+
+  const handleCellDoubleClick = (r: number, c: number) => {
+    if (gameState !== 'playing') return;
+    if (puzzle.prefilled[r] === c) return;
+
+    if (puzzle.solution[r] !== c) {
+      const newLives = lives - 1;
+      setLives(newLives);
+      setMistakeCell({ r, c });
+      setTimeout(() => setMistakeCell(null), 600);
+
+      const newGrid = [...grid];
+      newGrid[r] = [...grid[r]];
+      newGrid[r][c] = 'note';
+      setGrid(newGrid);
+
+      if (newLives <= 0) {
+        setGameState('lost');
+        if (safeMode === 'daily') {
+          resetStreak();
+        }
+      }
+      return;
+    }
+
+    const newGrid = [...grid];
+    newGrid[r] = [...grid[r]];
+    newGrid[r][c] = 'cat';
     setGrid(newGrid);
 
     let catsCount = 0;
@@ -234,6 +239,7 @@ export function Game() {
           grid={grid} 
           mistakeCell={mistakeCell} 
           onCellClick={handleCellClick} 
+           onCellDoubleClick={handleCellDoubleClick}
           isWon={gameState === 'won'}
         />
       </div>
@@ -256,7 +262,7 @@ export function Game() {
           </li>
           <li className="flex gap-4 items-start">
             <PawIcon className="w-8 h-8 shrink-0 opacity-50 mt-1" /> 
-            <span>Tap once to place a note (paw print). Tap again to place a cat!</span>
+            <span>Tap once to mark no cat, tap again to clear it. Double-tap to place a cat!</span>
           </li>
         </ul>
         <ActionButton className="w-full mt-8" onClick={() => setShowRules(false)}>Got it!</ActionButton>

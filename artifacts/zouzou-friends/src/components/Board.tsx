@@ -1,6 +1,7 @@
 import { CellPos, Puzzle } from '../lib/puzzle';
 import { CatIcon, PawIcon } from './Icons';
 import { Lock } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 export type CellState = 'blank' | 'note' | 'cat';
 
@@ -9,11 +10,47 @@ interface BoardProps {
   grid: CellState[][];
   mistakeCell: CellPos | null;
   onCellClick: (r: number, c: number) => void;
+  onCellDoubleClick: (r: number, c: number) => void;
   isWon?: boolean;
 }
 
-export function Board({ puzzle, grid, mistakeCell, onCellClick, isWon }: BoardProps) {
+export function Board({
+  puzzle,
+  grid,
+  mistakeCell,
+  onCellClick,
+  onCellDoubleClick,
+  isWon,
+}: BoardProps) {
   const size = puzzle.size || 6;
+  const pendingTaps = useRef(new Map<string, number>());
+
+  useEffect(() => {
+    return () => {
+      for (const timer of pendingTaps.current.values()) {
+        window.clearTimeout(timer);
+      }
+      pendingTaps.current.clear();
+    };
+  }, []);
+
+  const handleCellTap = (r: number, c: number) => {
+    const key = `${r}-${c}`;
+    const pendingTap = pendingTaps.current.get(key);
+
+    if (pendingTap !== undefined) {
+      window.clearTimeout(pendingTap);
+      pendingTaps.current.delete(key);
+      onCellDoubleClick(r, c);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      pendingTaps.current.delete(key);
+      onCellClick(r, c);
+    }, 240);
+    pendingTaps.current.set(key, timer);
+  };
   
   const getBorders = (r: number, c: number) => {
     const reg = puzzle.regionMap[r]?.[c] ?? 0;
@@ -43,7 +80,7 @@ export function Board({ puzzle, grid, mistakeCell, onCellClick, isWon }: BoardPr
           return (
             <button
               key={`${r}-${c}`}
-              onClick={() => onCellClick(r, c)}
+              onClick={() => handleCellTap(r, c)}
               type="button"
               aria-label={`Row ${r + 1}, column ${c + 1}${isPrefilled ? ', locked cat' : state === 'cat' ? ', cat placed' : state === 'note' ? ', marked unavailable' : ''}`}
               disabled={isPrefilled || isWon}
