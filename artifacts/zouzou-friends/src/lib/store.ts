@@ -1,60 +1,166 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState } from 'react';
 
-type BestTimes = {
+type GameStore = {
   easy: number | null;
-  normal: number | null;
+  medium: number | null;
   hard: number | null;
   daily: number | null;
   lastDailyDate: string | null;
+  playerName: string;
+  dailyStreak: number;
+  lastPlayedDate: string | null;
 };
 
-const DEFAULT_TIMES: BestTimes = {
+const cookieName = 'zouzou-player';
+const cookieLifetimeSeconds = 60 * 60 * 24 * 400;
+
+const DEFAULT_STORE: GameStore = {
   easy: null,
-  normal: null,
+  medium: null,
   hard: null,
   daily: null,
   lastDailyDate: null,
+  playerName: '',
+  dailyStreak: 0,
+  lastPlayedDate: null,
 };
 
-export function useBestTimes() {
-  const [bestTimes, setBestTimes] = useState<BestTimes>(() => {
-    try {
-      const item = window.localStorage.getItem('zouzou-best-times');
-      if (item) {
-        const parsed = JSON.parse(item);
-        // Reset daily best if it's a new day
-        const today = new Date().toISOString().slice(0, 10);
-        if (parsed.lastDailyDate !== today) {
-          parsed.daily = null;
-          parsed.lastDailyDate = today;
-          window.localStorage.setItem('zouzou-best-times', JSON.stringify(parsed));
-        }
-        return parsed;
-      }
-    } catch (error) {
-      console.warn('Error reading localStorage', error);
+function utcDateKey(date = new Date()): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function yesterdayUtcKey(): string {
+  return utcDateKey(new Date(Date.now() - 86_400_000));
+}
+
+function readCookie(): Partial<GameStore> | null {
+  const prefix = `${cookieName}=`;
+  const value = document.cookie
+    .split('; ')
+    .find((part) => part.startsWith(prefix))
+    ?.slice(prefix.length);
+
+  if (!value) return null;
+  return JSON.parse(decodeURIComponent(value)) as Partial<GameStore>;
+}
+
+function writeCookie(store: GameStore): void {
+  document.cookie = `${cookieName}=${encodeURIComponent(
+    JSON.stringify(store),
+  )}; Max-Age=${cookieLifetimeSeconds}; Path=/; SameSite=Lax`;
+}
+
+function readLegacyStore(): Partial<GameStore> | null {
+  for (const key of ['zouzou-store', 'zouzou-best-times']) {
+    const item = window.localStorage.getItem(key);
+    if (!item) continue;
+
+    const parsed = JSON.parse(item) as Partial<GameStore> & {
+      normal?: number | null;
+    };
+
+    if (parsed.normal !== undefined && parsed.medium === undefined) {
+      parsed.medium = parsed.normal;
     }
-    return DEFAULT_TIMES;
-  });
 
-  const saveBestTime = (mode: keyof Omit<BestTimes, 'lastDailyDate'>, time: number) => {
-    setBestTimes((prev) => {
-      const currentBest = prev[mode];
-      if (currentBest === null || time < currentBest) {
-        const next = { ...prev, [mode]: time };
-        if (mode === 'daily') {
-          next.lastDailyDate = new Date().toISOString().slice(0, 10);
-        }
-        try {
-          window.localStorage.setItem('zouzou-best-times', JSON.stringify(next));
-        } catch (e) {
-          // ignore
-        }
-        return next;
-      }
-      return prev;
+    return parsed;
+  }
+
+  return null;
+}
+
+function loadStore(): GameStore {
+  try {
+    const stored = readCookie() ?? readLegacyStore() ?? {};
+    const today = utcDateKey();
+    const yesterday = yesterdayUtcKey();
+    const next: GameStore = { ...DEFAULT_STORE, ...stored };
+
+    if (next.lastDailyDate !== today) {
+      next.daily = null;
+    }
+
+    if (
+      next.dailyStreak > 0 &&
+      next.lastPlayedDate !== today &&
+      next.lastPlayedDate !== yesterday
+    ) {
+      next.dailyStreak = 0;
+    }
+
+    writeCookie(next);
+    return next;
+  } catch (error) {
+    console.warn('Unable to read local game preferences', error);
+    return DEFAULT_STORE;
+  }
+}
+
+export function useStore() {
+  const [store, setStore] = useState<GameStore>(loadStore);
+
+  const updateStore = useCallback((updates: Partial<GameStore>) => {
+    setStore((previous) => {
+      const next = { ...previous, ...updates };
+      writeCookie(next);
+      return next;
     });
-  };
+  }, []);
 
-  return { bestTimes, saveBestTime };
+  const saveBestTime = useCallback(
+    (mode: 'easy' | 'medium' | 'hard' | 'daily', time: number) => {
+      setStore((previous) => {
+        const currentBest = previous[mode];
+        if (currentBest !== null && time >= currentBest) return previous;
+
+        const next = { ...previous, [mode]: time };
+        if (mode === 'daily') {
+          next.lastDailyDate = utcDateKey();
+        }
+        writeCookie(next);
+        return next;
+      });
+    },
+    [],
+  );
+
+  const setPlayerName = useCallback(
+    (name: string) => {
+      updateStore({ playerName: name.trim().replace(/\s+/g, ' ') });
+    },
+    [updateStore],
+  );
+
+  const recordDailyWin = useCallback(() => {
+    const today = utcDateKey();
+    const yesterday = yesterdayUtcKey();
+
+    setStore((previous) => {
+      if (previous.lastPlayedDate === today) return previous;
+
+      const dailyStreak =
+        previous.lastPlayedDate === yesterday
+          ? previous.dailyStreak + 1
+          : 1;
+      const next = {
+        ...previous,
+        dailyStreak,
+        lastPlayedDate: today,
+      };
+      writeCookie(next);
+      return next;
+    });
+  }, []);
+
+  const resetStreak = useCallback(() => {
+    updateStore({ dailyStreak: 0, lastPlayedDate: null });
+  }, [updateStore]);
+
+  return {
+    store,
+    saveBestTime,
+    setPlayerName,
+    recordDailyWin,
+    resetStreak,
+  };
 }

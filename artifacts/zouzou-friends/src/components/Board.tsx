@@ -13,22 +13,32 @@ interface BoardProps {
 }
 
 export function Board({ puzzle, grid, mistakeCell, onCellClick, isWon }: BoardProps) {
+  const size = puzzle.size || 6;
+  
   const getBorders = (r: number, c: number) => {
-    const reg = puzzle.regionMap[r][c];
-    const t = r === 0 || puzzle.regionMap[r - 1][c] !== reg;
-    const b = r === 5 || puzzle.regionMap[r + 1][c] !== reg;
-    const l = c === 0 || puzzle.regionMap[r][c - 1] !== reg;
-    const ri = c === 5 || puzzle.regionMap[r][c + 1] !== reg;
+    const reg = puzzle.regionMap[r]?.[c] ?? 0;
+    const t = r === 0 || puzzle.regionMap[r - 1]?.[c] !== reg;
+    const b = r === size - 1 || puzzle.regionMap[r + 1]?.[c] !== reg;
+    const l = c === 0 || puzzle.regionMap[r]?.[c - 1] !== reg;
+    const ri = c === size - 1 || puzzle.regionMap[r]?.[c + 1] !== reg;
     return `${t ? 'border-t-[3px]' : 'border-t border-t-black/5'} ${b ? 'border-b-[3px]' : 'border-b border-b-black/5'} ${l ? 'border-l-[3px]' : 'border-l border-l-black/5'} ${ri ? 'border-r-[3px]' : 'border-r border-r-black/5'} border-board`;
   };
 
+  const getRegionClass = (reg: number) => {
+    return `region-${reg % 10}`;
+  };
+
   return (
-    <div className="grid grid-cols-6 grid-rows-6 w-full max-w-[400px] aspect-square mx-auto border-[4px] border-board rounded-2xl overflow-hidden touch-manipulation shadow-xl bg-white">
-      {puzzle.regionMap.map((row, r) =>
-        row.map((reg, c) => {
+    <div 
+      className="w-full max-w-[400px] aspect-square mx-auto border-[4px] border-board rounded-2xl overflow-hidden touch-manipulation shadow-xl bg-white grid"
+      style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${size}, minmax(0, 1fr))` }}
+    >
+      {Array.from({ length: size }).map((_, r) =>
+        Array.from({ length: size }).map((_, c) => {
           const isMistake = mistakeCell?.r === r && mistakeCell?.c === c;
           const isPrefilled = puzzle.prefilled[r] === c;
-          const state = grid[r][c];
+          const state = grid[r]?.[c] || 'blank';
+          const reg = puzzle.regionMap[r]?.[c] ?? 0;
 
           return (
             <button
@@ -40,8 +50,8 @@ export function Board({ puzzle, grid, mistakeCell, onCellClick, isWon }: BoardPr
               className={`
                 relative flex items-center justify-center cursor-pointer select-none transition-colors duration-200
                 ${getBorders(r, c)}
-                region-${reg}
-                ${isMistake ? 'animate-shakeX bg-red-400!' : ''}
+                ${getRegionClass(reg)}
+                ${isMistake ? 'animate-shakeX !bg-red-400' : ''}
                 ${isPrefilled ? 'opacity-90 cursor-default' : 'hover:brightness-95 active:brightness-90'}
               `}
             >

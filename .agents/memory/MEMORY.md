@@ -1,0 +1,1 @@
+- [OpenAPI numeric fields](openapi-numeric-fields.md) — use bounded number schemas for generated numeric values; integer currently emits an incompatible Zod API.

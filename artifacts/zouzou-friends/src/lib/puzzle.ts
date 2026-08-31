@@ -1,146 +1,332 @@
 export type CellPos = { r: number; c: number };
+export type Difficulty = 'easy' | 'medium' | 'hard';
+export type PuzzleSize = 6 | 8 | 10;
 
 export type Puzzle = {
-  regionMap: number[][]; // 6x6
-  solution: number[]; // row index -> col index
-  prefilled: (number | null)[]; // row index -> col index or null
+  regionMap: number[][];
+  solution: number[];
+  prefilled: (number | null)[];
+  size: PuzzleSize;
 };
 
-// Store valid 6x6 cat placements (1 per row/col, no touching including diagonally)
-const VALID_CONFIGS: number[][] = [];
+type RandomSource = () => number;
 
-function initConfigs() {
-  if (VALID_CONFIGS.length > 0) return;
-  function search(r: number, cols: number[]) {
-    if (r === 6) {
-      VALID_CONFIGS.push([...cols]);
+function createSeededRandom(seed: number): RandomSource {
+  let state = seed >>> 0;
+
+  return () => {
+    let value = (state += 0x6d2b79f5);
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffle<T>(values: T[], random: RandomSource): T[] {
+  const shuffled = [...values];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const other = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[other]] = [
+      shuffled[other],
+      shuffled[index],
+    ];
+  }
+
+  return shuffled;
+}
+
+function createSolution(size: PuzzleSize, random: RandomSource): number[] {
+  const columns: number[] = [];
+  const usedColumns = new Set<number>();
+
+  function search(row: number): boolean {
+    if (row === size) return true;
+
+    const candidates = shuffle(
+      Array.from({ length: size }, (_, column) => column),
+      random,
+    );
+
+    for (const column of candidates) {
+      const touchesPrevious =
+        row > 0 && Math.abs(columns[row - 1] - column) <= 1;
+
+      if (usedColumns.has(column) || touchesPrevious) continue;
+
+      columns.push(column);
+      usedColumns.add(column);
+
+      if (search(row + 1)) return true;
+
+      columns.pop();
+      usedColumns.delete(column);
+    }
+
+    return false;
+  }
+
+  if (!search(0)) {
+    throw new Error(`Unable to create a valid ${size}x${size} solution`);
+  }
+
+  return columns;
+}
+
+function countSolutions(
+  regionMap: number[][],
+  size: PuzzleSize,
+  limit = 2,
+): number {
+  let count = 0;
+  const usedColumns = Array<boolean>(size).fill(false);
+  const usedRegions = Array<boolean>(size).fill(false);
+
+  function search(row: number, previousColumn: number | null): void {
+    if (count >= limit) return;
+
+    if (row === size) {
+      count += 1;
       return;
     }
-    for (let c = 0; c < 6; c++) {
-      let ok = true;
-      for (let i = 0; i < r; i++) {
-        // Check same column or diagonal touch
-        if (
-          cols[i] === c ||
-          (Math.abs(cols[i] - c) <= 1 && Math.abs(i - r) <= 1)
-        ) {
-          ok = false;
-          break;
-        }
+
+    for (let column = 0; column < size; column += 1) {
+      const region = regionMap[row][column];
+      const touchesPrevious =
+        previousColumn !== null &&
+        Math.abs(previousColumn - column) <= 1;
+
+      if (
+        usedColumns[column] ||
+        usedRegions[region] ||
+        touchesPrevious
+      ) {
+        continue;
       }
-      if (ok) search(r + 1, [...cols, c]);
+
+      usedColumns[column] = true;
+      usedRegions[region] = true;
+      search(row + 1, column);
+      usedColumns[column] = false;
+      usedRegions[region] = false;
     }
   }
-  search(0, []);
+
+  search(0, null);
+  return count;
 }
 
-function createPuzzleObj(
-  map: number[][],
-  config: number[],
-  prefillCount: number,
-  random: () => number
-): Puzzle {
-  let prefilled = Array(6).fill(null);
-  if (prefillCount > 0) {
-    let indices = [0, 1, 2, 3, 4, 5];
-    for (let i = 0; i < prefillCount; i++) {
-      let idx = Math.floor(random() * indices.length);
-      let row = indices.splice(idx, 1)[0];
-      prefilled[row] = config[row];
+function isRegionConnected(
+  regionMap: number[][],
+  region: number,
+  size: PuzzleSize,
+): boolean {
+  const cells: CellPos[] = [];
+
+  for (let row = 0; row < size; row += 1) {
+    for (let column = 0; column < size; column += 1) {
+      if (regionMap[row][column] === region) {
+        cells.push({ r: row, c: column });
+      }
     }
   }
-  return { regionMap: map, solution: config, prefilled };
-}
 
-export function generatePuzzle(seed?: number, prefillCount: number = 0): Puzzle {
-  initConfigs();
-  
-  let random = Math.random;
-  if (seed !== undefined) {
-    // Mulberry32 PRNG for deterministic daily puzzles
-    let a = seed;
-    random = () => {
-      let t = (a += 0x6d2b79f5);
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
+  if (cells.length === 0) return false;
+
+  const pending = [cells[0]];
+  const visited = new Set([`${cells[0].r}:${cells[0].c}`]);
+
+  for (let index = 0; index < pending.length; index += 1) {
+    const cell = pending[index];
+    const neighbors = [
+      { r: cell.r - 1, c: cell.c },
+      { r: cell.r + 1, c: cell.c },
+      { r: cell.r, c: cell.c - 1 },
+      { r: cell.r, c: cell.c + 1 },
+    ];
+
+    for (const neighbor of neighbors) {
+      if (
+        neighbor.r < 0 ||
+        neighbor.r >= size ||
+        neighbor.c < 0 ||
+        neighbor.c >= size ||
+        regionMap[neighbor.r][neighbor.c] !== region
+      ) {
+        continue;
+      }
+
+      const key = `${neighbor.r}:${neighbor.c}`;
+      if (!visited.has(key)) {
+        visited.add(key);
+        pending.push(neighbor);
+      }
+    }
   }
 
-  let maxAttempts = 2000;
-  let bestFallback: Puzzle | null = null;
+  return visited.size === cells.length;
+}
 
-  while (maxAttempts-- > 0) {
-    // 1. Pick a random valid config
-    const config = VALID_CONFIGS[Math.floor(random() * VALID_CONFIGS.length)];
+function createRegionMap(
+  solution: number[],
+  size: PuzzleSize,
+  random: RandomSource,
+): number[][] {
+  const backgroundRegion = size - 1;
+  const regionMap = Array.from({ length: size }, () =>
+    Array<number>(size).fill(backgroundRegion),
+  );
+  const regionSizes = Array<number>(size).fill(1);
 
-    // 2. Generate contiguous regions
-    let map = Array.from({ length: 6 }, () => Array(6).fill(-1));
-    for (let i = 0; i < 6; i++) map[i][config[i]] = i;
+  for (let row = 0; row < backgroundRegion; row += 1) {
+    regionMap[row][solution[row]] = row;
+  }
+  regionSizes[backgroundRegion] = size * size - backgroundRegion;
 
-    let emptyCells = 30;
-    let stuck = false;
-    
-    while (emptyCells > 0) {
-      let candidates: { r: number; c: number; adj: number[] }[] = [];
-      for (let r = 0; r < 6; r++) {
-        for (let c = 0; c < 6; c++) {
-          if (map[r][c] === -1) {
-            let adj = new Set<number>();
-            if (r > 0 && map[r - 1][c] !== -1) adj.add(map[r - 1][c]);
-            if (r < 5 && map[r + 1][c] !== -1) adj.add(map[r + 1][c]);
-            if (c > 0 && map[r][c - 1] !== -1) adj.add(map[r][c - 1]);
-            if (c < 5 && map[r][c + 1] !== -1) adj.add(map[r][c + 1]);
-            if (adj.size > 0) candidates.push({ r, c, adj: Array.from(adj) });
+  const protectedBackgroundCell = {
+    r: backgroundRegion,
+    c: solution[backgroundRegion],
+  };
+  const maximumMoves = size * size;
+  let moves = 0;
+
+  while (moves < maximumMoves) {
+    let moved = false;
+    const regions = shuffle(
+      Array.from({ length: backgroundRegion }, (_, region) => region),
+      random,
+    ).sort((left, right) => regionSizes[left] - regionSizes[right]);
+
+    for (const region of regions) {
+      const candidates = new Map<string, CellPos>();
+
+      for (let row = 0; row < size; row += 1) {
+        for (let column = 0; column < size; column += 1) {
+          if (regionMap[row][column] !== region) continue;
+
+          const neighbors = [
+            { r: row - 1, c: column },
+            { r: row + 1, c: column },
+            { r: row, c: column - 1 },
+            { r: row, c: column + 1 },
+          ];
+
+          for (const neighbor of neighbors) {
+            if (
+              neighbor.r < 0 ||
+              neighbor.r >= size ||
+              neighbor.c < 0 ||
+              neighbor.c >= size ||
+              regionMap[neighbor.r][neighbor.c] !== backgroundRegion ||
+              (neighbor.r === protectedBackgroundCell.r &&
+                neighbor.c === protectedBackgroundCell.c)
+            ) {
+              continue;
+            }
+
+            candidates.set(`${neighbor.r}:${neighbor.c}`, neighbor);
           }
         }
       }
-      if (candidates.length === 0) {
-        stuck = true;
-        break;
+
+      for (const candidate of shuffle([...candidates.values()], random)) {
+        regionMap[candidate.r][candidate.c] = region;
+
+        const remainsConnected = isRegionConnected(
+          regionMap,
+          backgroundRegion,
+          size,
+        );
+        const remainsUnique =
+          remainsConnected && countSolutions(regionMap, size) === 1;
+
+        if (remainsUnique) {
+          regionSizes[region] += 1;
+          regionSizes[backgroundRegion] -= 1;
+          moves += 1;
+          moved = true;
+          break;
+        }
+
+        regionMap[candidate.r][candidate.c] = backgroundRegion;
       }
-      let cand = candidates[Math.floor(random() * candidates.length)];
-      let reg = cand.adj[Math.floor(random() * cand.adj.length)];
-      map[cand.r][cand.c] = reg;
-      emptyCells--;
+
+      if (moved) break;
     }
 
-    if (stuck) continue;
-
-    // 3. Verify unique solution
-    let solutions = 0;
-    for (let i = 0; i < VALID_CONFIGS.length; i++) {
-      let cnf = VALID_CONFIGS[i];
-      let regionHasStar = [false, false, false, false, false, false];
-      for (let r = 0; r < 6; r++) {
-        regionHasStar[map[r][cnf[r]]] = true;
-      }
-      if (regionHasStar.every((x) => x)) {
-        solutions++;
-      }
-    }
-
-    if (solutions === 1) {
-      return createPuzzleObj(map, config, prefillCount, random);
-    }
-    if (solutions > 0 && !bestFallback) {
-      bestFallback = createPuzzleObj(map, config, prefillCount, random);
-    }
+    if (!moved) break;
   }
 
-  // Fallback if we somehow didn't find a unique one
-  return bestFallback!;
+  return regionMap;
+}
+
+function createPrefilledCells(
+  solution: number[],
+  size: PuzzleSize,
+  prefillCount: number,
+  random: RandomSource,
+): (number | null)[] {
+  const prefilled = Array<number | null>(size).fill(null);
+  const rows = shuffle(
+    Array.from({ length: size }, (_, row) => row),
+    random,
+  );
+
+  for (
+    let index = 0;
+    index < Math.min(prefillCount, size);
+    index += 1
+  ) {
+    const row = rows[index];
+    prefilled[row] = solution[row];
+  }
+
+  return prefilled;
+}
+
+export function generatePuzzle(
+  size: PuzzleSize,
+  seed?: number,
+  prefillCount = 0,
+): Puzzle {
+  const random =
+    seed === undefined ? Math.random : createSeededRandom(seed);
+  const solution = createSolution(size, random);
+  const regionMap = createRegionMap(solution, size, random);
+
+  return {
+    size,
+    solution,
+    regionMap,
+    prefilled: createPrefilledCells(
+      solution,
+      size,
+      prefillCount,
+      random,
+    ),
+  };
 }
 
 export function getDailySeed(): number {
-  const d = new Date();
-  // UTC makes the daily puzzle identical for players in every timezone.
-  const str = `${d.getUTCFullYear()}${(d.getUTCMonth() + 1).toString().padStart(2, '0')}${d.getUTCDate().toString().padStart(2, '0')}`;
-  return parseInt(str, 10);
+  const date = new Date();
+  const value = `${date.getUTCFullYear()}${(date.getUTCMonth() + 1)
+    .toString()
+    .padStart(2, '0')}${date
+    .getUTCDate()
+    .toString()
+    .padStart(2, '0')}`;
+  return Number.parseInt(value, 10);
 }
 
-export function formatTime(secs: number): string {
-  const m = Math.floor(secs / 60);
-  const s = secs % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
+export function getDailyDifficulty(seed = getDailySeed()): Difficulty {
+  const options: Difficulty[] = ['easy', 'medium', 'hard'];
+  const random = createSeededRandom(seed ^ 0x5a17c9e3);
+  return options[Math.floor(random() * options.length)];
+}
+
+export function formatTime(seconds: number): string {
+  const wholeSeconds = Math.max(0, Math.floor(seconds));
+  const minutes = Math.floor(wholeSeconds / 60);
+  const remainder = wholeSeconds % 60;
+  return `${minutes}:${remainder.toString().padStart(2, '0')}`;
 }

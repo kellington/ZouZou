@@ -23,6 +23,10 @@
   --region-3: #FFB7B2; /* Peach */
   --region-4: #FFF2CC; /* Lemon */
   --region-5: #B5C7D3; /* Sky */
+  --region-6: #E2F0CB; /* Celadon */
+  --region-7: #FFDAC1; /* Melon */
+  --region-8: #E0BBE4; /* Lilac */
+  --region-9: #FEC8D8; /* Rose */
 
   /* Override shadcn variables to match the warm theme just in case */
   --primary: 24 67% 53%; /* #D97736 */
@@ -53,6 +57,10 @@
   --region-3: #CC7777;
   --region-4: #BBAA66;
   --region-5: #668899;
+  --region-6: #88AA77;
+  --region-7: #CCAA88;
+  --region-8: #9977AA;
+  --region-9: #CC8899;
 }
 
 @layer base {
@@ -72,6 +80,10 @@
   .region-3 { background-color: var(--region-3); }
   .region-4 { background-color: var(--region-4); }
   .region-5 { background-color: var(--region-5); }
+  .region-6 { background-color: var(--region-6); }
+  .region-7 { background-color: var(--region-7); }
+  .region-8 { background-color: var(--region-8); }
+  .region-9 { background-color: var(--region-9); }
   
   .text-board { color: var(--board); }
   .border-board { border-color: var(--board); }
