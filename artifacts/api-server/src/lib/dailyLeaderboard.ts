@@ -18,8 +18,20 @@ const maximumStoredDays = 31;
 
 let writeQueue: Promise<void> = Promise.resolve();
 
-export function getUtcDateKey(date = new Date()): string {
-  return date.toISOString().slice(0, 10);
+export function getEdmontonDateKey(date = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Edmonton",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const values = Object.fromEntries(
+    parts
+      .filter(({ type }) => type !== "literal")
+      .map(({ type, value }) => [type, value]),
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 async function readStore(): Promise<LeaderboardStore> {
@@ -68,7 +80,7 @@ export async function getDailyLeaderboard(): Promise<{
   entries: DailyScore[];
 }> {
   await writeQueue;
-  const date = getUtcDateKey();
+  const date = getEdmontonDateKey();
   const store = await readStore();
 
   return {
@@ -84,7 +96,7 @@ export async function submitDailyScore(
   let result: { date: string; entries: DailyScore[] } | undefined;
 
   writeQueue = writeQueue.then(async () => {
-    const date = getUtcDateKey();
+    const date = getEdmontonDateKey();
     const store = await readStore();
     const entries = store.dates[date] ?? [];
     const normalizedName = name.toLocaleLowerCase();

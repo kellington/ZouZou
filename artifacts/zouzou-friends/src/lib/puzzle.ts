@@ -307,15 +307,24 @@ export function generatePuzzle(
   };
 }
 
-export function getDailySeed(): number {
-  const date = new Date();
-  const value = `${date.getUTCFullYear()}${(date.getUTCMonth() + 1)
-    .toString()
-    .padStart(2, '0')}${date
-    .getUTCDate()
-    .toString()
-    .padStart(2, '0')}`;
-  return Number.parseInt(value, 10);
+export function getEdmontonDateKey(date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Edmonton',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const values = Object.fromEntries(
+    parts
+      .filter(({ type }) => type !== 'literal')
+      .map(({ type, value }) => [type, value]),
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+export function getDailySeed(date = new Date()): number {
+  return Number.parseInt(getEdmontonDateKey(date).replaceAll('-', ''), 10);
 }
 
 export function getDailyDifficulty(seed = getDailySeed()): Difficulty {

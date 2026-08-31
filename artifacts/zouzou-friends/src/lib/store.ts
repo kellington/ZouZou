@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { getEdmontonDateKey } from './puzzle';
 
 type GameStore = {
   easy: number | null;
@@ -25,12 +26,8 @@ const DEFAULT_STORE: GameStore = {
   lastPlayedDate: null,
 };
 
-function utcDateKey(date = new Date()): string {
-  return date.toISOString().slice(0, 10);
-}
-
-function yesterdayUtcKey(): string {
-  return utcDateKey(new Date(Date.now() - 86_400_000));
+function yesterdayEdmontonDateKey(): string {
+  return getEdmontonDateKey(new Date(Date.now() - 86_400_000));
 }
 
 function readCookie(): Partial<GameStore> | null {
@@ -72,8 +69,8 @@ function readLegacyStore(): Partial<GameStore> | null {
 function loadStore(): GameStore {
   try {
     const stored = readCookie() ?? readLegacyStore() ?? {};
-    const today = utcDateKey();
-    const yesterday = yesterdayUtcKey();
+    const today = getEdmontonDateKey();
+    const yesterday = yesterdayEdmontonDateKey();
     const next: GameStore = { ...DEFAULT_STORE, ...stored };
 
     if (next.lastDailyDate !== today) {
@@ -115,7 +112,7 @@ export function useStore() {
 
         const next = { ...previous, [mode]: time };
         if (mode === 'daily') {
-          next.lastDailyDate = utcDateKey();
+          next.lastDailyDate = getEdmontonDateKey();
         }
         writeCookie(next);
         return next;
@@ -132,8 +129,8 @@ export function useStore() {
   );
 
   const recordDailyWin = useCallback(() => {
-    const today = utcDateKey();
-    const yesterday = yesterdayUtcKey();
+    const today = getEdmontonDateKey();
+    const yesterday = yesterdayEdmontonDateKey();
 
     setStore((previous) => {
       if (previous.lastPlayedDate === today) return previous;
