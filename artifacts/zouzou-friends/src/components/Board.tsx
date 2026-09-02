@@ -65,52 +65,92 @@ export function Board({
     return `region-${reg % 10}`;
   };
 
-  return (
-    <div 
-      className="w-full max-w-[400px] aspect-square mx-auto border-[4px] border-board rounded-2xl overflow-hidden touch-manipulation shadow-xl bg-white grid"
-      style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${size}, minmax(0, 1fr))` }}
-    >
-      {Array.from({ length: size }).map((_, r) =>
-        Array.from({ length: size }).map((_, c) => {
-          const isMistake = mistakeCell?.r === r && mistakeCell?.c === c;
-          const isPrefilled = puzzle.prefilled[r] === c;
-          const state = grid[r]?.[c] || 'blank';
-          const reg = puzzle.regionMap[r]?.[c] ?? 0;
+  const completedRegions = new Set<number>();
+  grid.forEach((row, r) => {
+    row.forEach((state, c) => {
+      if (state === 'cat') {
+        completedRegions.add(puzzle.regionMap[r]?.[c] ?? 0);
+      }
+    });
+  });
 
-          return (
-            <button
-              key={`${r}-${c}`}
-              onClick={() => handleCellTap(r, c)}
-              type="button"
-              aria-label={`Row ${r + 1}, column ${c + 1}${isPrefilled ? ', locked cat' : state === 'cat' ? ', cat placed' : state === 'note' ? ', marked unavailable' : ''}`}
-              disabled={isPrefilled || isWon}
-              className={`
-                relative flex items-center justify-center cursor-pointer select-none transition-colors duration-200
-                ${getBorders(r, c)}
-                ${getRegionClass(reg)}
-                ${isMistake ? 'animate-shakeX !bg-red-400' : ''}
-                ${isPrefilled ? 'opacity-90 cursor-default' : 'hover:brightness-95 active:brightness-90'}
-              `}
-            >
-              {state === 'cat' && (
-                <CatIcon 
-                  className={`w-[70%] h-[70%] text-board drop-shadow-sm ${isWon ? 'animate-bounce' : 'animate-bounceIn'}`} 
-                  style={isWon ? { animationDelay: `${(r + c) * 0.1}s` } : {}}
-                />
-              )}
-              {state === 'note' && (
-                <PawIcon className="w-[40%] h-[40%] text-board opacity-25 animate-zoomIn" />
-              )}
-              
-              {isPrefilled && (
-                <div className="absolute top-1 right-1 opacity-20">
-                  <Lock size={10} className="text-board" />
-                </div>
-              )}
-            </button>
-          );
-        })
-      )}
+  return (
+    <div className="w-full max-w-[400px] mx-auto">
+      <div
+        className="w-full aspect-square border-[4px] border-board rounded-2xl overflow-hidden touch-manipulation shadow-xl bg-white grid"
+        style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${size}, minmax(0, 1fr))` }}
+      >
+        {Array.from({ length: size }).map((_, r) =>
+          Array.from({ length: size }).map((_, c) => {
+            const isMistake = mistakeCell?.r === r && mistakeCell?.c === c;
+            const isPrefilled = puzzle.prefilled[r] === c;
+            const state = grid[r]?.[c] || 'blank';
+            const reg = puzzle.regionMap[r]?.[c] ?? 0;
+
+            return (
+              <button
+                key={`${r}-${c}`}
+                onClick={() => handleCellTap(r, c)}
+                type="button"
+                aria-label={`Row ${r + 1}, column ${c + 1}${isPrefilled ? ', locked cat' : state === 'cat' ? ', cat placed' : state === 'note' ? ', marked unavailable' : ''}`}
+                disabled={isPrefilled || isWon}
+                className={`
+                  relative flex items-center justify-center cursor-pointer select-none transition-colors duration-200
+                  ${getBorders(r, c)}
+                  ${getRegionClass(reg)}
+                  ${isMistake ? 'animate-shakeX !bg-red-400' : ''}
+                  ${isPrefilled ? 'opacity-90 cursor-default' : 'hover:brightness-95 active:brightness-90'}
+                `}
+              >
+                {state === 'cat' && (
+                  <CatIcon
+                    className={`w-[70%] h-[70%] text-board drop-shadow-sm ${isWon ? 'animate-bounce' : 'animate-bounceIn'}`}
+                    style={isWon ? { animationDelay: `${(r + c) * 0.1}s` } : {}}
+                  />
+                )}
+                {state === 'note' && (
+                  <PawIcon className="w-[40%] h-[40%] text-board opacity-25 animate-zoomIn" />
+                )}
+
+                {isPrefilled && (
+                  <div className="absolute top-1 right-1 opacity-20">
+                    <Lock size={10} className="text-board" />
+                  </div>
+                )}
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      <div className="mt-4 px-1" aria-label={`${size - completedRegions.size} colors left`}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-black uppercase tracking-wider text-board/55">Colors left</span>
+          <span className="text-xs font-black text-board/55">{size - completedRegions.size}</span>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          {Array.from({ length: size }).map((_, region) => {
+            const isComplete = completedRegions.has(region);
+            return (
+              <div
+                key={region}
+                className={`relative flex items-center gap-1.5 rounded-full border border-board/10 bg-white/70 px-2 py-1 transition-opacity ${isComplete ? 'opacity-45' : ''}`}
+                title={isComplete ? `Color ${region + 1} complete` : `Color ${region + 1} remaining`}
+              >
+                <span className={`h-3 w-3 rounded-full region-${region}`} />
+                <span className={`text-[11px] font-black text-board/70 ${isComplete ? 'line-through' : ''}`}>
+                  {region + 1}
+                </span>
+                {isComplete && (
+                  <span className="absolute inset-0 flex items-center justify-center text-base font-black leading-none text-board/70" aria-hidden="true">
+                    ×
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }

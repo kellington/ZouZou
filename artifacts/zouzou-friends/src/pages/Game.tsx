@@ -21,6 +21,7 @@ import {
 } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
+import { playMeowSound, playMistakeSound, playNoCatSound } from '../lib/sounds';
 
 type GameMode = 'easy' | 'medium' | 'hard' | 'daily';
 
@@ -159,6 +160,7 @@ export function Game() {
     if (gameState !== 'playing') return;
     if (puzzle.prefilled[r] === c) return;
 
+    playNoCatSound();
     const current = grid[r][c];
     const next: CellState = current === 'blank' ? 'note' : 'blank';
 
@@ -173,6 +175,7 @@ export function Game() {
     if (puzzle.prefilled[r] === c) return;
 
     if (puzzle.solution[r] !== c) {
+      playMistakeSound();
       const newLives = lives - 1;
       setLives(newLives);
       setMistakeCell({ r, c });
@@ -192,6 +195,7 @@ export function Game() {
       return;
     }
 
+    playMeowSound();
     const newGrid = [...grid];
     newGrid[r] = [...grid[r]];
     newGrid[r][c] = 'cat';

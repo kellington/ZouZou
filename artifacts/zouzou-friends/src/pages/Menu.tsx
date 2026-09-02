@@ -20,7 +20,7 @@ export function Menu() {
         
         <div className="flex justify-center mb-6">
           <div className="relative">
-            <CatIcon className="w-24 h-24 text-board animate-bounce duration-[2000ms]" />
+            <CatIcon className="w-24 h-24 text-[#AAB3BC] animate-bounce duration-[2000ms]" />
             <div className="absolute -bottom-2 w-16 h-2 bg-black/10 rounded-[100%] mx-auto left-0 right-0 animate-pulse"></div>
           </div>
         </div>
