@@ -53,12 +53,7 @@ export function Board({
   };
   
   const getBorders = (r: number, c: number) => {
-    const reg = puzzle.regionMap[r]?.[c] ?? 0;
-    const t = r === 0 || puzzle.regionMap[r - 1]?.[c] !== reg;
-    const b = r === size - 1 || puzzle.regionMap[r + 1]?.[c] !== reg;
-    const l = c === 0 || puzzle.regionMap[r]?.[c - 1] !== reg;
-    const ri = c === size - 1 || puzzle.regionMap[r]?.[c + 1] !== reg;
-    return `${t ? 'border-t-[3px]' : 'border-t border-t-black/5'} ${b ? 'border-b-[3px]' : 'border-b border-b-black/5'} ${l ? 'border-l-[3px]' : 'border-l border-l-black/5'} ${ri ? 'border-r-[3px]' : 'border-r border-r-black/5'} border-board`;
+    return 'border border-board';
   };
 
   const getRegionClass = (reg: number) => {
