@@ -1,1 +1,2 @@
 - [OpenAPI numeric fields](openapi-numeric-fields.md) — use bounded number schemas for generated numeric values; integer currently emits an incompatible Zod API.
+- [Replit Database missing keys](replit-database-missing-keys.md) — SDK v3 reports absent keys as a failed 404 result, not a successful null value.

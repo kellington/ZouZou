@@ -1,20 +1,18 @@
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import path from "node:path";
+import ReplitDatabase from "@replit/database";
 
 export type DailyScore = {
   name: string;
   seconds: number;
 };
 
-type LeaderboardStore = {
-  dates: Record<string, DailyScore[]>;
+export type DailyLeaderboard = {
+  date: string;
+  entries: DailyScore[];
 };
 
-const dataDirectory = path.resolve(process.cwd(), "data");
-const dataPath = path.join(dataDirectory, "daily-leaderboard.json");
-const temporaryDataPath = path.join(dataDirectory, "daily-leaderboard.tmp.json");
+const database = new ReplitDatabase();
+const leaderboardKey = "zouzou:daily-leaderboard";
 const maximumEntries = 10;
-const maximumStoredDays = 31;
 
 let writeQueue: Promise<void> = Promise.resolve();
 
@@ -34,99 +32,118 @@ export function getEdmontonDateKey(date = new Date()): string {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-async function readStore(): Promise<LeaderboardStore> {
-  try {
-    const contents = await readFile(dataPath, "utf8");
-    const parsed = JSON.parse(contents) as LeaderboardStore;
+function isDailyScore(value: unknown): value is DailyScore {
+  if (!value || typeof value !== "object") return false;
 
-    if (!parsed.dates || typeof parsed.dates !== "object") {
-      return { dates: {} };
+  const score = value as Record<string, unknown>;
+  return (
+    typeof score.name === "string" &&
+    typeof score.seconds === "number" &&
+    Number.isInteger(score.seconds) &&
+    score.seconds >= 1
+  );
+}
+
+function isDailyLeaderboard(value: unknown): value is DailyLeaderboard {
+  if (!value || typeof value !== "object") return false;
+
+  const leaderboard = value as Record<string, unknown>;
+  return (
+    typeof leaderboard.date === "string" &&
+    Array.isArray(leaderboard.entries) &&
+    leaderboard.entries.every(isDailyScore)
+  );
+}
+
+async function readStoredLeaderboard(): Promise<DailyLeaderboard | null> {
+  const result = await database.get(leaderboardKey);
+
+  if (!result.ok) {
+    if (result.error.statusCode === 404) {
+      return null;
     }
 
-    return parsed;
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      error.code === "ENOENT"
-    ) {
-      return { dates: {} };
-    }
-    throw error;
+    throw new Error(
+      `Unable to read Replit Database leaderboard (${result.error.statusCode ?? "unknown status"}): ${result.error.message || "no error details"}`,
+    );
   }
-}
 
-async function writeStore(store: LeaderboardStore): Promise<void> {
-  await mkdir(dataDirectory, { recursive: true });
-  await writeFile(temporaryDataPath, `${JSON.stringify(store, null, 2)}\n`, "utf8");
-  await rename(temporaryDataPath, dataPath);
-}
-
-function trimOldDates(store: LeaderboardStore): void {
-  const retainedDates = Object.keys(store.dates)
-    .sort()
-    .slice(-maximumStoredDays);
-  const retained = new Set(retainedDates);
-
-  for (const date of Object.keys(store.dates)) {
-    if (!retained.has(date)) {
-      delete store.dates[date];
-    }
+  if (result.value === null || result.value === undefined) {
+    return null;
   }
+
+  if (!isDailyLeaderboard(result.value)) {
+    throw new Error(
+      `Replit Database key "${leaderboardKey}" contains invalid leaderboard data`,
+    );
+  }
+
+  return result.value;
 }
 
-export async function getDailyLeaderboard(): Promise<{
-  date: string;
-  entries: DailyScore[];
-}> {
-  await writeQueue;
-  const date = getEdmontonDateKey();
-  const store = await readStore();
+async function readCurrentLeaderboard(
+  date: string,
+): Promise<DailyLeaderboard> {
+  const stored = await readStoredLeaderboard();
+
+  if (!stored || stored.date !== date) {
+    return { date, entries: [] };
+  }
 
   return {
     date,
-    entries: store.dates[date] ?? [],
+    entries: stored.entries
+      .filter(isDailyScore)
+      .sort((left, right) => left.seconds - right.seconds)
+      .slice(0, maximumEntries),
   };
+}
+
+async function writeLeaderboard(value: DailyLeaderboard): Promise<void> {
+  const result = await database.set(leaderboardKey, value);
+
+  if (!result.ok) {
+    throw new Error(
+      `Unable to write Replit Database leaderboard: ${result.error.message}`,
+    );
+  }
+}
+
+export async function getDailyLeaderboard(): Promise<DailyLeaderboard> {
+  await writeQueue;
+  return readCurrentLeaderboard(getEdmontonDateKey());
 }
 
 export async function submitDailyScore(
   name: string,
   seconds: number,
-): Promise<{ date: string; entries: DailyScore[] }> {
-  let result: { date: string; entries: DailyScore[] } | undefined;
-
-  writeQueue = writeQueue.then(async () => {
+): Promise<DailyLeaderboard> {
+  const operation = writeQueue.then(async () => {
     const date = getEdmontonDateKey();
-    const store = await readStore();
-    const entries = store.dates[date] ?? [];
+    const leaderboard = await readCurrentLeaderboard(date);
     const normalizedName = name.toLocaleLowerCase();
-    const existingIndex = entries.findIndex(
+    const existingIndex = leaderboard.entries.findIndex(
       (entry) => entry.name.toLocaleLowerCase() === normalizedName,
     );
 
     if (existingIndex === -1) {
-      entries.push({ name, seconds });
-    } else if (seconds < entries[existingIndex].seconds) {
-      entries[existingIndex] = { name, seconds };
+      leaderboard.entries.push({ name, seconds });
+    } else if (seconds < leaderboard.entries[existingIndex].seconds) {
+      leaderboard.entries[existingIndex] = { name, seconds };
     }
 
-    store.dates[date] = entries
+    leaderboard.entries = leaderboard.entries
       .sort((left, right) => left.seconds - right.seconds)
       .slice(0, maximumEntries);
-    trimOldDates(store);
-    await writeStore(store);
 
-    result = {
-      date,
-      entries: store.dates[date],
-    };
+    await writeLeaderboard(leaderboard);
+    return leaderboard;
   });
 
-  await writeQueue;
+  writeQueue = operation.then(
+    () => undefined,
+    () => undefined,
+  );
 
-  if (!result) {
-    throw new Error("Daily leaderboard update did not complete");
-  }
-
-  return result;
+  return operation;
 }
