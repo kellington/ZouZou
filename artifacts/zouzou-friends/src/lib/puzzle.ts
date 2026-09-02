@@ -333,6 +333,17 @@ export function getDailyDifficulty(seed = getDailySeed()): Difficulty {
   return options[Math.floor(random() * options.length)];
 }
 
+export function formatDailyDate(date: string): string {
+  const [year, month, day] = date.split('-').map(Number);
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: '2-digit',
+    timeZone: 'UTC',
+  })
+    .format(new Date(Date.UTC(year, month - 1, day)))
+    .replace(' ', '-');
+}
+
 export function formatTime(seconds: number): string {
   const wholeSeconds = Math.max(0, Math.floor(seconds));
   const minutes = Math.floor(wholeSeconds / 60);

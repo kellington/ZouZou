@@ -5,6 +5,8 @@ import {
   generatePuzzle,
   getDailyDifficulty,
   getDailySeed,
+  getEdmontonDateKey,
+  formatDailyDate,
   formatTime,
   type PuzzleSize,
   type CellPos,
@@ -54,6 +56,7 @@ export function Game() {
         : baseConfig.title,
   };
   const { store, saveBestTime, recordDailyWin, resetStreak, setPlayerName } = useStore();
+  const today = getEdmontonDateKey();
   
   const queryClient = useQueryClient();
   const hasRecordedGame = useRef(false);
@@ -133,11 +136,15 @@ export function Game() {
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (gameState === 'playing') {
+    if (gameState === 'playing' && !(
+      safeMode === 'daily' &&
+      store.lastDailyDate === today &&
+      store.daily !== null
+    )) {
       interval = setInterval(() => setSeconds(s => s + 1), 1000);
     }
     return () => clearInterval(interval);
-  }, [gameState]);
+  }, [gameState, safeMode, store.lastDailyDate, store.daily, today]);
 
   const handleRestart = () => {
     hasRecordedGame.current = false;
@@ -231,6 +238,25 @@ export function Game() {
       recordCompletedGame(name, Math.max(1, seconds));
     }
   };
+
+  if (
+    safeMode === 'daily' &&
+    store.lastDailyDate === today &&
+    store.daily !== null
+  ) {
+    return (
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 max-w-md mx-auto w-full text-center">
+        <CatIcon className="w-24 h-24 text-[#AAB3BC] animate-bounce mb-6" />
+        <h1 className="text-3xl font-black text-board mb-4">Daily puzzle complete</h1>
+        <p className="text-lg font-bold text-board/70 mb-8">
+          You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}.
+        </p>
+        <ActionButton variant="secondary" className="w-full" onClick={() => setLocation('/')}>
+          Back to Menu
+        </ActionButton>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[100dvh] flex flex-col p-4 sm:p-6 max-w-md mx-auto w-full relative">

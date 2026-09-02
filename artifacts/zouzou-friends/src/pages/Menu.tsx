@@ -2,7 +2,12 @@ import { useLocation } from 'wouter';
 import { CatIcon } from '../components/Icons';
 import { ActionButton } from '../components/ui';
 import { useStore } from '../lib/store';
-import { formatTime, getDailyDifficulty } from '../lib/puzzle';
+import {
+  formatDailyDate,
+  formatTime,
+  getDailyDifficulty,
+  getEdmontonDateKey,
+} from '../lib/puzzle';
 import { Star, Zap, Coffee, Skull, Edit2, Flame } from 'lucide-react';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 import { RecentPlayers } from '../components/RecentPlayers';
@@ -13,6 +18,9 @@ export function Menu() {
   const { store, setPlayerName } = useStore();
   const [isEditingName, setIsEditingName] = useState(false);
   const dailyDifficulty = getDailyDifficulty();
+  const today = getEdmontonDateKey();
+  const hasCompletedDaily =
+    store.lastDailyDate === today && store.daily !== null;
 
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-[hsl(var(--background))]">
@@ -72,6 +80,7 @@ export function Menu() {
               variant="secondary" 
               className="w-full text-lg shadow-[0_6px_0_0_#7BA898] active:translate-y-[6px]"
               onClick={() => setLocation('/play/daily')}
+              disabled={hasCompletedDaily}
             >
               <Star className="w-5 h-5 fill-current" />
               Daily Challenge
@@ -79,11 +88,15 @@ export function Menu() {
             <span className="text-xs font-black uppercase tracking-wider text-board/45 mt-2">
               Today: {dailyDifficulty} board
             </span>
-            {store.daily !== null && (
+            {hasCompletedDaily && store.daily !== null ? (
+              <span className="text-sm font-bold text-board/60 mt-2 max-w-xs">
+                You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}.
+              </span>
+            ) : store.daily !== null ? (
               <span className="text-sm font-bold text-board/50 mt-2">
                 Today's Best: {formatTime(store.daily)}
               </span>
-            )}
+            ) : null}
           </div>
 
           <div className="grid grid-cols-1 gap-3 mt-4">

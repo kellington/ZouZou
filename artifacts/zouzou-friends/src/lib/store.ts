@@ -108,9 +108,13 @@ export function useStore() {
     (mode: 'easy' | 'medium' | 'hard' | 'daily', time: number) => {
       setStore((previous) => {
         const currentBest = previous[mode];
-        if (currentBest !== null && time >= currentBest) return previous;
+        const isNewBest =
+          currentBest === null || time < currentBest;
+        if (mode !== 'daily' && !isNewBest) return previous;
 
-        const next = { ...previous, [mode]: time };
+        const next = isNewBest
+          ? { ...previous, [mode]: time }
+          : { ...previous };
         if (mode === 'daily') {
           next.lastDailyDate = getEdmontonDateKey();
         }
