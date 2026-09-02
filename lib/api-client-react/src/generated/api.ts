@@ -23,7 +23,10 @@ import type {
   DailyLeaderboardResponse,
   DailyScoreInput,
   ErrorResponse,
-  HealthStatus
+  HealthStatus,
+  PlayerGameEntry,
+  PlayerGameInput,
+  RecentPlayersResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -140,7 +143,7 @@ export const getGetDailyLeaderboardUrl = () => {
 }
 
 /**
- * Returns the top daily puzzle times for the current UTC date.
+ * Returns the top daily puzzle times for the current Edmonton date.
  * @summary Get today's shared leaderboard
  */
 export const getDailyLeaderboard = async ( options?: Parameters<typeof customFetch>[1]): Promise<DailyLeaderboardResponse> => {
@@ -218,7 +221,7 @@ export const getSubmitDailyScoreUrl = () => {
 }
 
 /**
- * Adds a completed daily time to the shared leaderboard for the current UTC date.
+ * Adds a completed daily time to the shared leaderboard for the current Edmonton date.
  * @summary Submit a daily puzzle time
  */
 export const submitDailyScore = async (dailyScoreInput: DailyScoreInput, options?: Parameters<typeof customFetch>[1]): Promise<DailyLeaderboardResponse> => {
@@ -279,5 +282,155 @@ export const useSubmitDailyScore = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getSubmitDailyScoreMutationOptions(options));
+    }
+
+export const getGetRecentPlayersUrl = () => {
+
+
+
+
+  return `/api/players/recent`
+}
+
+/**
+ * Returns named players ordered by the date of their most recent completed game.
+ * @summary Get recently active players
+ */
+export const getRecentPlayers = async ( options?: Parameters<typeof customFetch>[1]): Promise<RecentPlayersResponse> => {
+
+  return customFetch<RecentPlayersResponse>(getGetRecentPlayersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetRecentPlayersQueryKey = () => {
+    return [
+    `/api/players/recent`
+    ] as const;
+    }
+
+
+export const getGetRecentPlayersQueryOptions = <TData = Awaited<ReturnType<typeof getRecentPlayers>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRecentPlayers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRecentPlayersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRecentPlayers>>> = ({ signal }) => getRecentPlayers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRecentPlayers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetRecentPlayersQueryResult = NonNullable<Awaited<ReturnType<typeof getRecentPlayers>>>
+export type GetRecentPlayersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get recently active players
+ */
+
+export function useGetRecentPlayers<TData = Awaited<ReturnType<typeof getRecentPlayers>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRecentPlayers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetRecentPlayersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRecordPlayerGameUrl = () => {
+
+
+
+
+  return `/api/players/games`
+}
+
+/**
+ * Records a named player's completed game for the current Edmonton date.
+ * @summary Record a completed game
+ */
+export const recordPlayerGame = async (playerGameInput: PlayerGameInput, options?: Parameters<typeof customFetch>[1]): Promise<PlayerGameEntry> => {
+
+  return customFetch<PlayerGameEntry>(getRecordPlayerGameUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(playerGameInput)
+  }
+);}
+
+
+
+
+
+export const getRecordPlayerGameMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordPlayerGame>>, TError,{data: BodyType<PlayerGameInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof recordPlayerGame>>, TError,{data: BodyType<PlayerGameInput>}, TContext> => {
+
+const mutationKey = ['recordPlayerGame'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof recordPlayerGame>>, {data: BodyType<PlayerGameInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  recordPlayerGame(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RecordPlayerGameMutationResult = NonNullable<Awaited<ReturnType<typeof recordPlayerGame>>>
+    export type RecordPlayerGameMutationBody = BodyType<PlayerGameInput>
+    export type RecordPlayerGameMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Record a completed game
+ */
+export const useRecordPlayerGame = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof recordPlayerGame>>, TError,{data: BodyType<PlayerGameInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof recordPlayerGame>>,
+        TError,
+        {data: BodyType<PlayerGameInput>},
+        TContext
+      > => {
+      return useMutation(getRecordPlayerGameMutationOptions(options));
     }
 

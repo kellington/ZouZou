@@ -18,7 +18,7 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Returns the top daily puzzle times for the current UTC date.
+ * Returns the top daily puzzle times for the current Edmonton date.
  * @summary Get today's shared leaderboard
  */
 export const getDailyLeaderboardResponseDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
@@ -34,7 +34,7 @@ export const GetDailyLeaderboardResponse = zod.object({
 
 
 /**
- * Adds a completed daily time to the shared leaderboard for the current UTC date.
+ * Adds a completed daily time to the shared leaderboard for the current Edmonton date.
  * @summary Submit a daily puzzle time
  */
 export const submitDailyScoreBodyNameMax = 24;
@@ -57,6 +57,49 @@ export const SubmitDailyScoreResponse = zod.object({
   "name": zod.string(),
   "seconds": zod.number()
 }))
+})
+
+
+/**
+ * Returns named players ordered by the date of their most recent completed game.
+ * @summary Get recently active players
+ */
+export const getRecentPlayersResponseEntriesItemDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const GetRecentPlayersResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "name": zod.string(),
+  "date": zod.string().regex(getRecentPlayersResponseEntriesItemDateRegExp),
+  "game": zod.enum(['daily', 'easy', 'medium', 'hard']),
+  "seconds": zod.number()
+}))
+})
+
+
+/**
+ * Records a named player's completed game for the current Edmonton date.
+ * @summary Record a completed game
+ */
+export const recordPlayerGameBodyNameMax = 24;
+
+export const recordPlayerGameBodySecondsMax = 36000;
+
+
+
+export const RecordPlayerGameBody = zod.object({
+  "name": zod.string().min(1).max(recordPlayerGameBodyNameMax),
+  "game": zod.enum(['daily', 'easy', 'medium', 'hard']),
+  "seconds": zod.number().min(1).max(recordPlayerGameBodySecondsMax)
+})
+
+export const recordPlayerGameResponseDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const RecordPlayerGameResponse = zod.object({
+  "date": zod.string().regex(recordPlayerGameResponseDateRegExp),
+  "game": zod.enum(['daily', 'easy', 'medium', 'hard']),
+  "seconds": zod.number()
 })
 
 

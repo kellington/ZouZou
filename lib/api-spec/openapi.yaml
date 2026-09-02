@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: daily
     description: Shared daily puzzle leaderboard operations
+  - name: players
+    description: Player history operations
 paths:
   /healthz:
     get:
@@ -31,7 +33,7 @@ paths:
       operationId: getDailyLeaderboard
       tags: [daily]
       summary: Get today's shared leaderboard
-      description: Returns the top daily puzzle times for the current UTC date.
+      description: Returns the top daily puzzle times for the current Edmonton date.
       responses:
         "200":
           description: Today's leaderboard
@@ -43,7 +45,7 @@ paths:
       operationId: submitDailyScore
       tags: [daily]
       summary: Submit a daily puzzle time
-      description: Adds a completed daily time to the shared leaderboard for the current UTC date.
+      description: Adds a completed daily time to the shared leaderboard for the current Edmonton date.
       requestBody:
         required: true
         content:
@@ -59,6 +61,44 @@ paths:
                 $ref: "#/components/schemas/DailyLeaderboardResponse"
         "400":
           description: Invalid score submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /players/recent:
+    get:
+      operationId: getRecentPlayers
+      tags: [players]
+      summary: Get recently active players
+      description: Returns named players ordered by the date of their most recent completed game.
+      responses:
+        "200":
+          description: Recently active players
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecentPlayersResponse"
+  /players/games:
+    post:
+      operationId: recordPlayerGame
+      tags: [players]
+      summary: Record a completed game
+      description: Records a named player's completed game for the current Edmonton date.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlayerGameInput"
+      responses:
+        "200":
+          description: Recorded game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlayerGameEntry"
+        "400":
+          description: Invalid game submission
           content:
             application/json:
               schema:
@@ -108,6 +148,66 @@ components:
             $ref: "#/components/schemas/DailyScoreEntry"
       required:
         - date
+        - entries
+    PlayerGameInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 24
+        game:
+          type: string
+          enum: [daily, easy, medium, hard]
+        seconds:
+          type: number
+          minimum: 1
+          maximum: 36000
+      required:
+        - name
+        - game
+        - seconds
+    PlayerGameEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        game:
+          type: string
+          enum: [daily, easy, medium, hard]
+        seconds:
+          type: number
+      required:
+        - date
+        - game
+        - seconds
+    RecentPlayer:
+      type: object
+      properties:
+        name:
+          type: string
+        date:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+        game:
+          type: string
+          enum: [daily, easy, medium, hard]
+        seconds:
+          type: number
+      required:
+        - name
+        - date
+        - game
+        - seconds
+    RecentPlayersResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecentPlayer"
+      required:
         - entries
     ErrorResponse:
       type: object

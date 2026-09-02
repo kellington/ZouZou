@@ -5,6 +5,7 @@ import { useStore } from '../lib/store';
 import { formatTime, getDailyDifficulty } from '../lib/puzzle';
 import { Star, Zap, Coffee, Skull, Edit2, Flame } from 'lucide-react';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
+import { RecentPlayers } from '../components/RecentPlayers';
 import { useState } from 'react';
 
 export function Menu() {
@@ -131,6 +132,9 @@ export function Menu() {
 
           <div className="mt-8">
             <DailyLeaderboard />
+          </div>
+          <div className="mt-4">
+            <RecentPlayers />
           </div>
         </div>
       </div>

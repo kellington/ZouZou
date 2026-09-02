@@ -33,6 +33,69 @@ export interface DailyLeaderboardResponse {
   entries: DailyScoreEntry[];
 }
 
+export type PlayerGameInputGame = typeof PlayerGameInputGame[keyof typeof PlayerGameInputGame];
+
+
+export const PlayerGameInputGame = {
+  daily: 'daily',
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+} as const;
+
+export interface PlayerGameInput {
+  /**
+     * @minLength 1
+     * @maxLength 24
+     */
+  name: string;
+  game: PlayerGameInputGame;
+  /**
+     * @minimum 1
+     * @maximum 36000
+     */
+  seconds: number;
+}
+
+export type PlayerGameEntryGame = typeof PlayerGameEntryGame[keyof typeof PlayerGameEntryGame];
+
+
+export const PlayerGameEntryGame = {
+  daily: 'daily',
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+} as const;
+
+export interface PlayerGameEntry {
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  date: string;
+  game: PlayerGameEntryGame;
+  seconds: number;
+}
+
+export type RecentPlayerGame = typeof RecentPlayerGame[keyof typeof RecentPlayerGame];
+
+
+export const RecentPlayerGame = {
+  daily: 'daily',
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+} as const;
+
+export interface RecentPlayer {
+  name: string;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  date: string;
+  game: RecentPlayerGame;
+  seconds: number;
+}
+
+export interface RecentPlayersResponse {
+  entries: RecentPlayer[];
+}
+
 export interface ErrorResponse {
   error: string;
 }

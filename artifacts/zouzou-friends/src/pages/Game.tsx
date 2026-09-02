@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useLocation } from 'wouter';
 import { Board, CellState } from '../components/Board';
 import {
@@ -13,7 +13,12 @@ import { HeartIcon, PawIcon, CatIcon } from '../components/Icons';
 import { ActionButton, Modal } from '../components/ui';
 import { useStore } from '../lib/store';
 import { ArrowLeft, HelpCircle, RotateCcw, Flame } from 'lucide-react';
-import { useSubmitDailyScore, getGetDailyLeaderboardQueryKey } from '@workspace/api-client-react';
+import {
+  useSubmitDailyScore,
+  getGetDailyLeaderboardQueryKey,
+  useRecordPlayerGame,
+  getGetRecentPlayersQueryKey,
+} from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 
@@ -50,6 +55,7 @@ export function Game() {
   const { store, saveBestTime, recordDailyWin, resetStreak, setPlayerName } = useStore();
   
   const queryClient = useQueryClient();
+  const hasRecordedGame = useRef(false);
   const { mutate: submitScore, isPending: isSubmitting } = useSubmitDailyScore({
     mutation: {
       onSuccess: () => {
@@ -57,6 +63,32 @@ export function Game() {
       }
     }
   });
+  const { mutate: recordGame, isPending: isRecording } = useRecordPlayerGame({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetRecentPlayersQueryKey() });
+      }
+    }
+  });
+
+  const recordCompletedGame = useCallback((name: string, completedSeconds: number) => {
+    if (hasRecordedGame.current) return;
+
+    hasRecordedGame.current = true;
+    recordGame({
+      data: {
+        name,
+        game: safeMode,
+        seconds: completedSeconds,
+      },
+    });
+
+    if (safeMode === 'daily') {
+      submitScore({
+        data: { name, seconds: completedSeconds },
+      });
+    }
+  }, [recordGame, safeMode, submitScore]);
 
   const [puzzleSeed, setPuzzleSeed] = useState(() =>
     safeMode === 'daily' ? getDailySeed() : randomSeed(),
@@ -90,6 +122,7 @@ export function Game() {
   }, [safeMode]);
 
   useEffect(() => {
+    hasRecordedGame.current = false;
     setGrid(initGrid());
     setLives(config.lives);
     setGameState('playing');
@@ -106,6 +139,7 @@ export function Game() {
   }, [gameState]);
 
   const handleRestart = () => {
+    hasRecordedGame.current = false;
     setGrid(initGrid());
     setLives(config.lives);
     setGameState('playing');
@@ -178,24 +212,19 @@ export function Game() {
       
       if (safeMode === 'daily') {
         recordDailyWin();
-        if (store.playerName) {
-          submitScore({
-            data: { name: store.playerName, seconds: completedSeconds },
-          });
-        }
+      }
+
+      if (store.playerName) {
+        recordCompletedGame(store.playerName, completedSeconds);
       }
     }
   };
 
   const handleNameSubmit = () => {
-    if (tempName.trim()) {
-      setPlayerName(tempName.trim());
-      submitScore({
-        data: {
-          name: tempName.trim(),
-          seconds: Math.max(1, seconds),
-        },
-      });
+    const name = tempName.trim().replace(/\s+/g, ' ');
+    if (name) {
+      setPlayerName(name);
+      recordCompletedGame(name, Math.max(1, seconds));
     }
   };
 
@@ -275,35 +304,37 @@ export function Game() {
         <p className="text-xl mb-1 text-center">You solved it in</p>
         <p className="text-4xl font-black font-mono mb-6 text-center">{formatTime(seconds)}</p>
         
-        {safeMode === 'daily' && (
-          <div className="mb-6 space-y-4">
-            {!store.playerName ? (
-              <div className="bg-board/5 p-4 rounded-xl border border-board/10">
-                <p className="text-sm font-bold mb-3 text-center">Save your time to the leaderboard!</p>
-                <div className="flex gap-2">
-                  <input 
-                    type="text"
-                    value={tempName} 
-                    onChange={e => setTempName(e.target.value)}
-                    maxLength={24}
-                    className="flex-1 px-3 py-2 border-2 border-board rounded-lg font-bold text-board outline-none focus:ring-2 focus:ring-[#D97736]"
-                    placeholder="Your name"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleNameSubmit();
-                    }}
-                  />
-                  <ActionButton 
-                    onClick={handleNameSubmit} 
-                    disabled={!tempName.trim() || isSubmitting}
-                    className="px-4"
-                  >
-                    Submit
-                  </ActionButton>
-                </div>
-              </div>
-            ) : (
-              <DailyLeaderboard />
-            )}
+        {!store.playerName && !hasRecordedGame.current && (
+          <div className="bg-board/5 p-4 rounded-xl border border-board/10 mb-6">
+            <p className="text-sm font-bold mb-3 text-center">
+              {safeMode === 'daily' ? 'Save your time to the leaderboard!' : 'Add your name to save this game!'}
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tempName}
+                onChange={e => setTempName(e.target.value)}
+                maxLength={24}
+                className="flex-1 min-w-0 px-3 py-2 border-2 border-board rounded-lg font-bold text-board outline-none focus:ring-2 focus:ring-[#D97736]"
+                placeholder="Your name"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleNameSubmit();
+                }}
+              />
+              <ActionButton
+                onClick={handleNameSubmit}
+                disabled={!tempName.trim() || isSubmitting || isRecording}
+                className="px-4"
+              >
+                Save
+              </ActionButton>
+            </div>
+          </div>
+        )}
+
+        {safeMode === 'daily' && (store.playerName || hasRecordedGame.current) && (
+          <div className="mb-6">
+            <DailyLeaderboard />
           </div>
         )}
         
