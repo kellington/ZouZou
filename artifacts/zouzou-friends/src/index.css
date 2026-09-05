@@ -17,16 +17,16 @@
   
   --board: #4A3B32;
   
-  --region-0: #FFD8B1; /* Apricot */
-  --region-1: #B5EAD7; /* Mint */
-  --region-2: #C7CEEA; /* Lavender */
-  --region-3: #FFB7B2; /* Peach */
-  --region-4: #FFF2CC; /* Lemon */
-  --region-5: #B5C7D3; /* Sky */
-  --region-6: #E2F0CB; /* Celadon */
-  --region-7: #FFDAC1; /* Melon */
-  --region-8: #E0BBE4; /* Lilac */
-  --region-9: #FEC8D8; /* Rose */
+  --region-0: #FFD23F; /* Sunflower */
+  --region-1: #35C9A5; /* Teal */
+  --region-2: #5B8DEF; /* Blue */
+  --region-3: #A78BFA; /* Violet */
+  --region-4: #F472B6; /* Pink */
+  --region-5: #FF6B6B; /* Coral red */
+  --region-6: #FF9F1C; /* Orange */
+  --region-7: #9DD65D; /* Lime */
+  --region-8: #9FB8C8; /* Slate blue */
+  --region-9: #C8926B; /* Caramel */
 
   /* Override shadcn variables to match the warm theme just in case */
   --primary: 24 67% 53%; /* #D97736 */
@@ -50,17 +50,17 @@
   --card: 25 20% 20%;
   --card-foreground: 42 33% 90%;
   
-  /* Make regions slightly dimmer in dark mode */
-  --region-0: #CC9966;
-  --region-1: #669988;
-  --region-2: #8888AA;
-  --region-3: #CC7777;
-  --region-4: #BBAA66;
-  --region-5: #668899;
-  --region-6: #88AA77;
-  --region-7: #CCAA88;
-  --region-8: #9977AA;
-  --region-9: #CC8899;
+  /* Darker counterparts preserve the same easy-to-recognize hue order */
+  --region-0: #9A7300;
+  --region-1: #177D68;
+  --region-2: #315DAA;
+  --region-3: #6748B5;
+  --region-4: #A83B79;
+  --region-5: #A83D3D;
+  --region-6: #A65D00;
+  --region-7: #5D842B;
+  --region-8: #526F82;
+  --region-9: #805438;
 }
 
 @layer base {
