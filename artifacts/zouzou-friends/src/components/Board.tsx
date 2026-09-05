@@ -61,10 +61,17 @@ export function Board({
   };
 
   const completedRegions = new Set<number>();
+  const remainingCellsByRegion = new Map<number, number>();
   grid.forEach((row, r) => {
     row.forEach((state, c) => {
+      const region = puzzle.regionMap[r]?.[c] ?? 0;
       if (state === 'cat') {
-        completedRegions.add(puzzle.regionMap[r]?.[c] ?? 0);
+        completedRegions.add(region);
+      } else if (state === 'blank') {
+        remainingCellsByRegion.set(
+          region,
+          (remainingCellsByRegion.get(region) ?? 0) + 1,
+        );
       }
     });
   });
@@ -126,21 +133,21 @@ export function Board({
         <div className="flex flex-wrap justify-center gap-2">
           {Array.from({ length: size }).map((_, region) => {
             const isComplete = completedRegions.has(region);
+            const remainingCells = remainingCellsByRegion.get(region) ?? 0;
             return (
               <div
                 key={region}
                 className={`relative flex items-center gap-1.5 rounded-full border border-board/10 bg-white/70 px-2 py-1 transition-opacity ${isComplete ? 'opacity-45' : ''}`}
-                title={isComplete ? `Color ${region + 1} complete` : `Color ${region + 1} remaining`}
+                title={
+                  isComplete
+                    ? 'Color complete'
+                    : `${remainingCells} possible ${remainingCells === 1 ? 'square' : 'squares'} remaining`
+                }
               >
                 <span className={`h-3 w-3 rounded-full region-${region}`} />
                 <span className={`text-[11px] font-black text-board/70 ${isComplete ? 'line-through' : ''}`}>
-                  {region + 1}
+                  {isComplete ? '×' : remainingCells}
                 </span>
-                {isComplete && (
-                  <span className="absolute inset-0 flex items-center justify-center text-base font-black leading-none text-board/70" aria-hidden="true">
-                    ×
-                  </span>
-                )}
               </div>
             );
           })}
