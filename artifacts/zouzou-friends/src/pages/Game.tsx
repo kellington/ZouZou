@@ -177,6 +177,23 @@ export function Game() {
     setGrid(newGrid);
   };
 
+  const handleCellPaint = (
+    r: number,
+    c: number,
+    state: 'blank' | 'note',
+  ) => {
+    if (gameState !== 'playing') return;
+    if (puzzle.prefilled[r] === c) return;
+
+    setGrid((currentGrid) => {
+      if (currentGrid[r]?.[c] === state) return currentGrid;
+      const nextGrid = [...currentGrid];
+      nextGrid[r] = [...currentGrid[r]];
+      nextGrid[r][c] = state;
+      return nextGrid;
+    });
+  };
+
   const handleCellDoubleClick = (r: number, c: number) => {
     if (gameState !== 'playing') return;
     if (puzzle.prefilled[r] === c) return;
@@ -298,7 +315,8 @@ export function Game() {
           grid={grid} 
           mistakeCell={mistakeCell} 
           onCellClick={handleCellClick} 
-           onCellDoubleClick={handleCellDoubleClick}
+          onCellDoubleClick={handleCellDoubleClick}
+          onCellPaint={handleCellPaint}
           isWon={gameState === 'won'}
         />
       </div>

@@ -1,7 +1,7 @@
 import { CellPos, Puzzle } from '../lib/puzzle';
 import { CatIcon, PawIcon } from './Icons';
 import { Lock } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 
 export type CellState = 'blank' | 'note' | 'cat';
 
@@ -11,6 +11,7 @@ interface BoardProps {
   mistakeCell: CellPos | null;
   onCellClick: (r: number, c: number) => void;
   onCellDoubleClick: (r: number, c: number) => void;
+  onCellPaint: (r: number, c: number, state: 'blank' | 'note') => void;
   isWon?: boolean;
 }
 
@@ -20,10 +21,21 @@ export function Board({
   mistakeCell,
   onCellClick,
   onCellDoubleClick,
+  onCellPaint,
   isWon,
 }: BoardProps) {
   const size = puzzle.size || 6;
   const pendingTaps = useRef(new Map<string, number>());
+  const suppressNextClick = useRef(false);
+  const dragGesture = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startCell: CellPos;
+    mode: 'paint' | 'erase';
+    active: boolean;
+    visited: Set<string>;
+  } | null>(null);
 
   useEffect(() => {
     return () => {
@@ -35,6 +47,11 @@ export function Board({
   }, []);
 
   const handleCellTap = (r: number, c: number) => {
+    if (suppressNextClick.current) {
+      suppressNextClick.current = false;
+      return;
+    }
+
     const key = `${r}-${c}`;
     const pendingTap = pendingTaps.current.get(key);
 
@@ -50,6 +67,88 @@ export function Board({
       onCellClick(r, c);
     }, 240);
     pendingTaps.current.set(key, timer);
+  };
+
+  const getCellFromPoint = (clientX: number, clientY: number): CellPos | null => {
+    const element = document
+      .elementFromPoint(clientX, clientY)
+      ?.closest<HTMLElement>('[data-cell-row][data-cell-column]');
+    if (!element) return null;
+
+    const r = Number(element.dataset.cellRow);
+    const c = Number(element.dataset.cellColumn);
+    return Number.isInteger(r) && Number.isInteger(c) ? { r, c } : null;
+  };
+
+  const paintCell = (cell: CellPos) => {
+    const gesture = dragGesture.current;
+    if (!gesture || isWon || puzzle.prefilled[cell.r] === cell.c) return;
+
+    const key = `${cell.r}-${cell.c}`;
+    if (gesture.visited.has(key)) return;
+    gesture.visited.add(key);
+
+    const current = grid[cell.r]?.[cell.c];
+    if (gesture.mode === 'paint' && current === 'blank') {
+      onCellPaint(cell.r, cell.c, 'note');
+    } else if (gesture.mode === 'erase' && current === 'note') {
+      onCellPaint(cell.r, cell.c, 'blank');
+    }
+  };
+
+  const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!event.isPrimary || event.button !== 0 || isWon) return;
+    suppressNextClick.current = false;
+    const startCell = getCellFromPoint(event.clientX, event.clientY);
+    if (!startCell || puzzle.prefilled[startCell.r] === startCell.c) return;
+
+    dragGesture.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      startCell,
+      mode: grid[startCell.r]?.[startCell.c] === 'note' ? 'erase' : 'paint',
+      active: false,
+      visited: new Set(),
+    };
+  };
+
+  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = dragGesture.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+    if (!gesture.active) {
+      const distance = Math.hypot(
+        event.clientX - gesture.startX,
+        event.clientY - gesture.startY,
+      );
+      if (distance < 8) return;
+
+      gesture.active = true;
+      suppressNextClick.current = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      paintCell(gesture.startCell);
+    }
+
+    event.preventDefault();
+    const cell = getCellFromPoint(event.clientX, event.clientY);
+    if (cell) paintCell(cell);
+  };
+
+  const finishPointerGesture = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const gesture = dragGesture.current;
+    if (!gesture || gesture.pointerId !== event.pointerId) return;
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    dragGesture.current = null;
+
+    if (gesture.active) {
+      window.setTimeout(() => {
+        suppressNextClick.current = false;
+      }, 0);
+    }
   };
   
   const getBorders = (r: number, c: number) => {
@@ -79,8 +178,12 @@ export function Board({
   return (
     <div className="w-full max-w-[400px] mx-auto">
       <div
-        className="w-full aspect-square border-[4px] border-board rounded-2xl overflow-hidden touch-manipulation shadow-xl bg-white grid"
+        className="w-full aspect-square border-[4px] border-board rounded-2xl overflow-hidden touch-none shadow-xl bg-white grid"
         style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${size}, minmax(0, 1fr))` }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={finishPointerGesture}
+        onPointerCancel={finishPointerGesture}
       >
         {Array.from({ length: size }).map((_, r) =>
           Array.from({ length: size }).map((_, c) => {
@@ -92,6 +195,8 @@ export function Board({
             return (
               <button
                 key={`${r}-${c}`}
+                data-cell-row={r}
+                data-cell-column={c}
                 onClick={() => handleCellTap(r, c)}
                 type="button"
                 aria-label={`Row ${r + 1}, column ${c + 1}${isPrefilled ? ', locked cat' : state === 'cat' ? ', cat placed' : state === 'note' ? ', marked unavailable' : ''}`}
