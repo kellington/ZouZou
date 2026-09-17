@@ -11,31 +11,36 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Commit protocol files (Rob's OK) and decide branch path to `cf`
-- [ ] Move backup `~/Downloads/zouzou-repldb-2026-09-17.json` → `~/Documents/Backups/ZouZou/`
+- [ ] Commit README.md, the protocol files and the diary on `cf` → PR → `main` (Rob's OK; triggers a no-op redeploy)
+- [ ] Milestone checkpoint: rewrite PLAN.md ("Off Replit" done → "Settle in"), prune TASKS, re-check PROJECT.md success criteria
 
 ## Next
 
-Migration phases — detail in the SKYresearch plan §4.
-
-- [ ] Phase 1: `cf` branch; Repl `git log -1; git status` vs `fcf2467`; pnpm 10.34.5; overrides diff → lockfile; `PORT`/`BASE_PATH` defaults; Mac build
-- [ ] Phase 2: `artifacts/worker` (Hono + D1), migration SQL, `wrangler.jsonc`, `_headers`, transform script → local D1 (Gage)
-- [ ] Phase 2b: `wrangler dev` checklist (Quincy)
-- [ ] Phase 2c: delete Replit-only files/deps (show list first); rebuild + smoke
-- [ ] Phases 3–5: D1 create, Workers Builds, domain, Always Use HTTPS, rate-limit rule, final export/import, unpublish Replit, message friends
-- [ ] "For SKYresearch" block (plan §11)
+- [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
+- [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
+- [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
 
 ## Later
 
-- [ ] Replace "built on Replit" meta description in `artifacts/zouzou-friends/index.html`
+- [ ] Cancel Replit after pickem moves (~Oct–Nov 2026); download a final Repl zip first; confirm nothing else of ZouZou is billed
+- [ ] Simplify the Workers Builds command to `pnpm run build` (install is automatic)
+- [ ] `/api` with nothing after it → JSON 404 (add `/api` to `run_worker_first`)
+- [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK)
+- [ ] Optional: remove the `// @replit` comments in `ui/badge.tsx`, `ui/button.tsx`
+- [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
 - [ ] Customise `.claude/commands/project-status.md` for ZouZou
-- [ ] Rewrite `README.md` for the Cloudflare setup (after cutover)
-- [ ] Cancel Replit after pickem moves (~Oct–Nov 2026)
+- [ ] Maybe: use the kept history (past daily boards, per-player stats); small Worker test suite
 
 ## Done (recent)
 
-- [x] 2026-09-16 — Protocol files initialised; CLAUDE.md replaces `replit.md`
-- [x] 2026-09-16 — Phase 0 ReplDB backup (5 keys, 4 players, 62 games)
+- [x] 2026-09-17 — Phase 1: Mac build (pnpm 10.34.5, overrides removed, vite defaults, index.html noindex)
+- [x] 2026-09-17 — Phase 2/2b: Hono worker, D1 schema, transform, wrangler.jsonc, _headers; Quincy PASS
+- [x] 2026-09-17 — Phase 2c: Replit code/config/deps removed; Quincy PASS; CLAUDE.md updated
+- [x] 2026-09-17 — Phase 3: remote D1 created, migrated, backup imported; PR #3 merged; Workers Builds live
+- [x] 2026-09-17 — Phase 4: preview played on desktop + phone
+- [x] 2026-09-17 — Phase 5: Always Use HTTPS, custom domain, rate-limit rule, Replit unpublished, friends texted
+- [x] 2026-09-17 — README rewritten (uncommitted)
+- [x] 2026-09-16 — Protocol files initialised; Phase 0 ReplDB backup
 
 ---
 
