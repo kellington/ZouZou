@@ -5,14 +5,13 @@ project is lives in the five sibling files — this file is about *how we work*,
 plus durable project reference that agents need on hand.
 
 > **This is the protocol file.** `AGENTS.md` is a pointer back here for
-> non-Claude tools, and `replit.md` (Replit Agent's file) now points here too.
-> Edit this one.
+> non-Claude tools. Edit this one.
 
 ## What this repo is, in one line
 
 ZouZou & Friends — a browser cat-placement logic puzzle (daily challenge + easy/medium/hard)
 for Rob's friends, with a shared daily leaderboard; pnpm workspace, React 19 + Vite
-client, Express 5 API on Replit today, moving to a Cloudflare Worker + D1.
+client served with a Hono API by one Cloudflare Worker + D1 (migrating off Replit, 2026-09).
 
 ## Source of truth
 
@@ -45,8 +44,8 @@ anything repo-specific under the heading below and it will be picked up.
 ### Session supplements for this repo
 
 - Session notes / next prompts live in `project/diary/diary-YYYY-MM.md`.
-- During the migration, check which branch you're on: Replit history is on `main`,
-  migration work goes on `cf` (plan §4). Don't do migration work on `main` or `vscode`.
+- During the migration, check which branch you're on: migration work goes on `cf`
+  (plan §4) until it merges to `main`. Don't do migration work on `main` or `vscode`.
 - At end of the migration, produce a "for SKYresearch" block answering plan §11.
 
 ## Milestones
@@ -87,8 +86,8 @@ report instead of proceeding.
 ### Guardrails specific to this repo
 
 - **Friends' data is real.** The live leaderboard and player history hold friends'
-  names. Never write to the production API (`zouzou-and-friends.replit.app/api/*`
-  POSTs) or production D1 to "test" — use local D1, or the `zz-test` user with Rob's OK.
+  names. Never write to the production API (Replit URL until cutover, then
+  `zouzou.minus1over12.com` / workers.dev) or production D1 (`zouzou`) to "test" — use local D1, or the `zz-test` user with Rob's OK.
 - **Every `wrangler … --remote` command needs Rob's OK at the moment** — D1 create,
   migrations, import, deletes (incl. `zz-test` cleanup), Time Travel restore. Previews
   share production D1 (plan D12), so a preview write *is* a production write.
@@ -105,17 +104,17 @@ report instead of proceeding.
 ## Conventions
 
 - **Language / stack:** TypeScript 5.9, pnpm workspace, Node 24. Client: React 19.1 +
-  Vite + Tailwind 4 + wouter + react-query. API: Express 5 + pino (→ Hono on Workers).
+  Vite + Tailwind 4 + wouter + react-query. API: Hono on Cloudflare Workers, D1 (SQLite).
   Contract-first: OpenAPI → Orval → `@workspace/api-zod` + `@workspace/api-client-react`.
 - **Code style:** Prettier (root devDep). Match surrounding code.
 - **Naming:** workspace packages are `@workspace/<name>`; deployables in `artifacts/`,
   shared libs in `lib/`.
-- **Testing:** no test suite yet. Verify with `pnpm run typecheck` + build + manual play;
-  Quincy verifies migration phases (plan Phase 2b checklist).
+- **Testing:** no test suite yet. Verify with `pnpm run typecheck` + build + `wrangler dev`
+  smoke + manual play; Quincy verifies migration phases (plan Phase 2b checklist).
 - **Commits:**
-- **Branching:** `main` = what Replit publishes. `vscode` = local protocol-file work.
-  `cf` = Cloudflare migration branch.
-- **Secrets / env:** no app secrets today (ReplDB URL is injected by Replit). Cloudflare
+- **Branching:** `main` = production (Replit publishes it manually today; Workers Builds
+  deploys it after Phase 3). `cf` = Cloudflare migration branch. `vscode` = protocol-file work.
+- **Secrets / env:** no app secrets — the Worker only has the D1 binding `DB`. Cloudflare
   account IDs etc. go in `SECRETS.PRIVATE.YAML` — local scratchpad, gitignored, copied
   from the `.example` twin — never the deployed secret store.
 
@@ -149,28 +148,30 @@ and business rules out of STATE.md, where they'd rot.
 
 ### Repo map
 
-| Path | What | Migration fate (plan §1.1) |
-|---|---|---|
-| `artifacts/zouzou-friends` | The game (React/Vite). Build → `dist/public` | Keep → Worker static assets |
-| `artifacts/api-server` | Express 5 API, ReplDB storage, served at `/api` | Replace with `artifacts/worker` (Hono + D1) |
-| `artifacts/mockup-sandbox` | Replit "Canvas" component previewer, never deployed | Delete |
-| `lib/api-spec` | `openapi.yaml` + Orval config — **the API contract** | Keep |
-| `lib/api-zod` | Generated Zod schemas | Keep |
-| `lib/api-client-react` | Generated react-query hooks (base `/api`, same-origin) | Keep |
-| `lib/db` | Drizzle + pg scaffold, empty schema, unused | Delete |
-| `scripts/` | Replit template (`post-merge.sh`, `hello.ts`) | Delete |
-| `.replit`, `*/.replit-artifact/`, `replit.md`, `.agents/` | Replit config / agent memory | Delete in Phase 2c |
-| `screenshots/` | Game screenshots | Keep |
+| Path | What |
+|---|---|
+| `wrangler.jsonc` | Worker `zouzou`: assets = client build (SPA fallback), `run_worker_first: /api/*`, D1 binding `DB` → `zouzou` |
+| `artifacts/zouzou-friends` | The game (React/Vite). Build → `dist/public` (Worker static assets); `public/_headers` |
+| `artifacts/worker` | Hono API (`src/index.ts`), D1 migrations (`migrations/`), ReplDB → SQL transform (`scripts/repldb-to-sql.mjs`), generated `worker-configuration.d.ts` |
+| `lib/api-spec` | `openapi.yaml` + Orval config — **the API contract** |
+| `lib/api-zod` | Generated Zod schemas (used by the Worker) |
+| `lib/api-client-react` | Generated react-query hooks (base `/api`, same-origin) |
+| `screenshots/` | Game screenshots |
+
+Removed in Phase 2c (2026-09-17): Express `api-server` (ReplDB), `mockup-sandbox`, `lib/db`,
+`scripts/`, `.replit*`, `replit.md`, `.agents/`, `.npmrc`. Old API source: `git show 74b50a3:artifacts/api-server/`.
 
 ### Data model
 
-Today (ReplDB KV, `artifacts/api-server/src/lib/`):
+Replit (legacy, until cutover — ReplDB KV):
 - `zouzou:daily-leaderboard` → `{ date, entries: [{name, seconds}] }` — **only today**;
   overwritten when the Edmonton date rolls. Top 10, one best time per name (case-insensitive).
 - `zouzou:player:<encodeURIComponent(lowercase name)>` → `{ name, entries: [{date, game, seconds}] }` — every game.
 
-Target (D1, plan §2.4): `daily_scores (date, name_key, name, seconds)` PK `(date, name_key)`
-— keeps every day; `player_games (id, name_key, name, date, game, seconds)`.
+D1 (`artifacts/worker/migrations/0001_init.sql`): `daily_scores (date, name_key, name, seconds)`
+PK `(date, name_key)` — best time per player per day, every day kept; `player_games (id, name_key,
+name, date, game, seconds)` — every game. `seconds` CHECK: integer, 1–36000. `name_key` =
+lowercased, whitespace-normalised name. `0001` is applied remotely — schema changes need `0002_*.sql`.
 
 Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store` /
 `zouzou-best-times`): best times per mode, `daily`, `lastDailyDate`, `playerName`,
@@ -212,32 +213,41 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
 ### Commands
 
 ```
-# run locally (today; vite.config.ts requires PORT and BASE_PATH)
-pnpm --filter @workspace/api-server run dev                       # API on :8080
-PORT=5173 BASE_PATH=/ pnpm --filter @workspace/zouzou-friends run dev
+# run locally (wrangler is a pinned devDep — use npx/pnpm exec, not a global install)
+pnpm --filter @workspace/zouzou-friends run build   # client → dist/public (needed by wrangler dev)
+pnpm exec wrangler dev --local --port 8787          # Worker + assets + local D1
+pnpm --filter @workspace/zouzou-friends run dev     # client-only Vite dev (PORT/BASE_PATH default 5173 and /)
+
+# local D1
+pnpm exec wrangler d1 migrations apply zouzou --local
+pnpm exec wrangler d1 execute zouzou --local --file=<import.sql>
 
 # test
 pnpm run typecheck
 
 # build / deploy
 pnpm run build
-pnpm --filter @workspace/api-spec run codegen    # after editing openapi.yaml
-# Replit: Publish button (autoscale). Cloudflare target: Workers Builds on push to main
-# (wrangler.jsonc at root) — see migration plan.
+pnpm --filter @workspace/api-spec run codegen      # after editing openapi.yaml
+pnpm --filter @workspace/worker run cf-typegen      # after changing wrangler.jsonc bindings/compat date
+# Deploy: Workers Builds on push to main (build: pnpm install --frozen-lockfile &&
+# pnpm --filter @workspace/zouzou-friends run build; deploy: npx wrangler deploy).
+# Remote D1 (Rob's OK every time): wrangler d1 … --remote; Time Travel 7 days on Free.
 ```
 
-Live: https://zouzou-and-friends.replit.app → target `zouzou.minus1over12.com`.
-Quick check: `curl -fsSL https://ZouZou-and-friends.replit.app/api/daily/leaderboard | jq .`
+Live: https://zouzou-and-friends.replit.app (until cutover) → `zouzou.minus1over12.com`.
+Quick check: `curl -fsSL <host>/api/daily/leaderboard | jq .`
 
 ### Known gotchas
 
-- **Vite build throws off Replit** unless `PORT` and `BASE_PATH` are set.
-- **Platform `overrides` strip non-linux-x64 native binaries** (esbuild, rollup, tailwind
-  oxide…) — Mac builds break until removed (plan §1.2).
 - **OpenAPI numeric fields:** use `type: number` with bounds, not `integer` — Orval emits
   `zod.int()` which the workspace Zod doesn't have. Enforce `Number.isInteger` in the route.
 - **Board drag:** don't capture the pointer on pointer-down; capture only after the drag
   threshold, or taps never reach the cell button.
-- **ReplDB v3 missing keys** return `ok:false` with status 404, not `null`.
-- **`POST /players/games` doesn't check `Number.isInteger`** today (plan §1.5) — the Worker port fixes it.
-- `workerd` runs in UTC; Edmonton date via `Intl` must be asserted in `wrangler dev`.
+- **workerd runs in UTC** — dates must go through `Intl` with `timeZone: "America/Edmonton"`
+  (verified in workerd across midnight/DST, 2026-09-17).
+- **SQLite `BETWEEN` accepts REALs** — integer columns need `typeof(x) = 'integer'` in the CHECK.
+- **Previews share production D1** (plan D12) — test only with `zz-test`, delete its rows after (Rob's OK).
+- **Re-running the ReplDB import deletes all rows first** — any real games since the last
+  import are lost. Final import must happen before friends get the new link.
+- **esbuild versions differ by tool** (vite 0.27.3, wrangler 0.28.1, orval 0.28.2) — don't re-add a global pin.
+- `pnpm install` warns "Ignored build scripts: workerd" — harmless; `wrangler dev` works.
