@@ -1,13 +1,13 @@
 # State
 
-*Last updated: 2026-09-17 09:55*
+*Last updated: 2026-09-17 (status page session)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
 assets and a Hono API, backed by D1. The Replit deployment is unpublished, and past players were
 texted the new URL on 2026-09-17. The "Off Replit" milestone is done apart from the tail items
-(usage check, cancelling Replit). The README rewrite is uncommitted on `cf`.
+(usage check, cancelling Replit). The README rewrite is committed on `cf` (`33eb7b6`), not yet on `main`.
 
 ## What's working
 
@@ -28,13 +28,14 @@ texted the new URL on 2026-09-17. The "Off Replit" milestone is done apart from 
   - Rob played on desktop and phone (Phase 4).
 - **Repo:**
   - Replit-only code, config and deps removed (Phase 2c).
-  - `main` @ `23c01fd` (PR #3 merged); `cf` = `main`.
+  - `main` @ `23c01fd` (PR #3 merged); `cf` @ `33eb7b6` (pushed): 1 commit ahead with README + STATE/TASKS/diary.
   - CLAUDE.md updated for the Cloudflare setup.
 
 ## In progress
 
-- `README.md` rewrite, uncommitted on `cf`: needs a commit → PR → `main`, which triggers a no-op redeploy.
-- `project/diary/diary-2026-09.md` has uncommitted edits (Rob's and the next-session prompt).
+- `cf` → `main` PR not opened yet: README + protocol files + diary (`33eb7b6`), and a no-op redeploy when merged.
+- Uncommitted on `cf`: `project/status/status-2026-09-17.html`, `project/status/STATUS-SUMMARY.md`
+  (first status page), and this session's STATE/TASKS/diary edits.
 
 ## Known issues
 
@@ -48,7 +49,7 @@ texted the new URL on 2026-09-17. The "Off Replit" milestone is done apart from 
 ## Environment / setup
 
 ```
-branch: cf (== main @ 23c01fd) + uncommitted README.md, diary
+branch: cf @ 33eb7b6 (main @ 23c01fd) + uncommitted project/status/*, STATE/TASKS/diary
 Mac: Node 26.8.1 (no nvm), pnpm 10.34.5 global; wrangler via npx / pnpm exec (logged in)
 Backups (outside git): ~/Documents/Backups/ZouZou/ — repldb export, import SQL, pre-import D1 export
 D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-00000000-…2ce7
@@ -61,16 +62,20 @@ D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-
 - **PLAN.md drift:** the order changed from plan §4. D1 was created, migrated and imported before
   the merge; the final ReplDB export (5d/5e) was skipped. Rob checked the live API against the
   backup first and found no new games.
+- **PLAN.md drift:** all definition-of-done boxes are still unticked, though Phases 1–5 are done.
+- **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
+- `.claude/commands/project-status.md` still has the TEMPLATE header. The first page chose a warm
+  orange palette, group Personal / Personal Project / priority 8. Keep those when customising.
 - **Any friend blocked by the rate limit?** Unknown until people play; raise to 20 req/10 s if so.
 - Rob's personal Repl URL `zou-zou-robkellington.replit.app` also shows "not live". Anything else
   still running on Replit for ZouZou (billing)?
 
 ## Resolved this session
 
-- Phases 1 → 5 of the migration done (5d export and 5e re-import skipped by Rob's decision).
-- For SKYresearch: the plan §11 feedback block was delivered in the session (3 items pending:
-  §11.8 false positives, §11.9 friends' reaction, §11.10 one-week usage).
-- CLAUDE.md is the agent file; `replit.md` and `.agents/` were deleted.
+- DECISIONS.md: logged the three 2026-09-17 calls (skipped 5d/5e, kept `zz-test`, plan §4 order).
+- First `/project-status` run: `project/status/status-2026-09-17.html` + `STATUS-SUMMARY.md`.
+- Earlier the same day: migration Phases 1 → 5 (5d/5e skipped), SKYresearch §11 block delivered
+  (§11.8–11.10 pending), and CLAUDE.md made the agent file.
 
 ---
 

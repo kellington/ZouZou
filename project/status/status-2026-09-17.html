@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZouZou Status 2026-09-17</title>
+<style>
+:root{
+  --bg:#fbf7f1;--card:#ffffff;--ink:#2b2420;--muted:#6f625a;--line:#e8dfd4;
+  --brand:#d9622b;--brand-soft:#fbe6da;
+  --green:#2f8a4c;--green-soft:#e1f2e6;--amber:#b7791f;--amber-soft:#fbefd9;--red:#c0392b;--red-soft:#f8e0dd;
+  --grey:#8a8079;--grey-soft:#efeae4;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#1b1714;--card:#25201c;--ink:#f1e9e1;--muted:#b3a59a;--line:#3a322c;
+  --brand:#f08a55;--brand-soft:#43291c;
+  --green:#6cc98a;--green-soft:#1f3a28;--amber:#e8b35a;--amber-soft:#3d3020;--red:#ef7d70;--red-soft:#402421;
+  --grey:#a39990;--grey-soft:#302a25;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 48px}
+header{background:var(--brand);color:#fff;padding:22px 0}
+header .wrap{padding-bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+header h1{margin:0;font-size:24px;letter-spacing:-.01em}
+header .badge{background:#fff;color:var(--brand);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+header a{color:#fff}
+header .date{margin-left:auto;opacity:.9;font-variant-numeric:tabular-nums}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:34px 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px}
+.pill b{color:var(--muted);font-weight:600;margin-right:4px}
+.purpose{font-size:18px;margin:18px 0 0}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0}
+ul.check{list-style:none;padding:0}
+ul.check li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)}
+ul.check li:last-child{border-bottom:0}
+.dot{flex:none;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:1px}
+.ok{background:var(--green-soft);color:var(--green)}
+.warn{background:var(--amber-soft);color:var(--amber)}
+.bad{background:var(--red-soft);color:var(--red)}
+.na{background:var(--grey-soft);color:var(--grey)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:1px}
+.card h3{margin:0 0 8px;font-size:15px}
+.src{font-size:12px;color:var(--muted);margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+td.num{font-variant-numeric:tabular-nums}
+.dec h3{margin:0}
+.dec .when{font-size:12px;color:var(--muted)}
+.dec p{margin:6px 0 0}
+.callout{border-left:4px solid var(--amber);background:var(--amber-soft)}
+.legend{font-size:12px;color:var(--muted);margin-top:8px}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--grey-soft);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+footer{margin-top:40px;font-size:12px;color:var(--muted);text-align:center}
+@media (max-width:560px){header .date{margin-left:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>ZouZou &amp; Friends</h1>
+    <span class="badge">Live · Settling in</span>
+    <a href="https://zouzou.minus1over12.com">zouzou.minus1over12.com</a>
+    <span class="date">2026-09-17</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="pills">
+    <span class="pill"><b>Stack</b>React 19 + Vite · Hono · D1</span>
+    <span class="pill"><b>Hosting</b>Cloudflare Worker (Free)</span>
+    <span class="pill"><b>Milestone</b>Off Replit — done (PLAN.md not yet rewritten)</span>
+    <span class="pill"><b>Tasks</b>Now 2 · Next 3 · Later 8 · Done 8</span>
+    <span class="pill"><b>Branch</b><code>cf</code> 1 commit ahead of <code>main</code></span>
+  </div>
+
+  <p class="purpose">A cat-placement logic puzzle in the browser — a daily challenge everyone shares, plus endless easy/medium/hard games — for Rob's circle of friends. <span class="src">(PROJECT.md)</span></p>
+
+  <!-- 4 -->
+  <h2>Since last status</h2>
+  <div class="card">
+    <p style="margin:0 0 8px"><b>First status page — no prior baseline.</b> Activity summarised from git log and the diary instead:</p>
+    <ul>
+      <li>2026-09-16: protocol files initialised; Phase 0 ReplDB backup; migration plan decided (SKYresearch plan §8).</li>
+      <li>2026-09-17: Phases 1 → 5 shipped — Mac build, Hono Worker + D1, Replit code removed, remote D1 imported, PR #3 merged, Workers Builds live, custom domain + HTTPS + rate limit, Replit unpublished, friends texted.</li>
+      <li>2026-09-17: <code>33eb7b6</code> "migration done" — README rewrite + STATE/TASKS/diary committed and pushed to <code>origin/cf</code>; not yet on <code>main</code>.</li>
+    </ul>
+    <div class="src">Sources: git log, <code>project/diary/diary-2026-09.md</code>, TASKS.md Done</div>
+  </div>
+
+  <!-- 5 -->
+  <h2>Current milestone — Off Replit</h2>
+  <div class="card">
+    <ul class="check">
+      <li><span class="dot ok">✓</span><div>Phase 1: <code>cf</code> branch, overrides removed, <code>pnpm@10.34.5</code>, Mac build passes</div></li>
+      <li><span class="dot ok">✓</span><div>Phase 2: <code>artifacts/worker</code> (Hono + D1), <code>0001_init.sql</code>, <code>wrangler.jsonc</code>, <code>_headers</code>, transform tested</div></li>
+      <li><span class="dot ok">✓</span><div>Phase 2b: <code>wrangler dev</code> checklist — Quincy PASS, 62/62 harness</div></li>
+      <li><span class="dot ok">✓</span><div>Phase 2c: Replit-only files/deps deleted; rebuild + smoke pass (Quincy PASS)</div></li>
+      <li><span class="dot ok">✓</span><div>Phases 3–4: D1 created, Workers Builds connected, custom domain + Always Use HTTPS + rate-limit rule live; played on desktop + phone</div></li>
+      <li><span class="dot warn">~</span><div>Phase 5: Replit unpublished, friends texted — <b>final ReplDB export/re-import (5d/5e) skipped</b> by Rob's call (live API matched backup). Backup import verified: 62 games, 4 players, 25 daily rows / 14 dates (+1 <code>zz-test</code>)</div></li>
+      <li><span class="dot warn">~</span><div>"For SKYresearch" §11 block delivered — 3 items pending: §11.8 false positives, §11.9 friends' reaction, §11.10 one-week usage</div></li>
+    </ul>
+    <div class="legend">✓ green = done per STATE.md · ~ amber = done with deviation or pending items · ✗ red = not started. PLAN.md checkboxes are all still unticked — state here is from STATE.md / TASKS.md Done.</div>
+  </div>
+
+  <h2>Success criteria (PROJECT.md)</h2>
+  <div class="card">
+    <ul class="check">
+      <li><span class="dot ok">✓</span><div>One link, phone or desktop, no sign-up — live at the custom domain; played on both (STATE.md)</div></li>
+      <li><span class="dot ok">✓</span><div>Leaderboard + recent players correct, history preserved — D1 import verified; Worker/Express parity 62/62</div></li>
+      <li><span class="dot warn">~</span><div>$0/month on Cloudflare Free, no Replit dependency — running on Free; Replit unpublished but <b>not cancelled</b>; usage vs limits unmeasured until ~2026-09-24</div></li>
+      <li><span class="dot ok">✓</span><div>Change + deploy from Mac (push to <code>main</code> → live) — Workers Builds deploys <code>main</code> (version <code>88c45c3e</code>)</div></li>
+    </ul>
+  </div>
+
+  <!-- 6 -->
+  <h2>Working · In progress · Known issues</h2>
+  <div class="grid g3">
+    <div class="card">
+      <h3><span class="tag ok">Working</span></h3>
+      <ul>
+        <li>Worker <code>zouzou</code> on custom domain; workers.dev fallback kept</li>
+        <li>D1 <code>zouzou</code> (WNAM), <code>0001</code> applied, history imported</li>
+        <li>Always Use HTTPS on; apex + geeks-pickem unaffected</li>
+        <li>Rate-limit <code>zouzou-api</code> 10 req/10 s — tested (17×429 on 40-burst, recovered)</li>
+        <li>Workers Builds picks up pnpm 10.34.5 + Node 24.21.0</li>
+        <li>Replit code/config/deps removed; CLAUDE.md updated</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag warn">In progress</span></h3>
+      <ul>
+        <li>README rewrite + protocol files + diary: committed on <code>cf</code> (<code>33eb7b6</code>), needs PR → <code>main</code> (no-op redeploy)</li>
+        <li>Milestone checkpoint (PLAN.md rewrite → "Settle in")</li>
+      </ul>
+      <div class="src">STATE.md still says README "uncommitted" — git shows it committed and pushed to <code>origin/cf</code>.</div>
+    </div>
+    <div class="card">
+      <h3><span class="tag bad">Known issues</span></h3>
+      <ul>
+        <li><code>GET /api</code> (bare) returns SPA HTML, not JSON 404 — cosmetic</li>
+        <li><code>zz-test</code> shows in "Recent players" indefinitely</li>
+        <li>Builds command runs <code>pnpm install</code> twice (~2 s)</li>
+        <li>Harmless build warnings: workerd build scripts, tooltip.tsx sourcemap</li>
+        <li>10 <code>// @replit</code> comments in <code>ui/badge.tsx</code>, <code>ui/button.tsx</code></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <h2>Task board (TASKS.md)</h2>
+  <div class="grid g3">
+    <div class="card">
+      <h3>Now <span class="src">(2)</span></h3>
+      <ul>
+        <li>PR <code>cf</code> → <code>main</code> for README + protocol files + diary (Rob's OK) — commit step already done</li>
+        <li>Milestone checkpoint: rewrite PLAN.md, prune TASKS, re-check success criteria</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Next <span class="src">(3)</span></h3>
+      <ul>
+        <li>~2026-09-24: one-week usage check vs Free limits → SKYresearch §11.10</li>
+        <li>Watch for friends hitting 429s; raise to 20 req/10 s if so → §11.8</li>
+        <li>Capture friends' reaction to the move → §11.9</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Later <span class="src">(8)</span></h3>
+      <ul>
+        <li>Cancel Replit after pickem moves (~Oct–Nov 2026)</li>
+        <li>Simplify Builds command to <code>pnpm run build</code></li>
+        <li><code>/api</code> → JSON 404</li>
+        <li>Optional: delete <code>zz-test</code> rows (remote, Rob's OK)</li>
+        <li>Optional: remove <code>// @replit</code> comments</li>
+        <li>Optional: explicit <code>workers_dev</code> / <code>preview_urls</code></li>
+        <li>Customise <code>project-status</code> command</li>
+        <li>Maybe: use kept history; small Worker test suite</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <h2>Recent decisions (DECISIONS.md)</h2>
+  <div class="grid g2">
+    <div class="card dec">
+      <span class="when">2026-09-16</span>
+      <h3>Move off Replit to Cloudflare Worker + D1</h3>
+      <p>One Worker serves static assets + Hono API on D1; full data import; Replit unpublished at cutover, no rollback. Trade-off: cookie progress restarts on new domain; previews share production D1.</p>
+    </div>
+    <div class="card dec">
+      <span class="when">2026-09-16</span>
+      <h3>CLAUDE.md replaces replit.md as the agent file</h3>
+      <p>Claude Code + protocol files is the agent setup; <code>replit.md</code> and <code>.agents/</code> deleted. Trade-off: Replit Agent loses project context.</p>
+    </div>
+  </div>
+  <div class="card callout" style="margin-top:14px">
+    <b>Not yet logged:</b> 2026-09-17 calls recorded only in STATE.md/diary — skip final ReplDB export (5d/5e) after checking live API vs backup; keep the <code>zz-test</code> row in production D1; migration order changed from plan §4 (D1 imported before merge). Candidates for DECISIONS.md.
+  </div>
+
+  <!-- 9 -->
+  <h2>Risks</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Risk</th><th>Source</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Rate-limit rule counts GETs; households on one IP could hit 10 req/10 s</td><td>PLAN.md, STATE.md</td><td><span class="tag warn">Open</span> unknown until friends play</td></tr>
+        <tr><td>Previews write to production D1</td><td>PLAN.md (D12)</td><td><span class="tag warn">Accepted</span></td></tr>
+        <tr><td>Replit still possibly billing (personal Repl URL also "not live"; nothing confirmed cancelled)</td><td>STATE.md open questions</td><td><span class="tag warn">Open</span></td></tr>
+        <tr><td>Free-tier limits (100k req/day, 100k D1 rows written/day) — unmeasured</td><td>PROJECT.md, TASKS.md</td><td><span class="tag warn">Open</span> check ~2026-09-24</td></tr>
+        <tr><td>Workers Builds + pnpm / <code>minimumReleaseAge</code> unverified</td><td>PLAN.md §9.1</td><td><span class="tag ok">Retired</span> Builds live, correct pnpm/Node</td></tr>
+        <tr><td>Repl KV unreadable after unpublish</td><td>PLAN.md §9.2</td><td><span class="tag ok">Retired</span> backups in <code>~/Documents/Backups/ZouZou/</code></td></tr>
+        <tr><td>PLAN.md stale — milestone done, checkboxes unticked, order drift</td><td>STATE.md open questions</td><td><span class="tag warn">Open</span> checkpoint in Now</td></tr>
+      </tbody>
+    </table>
+    <div class="legend">Open = amber · Accepted = amber (by decision) · Retired = green · red reserved for a risk that has materialised.</div>
+  </div>
+
+  <!-- 10 -->
+  <h2>Source freshness</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>File</th><th>Last commit</th><th>Age</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>PROJECT.md</td><td class="num">2026-09-17</td><td class="num">0 d</td><td><span class="tag ok">Fresh</span></td></tr>
+        <tr><td>PLAN.md</td><td class="num">2026-09-17</td><td class="num">0 d</td><td><span class="tag ok">Fresh</span> <span class="src">(content outdated — see risks)</span></td></tr>
+        <tr><td>STATE.md</td><td class="num">2026-09-17</td><td class="num">0 d</td><td><span class="tag ok">Fresh</span></td></tr>
+        <tr><td>TASKS.md</td><td class="num">2026-09-17</td><td class="num">0 d</td><td><span class="tag ok">Fresh</span></td></tr>
+        <tr><td>DECISIONS.md</td><td class="num">2026-09-17</td><td class="num">0 d</td><td><span class="tag ok">Fresh</span></td></tr>
+        <tr><td>diary-2026-09.md</td><td class="num">2026-09-17</td><td class="num">0 d</td><td><span class="tag ok">Fresh</span></td></tr>
+      </tbody>
+    </table>
+    <div class="legend">Thresholds: green ≤ 30 days · amber &gt; 30 days · red &gt; 90 days. Dates from <code>git log -1 --format=%cs</code>.</div>
+  </div>
+
+  <h2>AI + Process</h2>
+  <div class="card">
+    Built end-to-end by Replit Agent; now maintained with Claude Code and the Alice / Rex / Gage / Quincy team. See <a href="../../AI+PROCESS.md">AI+PROCESS.md</a> (no HTML version yet; its snapshot still says "moving to Cloudflare").
+  </div>
+
+  <footer>Generated 2026-09-17 · derived from PROJECT/PLAN/STATE/TASKS/DECISIONS, diary, git log</footer>
+</div>
+</body>
+</html>

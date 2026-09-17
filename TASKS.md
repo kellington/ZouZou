@@ -11,8 +11,8 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Commit README.md, the protocol files and the diary on `cf` → PR → `main` (Rob's OK; triggers a no-op redeploy)
-- [ ] Milestone checkpoint: rewrite PLAN.md ("Off Replit" done → "Settle in"), prune TASKS, re-check PROJECT.md success criteria
+- [ ] Commit the status page + session edits on `cf`, then PR `cf` → `main` (Rob's OK; README is already in `33eb7b6`; triggers a no-op redeploy)
+- [ ] Milestone checkpoint: rewrite PLAN.md ("Off Replit" done → "Settle in"), prune TASKS, re-check PROJECT.md success criteria (the "$0 / no Replit" criterion is only partly met)
 
 ## Next
 
@@ -28,7 +28,8 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK)
 - [ ] Optional: remove the `// @replit` comments in `ui/badge.tsx`, `ui/button.tsx`
 - [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
-- [ ] Customise `.claude/commands/project-status.md` for ZouZou
+- [ ] Customise `.claude/commands/project-status.md` for ZouZou (drop the TEMPLATE header; fix the palette and group/priority used in the first page)
+- [ ] Update `AI+PROCESS.md` for the Cloudflare move (snapshot still says "moving")
 - [ ] Maybe: use the kept history (past daily boards, per-player stats); small Worker test suite
 
 ## Done (recent)
@@ -39,7 +40,9 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [x] 2026-09-17 — Phase 3: remote D1 created, migrated, backup imported; PR #3 merged; Workers Builds live
 - [x] 2026-09-17 — Phase 4: preview played on desktop + phone
 - [x] 2026-09-17 — Phase 5: Always Use HTTPS, custom domain, rate-limit rule, Replit unpublished, friends texted
-- [x] 2026-09-17 — README rewritten (uncommitted)
+- [x] 2026-09-17 — Logged 3 migration decisions in DECISIONS.md
+- [x] 2026-09-17 — First status page (`project/status/status-2026-09-17.html`, STATUS-SUMMARY.md)
+- [x] 2026-09-17 — README rewritten; committed on `cf` (`33eb7b6`)
 - [x] 2026-09-16 — Protocol files initialised; Phase 0 ReplDB backup
 
 ---
