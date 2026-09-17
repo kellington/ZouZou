@@ -32,3 +32,24 @@ writing a design doc, which belongs elsewhere.
 **Why:** Development moves to the Mac ahead of the Cloudflare migration; `replit.md` was template placeholders and described a Postgres DB the app doesn't use.
 **Trade-off:** Replit Agent loses its project context if used again before cutover.
 **Impact:** Gotchas from `.agents/memory/` copied into CLAUDE.md Known gotchas.
+
+## [2026-09-17] — Skip final ReplDB export/re-import (plan 5d/5e)
+
+**Decision:** Cut over using the Phase 0 backup import; no final export or re-import.
+**Why:** Rob checked the live Replit API against the backup — no new games.
+**Trade-off:** Any game posted between the check and the unpublish is lost.
+**Impact:** D1 holds 62 games / 4 players / 25 daily rows from the backup.
+
+## [2026-09-17] — Keep the zz-test row in production D1
+
+**Decision:** Leave the one zz-test daily game from preview testing in D1.
+**Why:** Rob's choice; harmless, and deleting needs a remote write.
+**Trade-off:** zz-test shows in "Recent players" indefinitely.
+**Impact:** Deletion stays an optional Later task.
+
+## [2026-09-17] — D1 created and imported before the cf → main merge
+
+**Decision:** Remote D1 was created, migrated and imported before merging, not in the plan §4 order.
+**Why:** Production D1 needed data before Workers Builds went live on main.
+**Trade-off:** Diverges from the documented plan order.
+**Impact:** PLAN.md / SKYresearch plan need the actual order noted.
