@@ -1,3 +1,0 @@
-- [OpenAPI numeric fields](openapi-numeric-fields.md) — use bounded number schemas for generated numeric values; integer currently emits an incompatible Zod API.
-- [Board drag pointer capture](board-drag-pointer-capture.md) — capture pointers only after drag begins; capture on press prevents cell tap clicks from reaching buttons.
-- [Replit Database missing keys](replit-database-missing-keys.md) — SDK v3 reports absent keys as a failed 404 result, not a successful null value.
