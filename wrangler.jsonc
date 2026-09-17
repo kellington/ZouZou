@@ -12,7 +12,7 @@
     {
       "binding": "DB",
       "database_name": "zouzou",
-      "database_id": "<from wrangler d1 create>", // placeholder until Phase 3
+      "database_id": "25d21c9d-be53-4eb2-a819-5e7b0ae9c078", // remote D1 zouzou, WNAM, created 2026-09-17
       "migrations_dir": "./artifacts/worker/migrations"
     }
   ],
