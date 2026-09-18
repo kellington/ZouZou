@@ -260,8 +260,12 @@ export function Game() {
     }
   };
 
+  // Skip while the win modal is up: saveBestTime sets lastDailyDate on the
+  // winning move, and this screen would otherwise replace the modal (and its
+  // name prompt) before an unnamed player can save to the leaderboard.
   if (
     safeMode === 'daily' &&
+    gameState !== 'won' &&
     store.lastDailyDate === today &&
     store.daily !== null
   ) {
