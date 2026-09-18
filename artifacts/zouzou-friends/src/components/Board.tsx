@@ -1,5 +1,6 @@
 import { CellPos, Puzzle } from '../lib/puzzle';
-import { CatIcon, PawIcon } from './Icons';
+import { CritterIcon, CritterMarkIcon } from './Icons';
+import { CRITTER_NOUN, type Critter } from '../lib/critters';
 import { Lock } from 'lucide-react';
 import { useEffect, useRef, type PointerEvent as ReactPointerEvent } from 'react';
 
@@ -13,6 +14,7 @@ interface BoardProps {
   onCellDoubleClick: (r: number, c: number) => void;
   onCellPaint: (r: number, c: number, state: 'blank' | 'note') => void;
   isWon?: boolean;
+  critter: Critter;
 }
 
 export function Board({
@@ -23,7 +25,9 @@ export function Board({
   onCellDoubleClick,
   onCellPaint,
   isWon,
+  critter,
 }: BoardProps) {
+  const noun = CRITTER_NOUN[critter];
   const size = puzzle.size || 6;
   const pendingTaps = useRef(new Map<string, number>());
   const suppressNextClick = useRef(false);
@@ -199,7 +203,7 @@ export function Board({
                 data-cell-column={c}
                 onClick={() => handleCellTap(r, c)}
                 type="button"
-                aria-label={`Row ${r + 1}, column ${c + 1}${isPrefilled ? ', locked cat' : state === 'cat' ? ', cat placed' : state === 'note' ? ', marked unavailable' : ''}`}
+                aria-label={`Row ${r + 1}, column ${c + 1}${isPrefilled ? `, locked ${noun.singular}` : state === 'cat' ? `, ${noun.singular} placed` : state === 'note' ? ', marked unavailable' : ''}`}
                 disabled={isPrefilled || isWon}
                 className={`
                   relative flex items-center justify-center cursor-pointer select-none transition-colors duration-200
@@ -210,13 +214,14 @@ export function Board({
                 `}
               >
                 {state === 'cat' && (
-                  <CatIcon
+                  <CritterIcon
+                    critter={critter}
                     className={`w-[70%] h-[70%] text-board drop-shadow-sm ${isWon ? 'animate-bounce' : 'animate-bounceIn'}`}
                     style={isWon ? { animationDelay: `${(r + c) * 0.1}s` } : {}}
                   />
                 )}
                 {state === 'note' && (
-                  <PawIcon className="w-[40%] h-[40%] text-board opacity-25 animate-zoomIn" />
+                  <CritterMarkIcon critter={critter} className="w-[40%] h-[40%] text-board opacity-25 animate-zoomIn" />
                 )}
 
                 {isPrefilled && (

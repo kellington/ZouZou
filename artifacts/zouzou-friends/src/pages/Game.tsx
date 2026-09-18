@@ -11,7 +11,8 @@ import {
   type PuzzleSize,
   type CellPos,
 } from '../lib/puzzle';
-import { HeartIcon, PawIcon, CatIcon } from '../components/Icons';
+import { HeartIcon, CritterIcon, CritterMarkIcon } from '../components/Icons';
+import { CRITTER_NOUN, CRITTER_LABEL, CRITTER_WIN_TITLE } from '../lib/critters';
 import { ActionButton, Modal } from '../components/ui';
 import { useStore } from '../lib/store';
 import { ArrowLeft, HelpCircle, RotateCcw, Flame } from 'lucide-react';
@@ -23,7 +24,7 @@ import {
 } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
-import { playMeowSound, playMistakeSound, playNoCatSound } from '../lib/sounds';
+import { playCritterSound, playMistakeSound, playNoCatSound } from '../lib/sounds';
 
 type GameMode = 'easy' | 'medium' | 'hard' | 'daily';
 
@@ -57,6 +58,9 @@ export function Game() {
   };
   const { store, saveBestTime, recordDailyWin, resetStreak, setPlayerName } = useStore();
   const today = getEdmontonDateKey();
+  const critter = store.critter;
+  const critterNoun = CRITTER_NOUN[critter];
+  const critterPluralCap = CRITTER_LABEL[critter];
   
   const queryClient = useQueryClient();
   const hasRecordedGame = useRef(false);
@@ -219,7 +223,7 @@ export function Game() {
       return;
     }
 
-    playMeowSound();
+    playCritterSound(critter);
     const newGrid = [...grid];
     newGrid[r] = [...grid[r]];
     newGrid[r][c] = 'cat';
@@ -263,7 +267,7 @@ export function Game() {
   ) {
     return (
       <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 max-w-md mx-auto w-full text-center">
-        <CatIcon className="w-24 h-24 text-[#AAB3BC] animate-bounce mb-6" />
+        <CritterIcon critter={critter} className="w-24 h-24 text-[#AAB3BC] animate-bounce mb-6" />
         <h1 className="text-3xl font-black text-board mb-4">Daily puzzle complete</h1>
         <p className="text-lg font-bold text-board/70 mb-8">
           You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}.
@@ -318,6 +322,7 @@ export function Game() {
           onCellDoubleClick={handleCellDoubleClick}
           onCellPaint={handleCellPaint}
           isWon={gameState === 'won'}
+          critter={critter}
         />
       </div>
 
@@ -330,24 +335,24 @@ export function Game() {
       <Modal isOpen={showRules} onClose={() => setShowRules(false)} title="How to Play">
         <ul className="space-y-5 text-left text-base">
           <li className="flex gap-4 items-start">
-            <CatIcon className="w-8 h-8 shrink-0 mt-1" /> 
-            <span>Place exactly one cat in every <strong>row</strong>, <strong>column</strong>, and <strong>colored region</strong>.</span>
+            <CritterIcon critter={critter} className="w-8 h-8 shrink-0 mt-1" />
+            <span>Place exactly one {critterNoun.singular} in every <strong>row</strong>, <strong>column</strong>, and <strong>colored region</strong>.</span>
           </li>
           <li className="flex gap-4 items-start">
-            <div className="w-8 h-8 border-2 border-dashed border-board rounded-lg shrink-0 flex items-center justify-center text-xl font-black mt-1">!</div> 
-            <span>Cats cannot touch each other—<strong>not even diagonally!</strong></span>
+            <div className="w-8 h-8 border-2 border-dashed border-board rounded-lg shrink-0 flex items-center justify-center text-xl font-black mt-1">!</div>
+            <span>{critterPluralCap} cannot touch each other—<strong>not even diagonally!</strong></span>
           </li>
           <li className="flex gap-4 items-start">
-            <PawIcon className="w-8 h-8 shrink-0 opacity-50 mt-1" /> 
-            <span>Tap once to mark no cat, tap again to clear it. Double-tap to place a cat!</span>
+            <CritterMarkIcon critter={critter} className="w-8 h-8 shrink-0 opacity-50 mt-1" />
+            <span>Tap once to mark no {critterNoun.singular}, tap again to clear it. Double-tap to place a {critterNoun.singular}!</span>
           </li>
         </ul>
         <ActionButton className="w-full mt-8" onClick={() => setShowRules(false)}>Got it!</ActionButton>
       </Modal>
 
-      <Modal isOpen={gameState === 'won'} onClose={() => setLocation('/')} title="Purrfect!">
+      <Modal isOpen={gameState === 'won'} onClose={() => setLocation('/')} title={CRITTER_WIN_TITLE[critter]}>
         <div className="flex justify-center mb-4">
-          <CatIcon className="w-20 h-20 text-board animate-bounce" />
+          <CritterIcon critter={critter} className="w-20 h-20 text-board animate-bounce" />
         </div>
         <p className="text-xl mb-1 text-center">You solved it in</p>
         <p className="text-4xl font-black font-mono mb-6 text-center">{formatTime(seconds)}</p>

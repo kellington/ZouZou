@@ -1,5 +1,6 @@
 import { useLocation } from 'wouter';
-import { CatIcon } from '../components/Icons';
+import { CritterIcon } from '../components/Icons';
+import { CritterPicker } from '../components/CritterPicker';
 import { ActionButton } from '../components/ui';
 import { useStore } from '../lib/store';
 import {
@@ -15,7 +16,7 @@ import { useState } from 'react';
 
 export function Menu() {
   const [, setLocation] = useLocation();
-  const { store, setPlayerName } = useStore();
+  const { store, setPlayerName, setCritter } = useStore();
   const [isEditingName, setIsEditingName] = useState(false);
   const dailyDifficulty = getDailyDifficulty();
   const today = getEdmontonDateKey();
@@ -28,7 +29,7 @@ export function Menu() {
         
         <div className="flex justify-center mb-6">
           <div className="relative">
-            <CatIcon className="w-24 h-24 text-[#AAB3BC] animate-bounce duration-[2000ms]" />
+            <CritterIcon critter={store.critter} className="w-24 h-24 text-[#AAB3BC] animate-bounce duration-[2000ms]" />
             <div className="absolute -bottom-2 w-16 h-2 bg-black/10 rounded-[100%] mx-auto left-0 right-0 animate-pulse"></div>
           </div>
         </div>
@@ -72,6 +73,10 @@ export function Menu() {
               }}
             />
           )}
+        </div>
+
+        <div className="mb-6">
+          <CritterPicker value={store.critter} onChange={setCritter} />
         </div>
 
         <div className="space-y-4">
