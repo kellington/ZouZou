@@ -1,17 +1,17 @@
 # State
 
-*Last updated: 2026-09-17 (status page session)*
+*Last updated: 2026-09-18 (critters + daily-save bug fix)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
-assets and a Hono API, backed by D1. The Replit deployment is unpublished, and past players were
-texted the new URL on 2026-09-17. The "Off Replit" milestone is done apart from the tail items
-(usage check, cancelling Replit). The README rewrite is committed on `cf` (`33eb7b6`), not yet on `main`.
+assets and a Hono API, backed by D1. Replit is unpublished; friends were texted the new URL on
+2026-09-17. 2026-09-18: the critter picker (cats / dogs / dinosaurs / monkeys) shipped (PR #5), and a
+daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on production.
 
 ## What's working
 
-- **Production:** Worker `zouzou` (version `88c45c3e`), deployed by Workers Builds on push to `main`.
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `85ee7bc`).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
 - **D1 `zouzou` (WNAM):**
@@ -26,22 +26,26 @@ texted the new URL on 2026-09-17. The "Off Replit" milestone is done apart from 
   - Quincy 2b and 2c: 62/62 API harness passes (Worker vs Express parity, boundaries, Edmonton date
     incl. DST, headers, SPA fallback, JSON 404/500).
   - Rob played on desktop and phone (Phase 4).
+- **Critter picker:** a "Find:" choice on the Menu, saved in the `zouzou-player` cookie (default cat).
+  Per-critter icons, sounds (on every correct placement, as the meow was), win titles, rules copy.
+- **Daily save fix (`658571d`):** the "Daily puzzle complete" screen no longer replaces the win
+  popup, so unnamed players see the name box and Top 5 again. Before this, a daily win with no
+  saved name recorded nothing (bug existed since before critters; hit everyone new to the domain).
 - **Repo:**
-  - Replit-only code, config and deps removed (Phase 2c).
-  - `main` @ `23c01fd` (PR #3 merged); `cf` @ `33eb7b6` (pushed): 1 commit ahead with README + STATE/TASKS/diary.
-  - CLAUDE.md updated for the Cloudflare setup.
+  - `origin/main` @ `85ee7bc` (PRs #4 cf, #5 critters, #6 fix merged). Local `main` is 2 behind — pull.
+  - `feature/critters` @ `658571d`, merged; can be deleted. `cf` @ `95041d1`, merged.
 
 ## In progress
 
-- `cf` → `main` PR not opened yet: README + protocol files + diary (`33eb7b6`), and a no-op redeploy when merged.
-- Uncommitted on `cf`: `project/status/status-2026-09-17.html`, `project/status/STATUS-SUMMARY.md`
-  (first status page), and this session's STATE/TASKS/diary edits.
+- Nothing mid-flight. Uncommitted: this session's STATE/TASKS/diary edits.
 
 ## Known issues
 
 - `GET /api` with nothing after it returns the SPA HTML instead of a JSON 404 (`run_worker_first`
   only matches `/api/*`). Cosmetic.
 - `zz-test` shows in "Recent players" indefinitely, since the list shows each name's latest game.
+  It is also on today's (2026-09-18) live daily board (98 s) from Rob's post-fix check.
+- Rob's own 2026-09-18 daily was lost to the save bug; not backfilled (Rob's call).
 - The Builds command runs `pnpm install` twice (Builds installs automatically). Harmless, adds ~2 s.
 - Build log warnings, both harmless: "Ignored build scripts: workerd" and the tooltip.tsx sourcemap.
 - 10 `// @replit` comments remain in `ui/badge.tsx` and `ui/button.tsx`.
@@ -49,7 +53,7 @@ texted the new URL on 2026-09-17. The "Off Replit" milestone is done apart from 
 ## Environment / setup
 
 ```
-branch: cf @ 33eb7b6 (main @ 23c01fd) + uncommitted project/status/*, STATE/TASKS/diary
+branch: feature/critters @ 658571d (origin/main @ 85ee7bc; local main behind 2) + uncommitted STATE/TASKS/diary
 Mac: Node 26.8.1 (no nvm), pnpm 10.34.5 global; wrangler via npx / pnpm exec (logged in)
 Backups (outside git): ~/Documents/Backups/ZouZou/ — repldb export, import SQL, pre-import D1 export
 D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-00000000-…2ce7
@@ -72,10 +76,9 @@ D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-
 
 ## Resolved this session
 
-- DECISIONS.md: logged the three 2026-09-17 calls (skipped 5d/5e, kept `zz-test`, plan §4 order).
-- First `/project-status` run: `project/status/status-2026-09-17.html` + `STATUS-SUMMARY.md`.
-- Earlier the same day: migration Phases 1 → 5 (5d/5e skipped), SKYresearch §11 block delivered
-  (§11.8–11.10 pending), and CLAUDE.md made the agent file.
+- Daily-save bug: the win popup (name box + Top 5) was replaced by "Daily puzzle complete" on the
+  winning move. Fixed in `Game.tsx` (skip that screen while `gameState === 'won'`); merged PR #6, deployed, verified by Rob.
+- Earlier today: critter picker built, Quincy PASS, merged PR #5. Status page + README reached `main` via PR #4.
 
 ---
 

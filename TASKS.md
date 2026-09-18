@@ -11,7 +11,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Commit the status page + session edits on `cf`, then PR `cf` → `main` (Rob's OK; README is already in `33eb7b6`; triggers a no-op redeploy)
+- [ ] Commit this session's STATE/TASKS/diary; pull `main`; delete merged `feature/critters` (Rob's OK)
 - [ ] Milestone checkpoint: rewrite PLAN.md ("Off Replit" done → "Settle in"), prune TASKS, re-check PROJECT.md success criteria (the "$0 / no Replit" criterion is only partly met)
 
 ## Next
@@ -19,13 +19,14 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
+- [ ] Ask Brent (and others) how the critter choice lands
 
 ## Later
 
 - [ ] Cancel Replit after pickem moves (~Oct–Nov 2026); download a final Repl zip first; confirm nothing else of ZouZou is billed
 - [ ] Simplify the Workers Builds command to `pnpm run build` (install is automatic)
 - [ ] `/api` with nothing after it → JSON 404 (add `/api` to `run_worker_first`)
-- [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK)
+- [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK) — now incl. its 2026-09-18 daily
 - [ ] Optional: remove the `// @replit` comments in `ui/badge.tsx`, `ui/button.tsx`
 - [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
 - [ ] Customise `.claude/commands/project-status.md` for ZouZou (drop the TEMPLATE header; fix the palette and group/priority used in the first page)
@@ -34,6 +35,9 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Done (recent)
 
+- [x] 2026-09-18 — Daily-save bug fixed (win popup hidden by "Daily puzzle complete"); PR #6 merged, verified live
+- [x] 2026-09-18 — Critter picker (cats/dogs/dinosaurs/monkeys); Quincy PASS; PR #5 merged
+- [x] 2026-09-18 — `cf` → `main` (PR #4): README, status page, protocol files
 - [x] 2026-09-17 — Phase 1: Mac build (pnpm 10.34.5, overrides removed, vite defaults, index.html noindex)
 - [x] 2026-09-17 — Phase 2/2b: Hono worker, D1 schema, transform, wrangler.jsonc, _headers; Quincy PASS
 - [x] 2026-09-17 — Phase 2c: Replit code/config/deps removed; Quincy PASS; CLAUDE.md updated
