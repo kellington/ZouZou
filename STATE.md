@@ -1,12 +1,12 @@
 # State
 
-*Last updated: 2026-09-18 (critters + daily-save bug fix)*
+*Last updated: 2026-09-24 (vault session: Rob deleted the Replit project). Previous: 2026-09-18 (critters + daily-save bug fix)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
-assets and a Hono API, backed by D1. Replit is unpublished; friends were texted the new URL on
-2026-09-17. 2026-09-18: the critter picker (cats / dogs / dinosaurs / monkeys) shipped (PR #5), and a
+assets and a Hono API, backed by D1. **Rob deleted the Replit project on 2026-09-24** (unpublished
+2026-09-17, when friends were texted the new URL). 2026-09-18: the critter picker (cats / dogs / dinosaurs / monkeys) shipped (PR #5), and a
 daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on production.
 
 ## What's working
@@ -49,6 +49,9 @@ daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on produ
 - The Builds command runs `pnpm install` twice (Builds installs automatically). Harmless, adds ~2 s.
 - Build log warnings, both harmless: "Ignored build scripts: workerd" and the tooltip.tsx sourcemap.
 - 10 `// @replit` comments remain in `ui/badge.tsx` and `ui/button.tsx`.
+- **ReplDB is gone with the Replit project (2026-09-24).** The Phase 0 export in
+  `~/Documents/Backups/ZouZou/` is now the only copy of the pre-migration data. No final Repl zip
+  was recorded as taken.
 
 ## Environment / setup
 
@@ -71,8 +74,8 @@ D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-
 - `.claude/commands/project-status.md` still has the TEMPLATE header. The first page chose a warm
   orange palette, group Personal / Personal Project / priority 8. Keep those when customising.
 - **Any friend blocked by the rate limit?** Unknown until people play; raise to 20 req/10 s if so.
-- Rob's personal Repl URL `zou-zou-robkellington.replit.app` also shows "not live". Anything else
-  still running on Replit for ZouZou (billing)?
+- Rob's personal Repl URL `zou-zou-robkellington.replit.app` also showed "not live". The project is
+  deleted (2026-09-24); the Replit account closes once conforma is off it (tracked in the conforma repo).
 
 ## Resolved this session
 

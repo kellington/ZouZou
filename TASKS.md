@@ -20,14 +20,20 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
 - [ ] Ask Brent (and others) how the critter choice lands
+- [ ] **Replit cleanup. Paste into a new session:**
+  > ZouZou's Replit project was deleted on 2026-09-24 (STATE.md). Remove the Replit leftovers in one small PR. The build must pass, and Quincy greps for any remaining `replit` outside `project/diary/`.
+  > 1. Remove the 10 `// @replit` comments in `artifacts/zouzou-friends/src/components/ui/badge.tsx` and `button.tsx`.
+  > 2. Remove the old deployment URL and `REPLIT_DB_URL` lines from `SECRETS.PRIVATE.YAML.example`.
+  > 3. Fix the stale Replit text in CLAUDE.md (l.14 "migrating off Replit", l.89 "Replit URL until cutover", l.115 "Replit publishes it manually", l.166 "legacy, until cutover").
+  > 4. Update `AI+PROCESS.md`; its snapshot still says "moving".
+  > 5. Tick PROJECT.md's "$0 / no Replit dependency" criterion only after the Replit account itself is closed (tracked in conforma).
+  > 6. Confirm the ReplDB export in `~/Documents/Backups/ZouZou/` is intact. It's now the only copy.
 
 ## Later
 
-- [ ] Cancel Replit after pickem moves (~Oct–Nov 2026); download a final Repl zip first; confirm nothing else of ZouZou is billed
 - [ ] Simplify the Workers Builds command to `pnpm run build` (install is automatic)
 - [ ] `/api` with nothing after it → JSON 404 (add `/api` to `run_worker_first`)
 - [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK) — now incl. its 2026-09-18 daily
-- [ ] Optional: remove the `// @replit` comments in `ui/badge.tsx`, `ui/button.tsx`
 - [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
 - [ ] Customise `.claude/commands/project-status.md` for ZouZou (drop the TEMPLATE header; fix the palette and group/priority used in the first page)
 - [ ] Update `AI+PROCESS.md` for the Cloudflare move (snapshot still says "moving")
@@ -35,6 +41,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Done (recent)
 
+- [x] 2026-09-24 — Rob deleted the Replit project
 - [x] 2026-09-18 — Daily-save bug fixed (win popup hidden by "Daily puzzle complete"); PR #6 merged, verified live
 - [x] 2026-09-18 — Critter picker (cats/dogs/dinosaurs/monkeys); Quincy PASS; PR #5 merged
 - [x] 2026-09-18 — `cf` → `main` (PR #4): README, status page, protocol files
