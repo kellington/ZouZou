@@ -36,11 +36,11 @@ daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on produ
 - **Repo:**
   - **Public** on GitHub, MIT `LICENSE`. `main` @ `58268ca` (PR #9 `replit-deleted`: self-host README,
     grill-me skill removed, friend's name replaced in TASKS/diary).
-  - Merged branches that can be deleted (Rob's OK): `feature/critters`, `cf`, `replit-deleted`.
+  - Branches: `main`, `vscode`. Merged branches deleted 2026-09-24.
 
 ## In progress
 
-- Nothing mid-flight. Uncommitted: this session's STATE/TASKS/diary edits (on `main`).
+- Nothing mid-flight.
 
 ## Known issues
 
@@ -81,7 +81,7 @@ D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-
 
 - 2026-09-24: made the repo public. Quincy audited the tree and full history: ready after small fixes.
   Gage rewrote README deploy docs as generic self-hosting. Rob accepted: live link, diary tracked, name in history.
-- Rob still to run: the friends'-names grep over history (`git log --all -p | grep -i -e …`).
+- Rob ran the friends'-names grep over history: one first name only (accepted); no emails but Rob's.
 - 2026-09-18: Daily-save bug: the win popup (name box + Top 5) was replaced by "Daily puzzle complete" on the
   winning move. Fixed in `Game.tsx` (skip that screen while `gameState === 'won'`); merged PR #6, deployed, verified by Rob.
 - Earlier today: critter picker built, Quincy PASS, merged PR #5. Status page + README reached `main` via PR #4.

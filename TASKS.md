@@ -11,8 +11,6 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Commit this session's STATE/TASKS/diary; delete merged `feature/critters`, `cf`, `replit-deleted` (Rob's OK)
-- [ ] Rob: grep history for friends' real names (`git log --all -p | grep -i -e name1 -e name2`)
 
 ## Next
 
@@ -40,6 +38,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Done (recent)
 
+- [x] 2026-09-24 — Merged branches deleted (feature/critters, cf, replit-deleted); Rob's name grep: only one first name, left in history
 - [x] 2026-09-24 — PLAN.md rewritten: "Off Replit" closed → "Settle in"
 - [x] 2026-09-24 — Repo made public (Quincy audit, self-host README, MIT LICENSE, grill-me removed; PR #9)
 - [x] 2026-09-24 — Rob deleted the Replit project
