@@ -136,7 +136,7 @@ statelessness, and routing to the shared members **Harry** (hiring), **Rex**
 - If a task takes more than ~3 tool calls of exploration without progress, stop and check in.
 - Don't reformat or restructure the protocol files unless I ask. Small content edits only.
 - Terms of art for this project go in `GLOSSARY.md` — create it the first time a
-  term needs pinning down (the `/grill-me` skill expects it there).
+  term needs pinning down.
 
 ---
 
