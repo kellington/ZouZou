@@ -11,8 +11,8 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Commit this session's STATE/TASKS/diary; pull `main`; delete merged `feature/critters` (Rob's OK)
-- [ ] Milestone checkpoint: rewrite PLAN.md ("Off Replit" done → "Settle in"), prune TASKS, re-check PROJECT.md success criteria (the "$0 / no Replit" criterion is only partly met)
+- [ ] Commit this session's STATE/TASKS/diary; delete merged `feature/critters`, `cf`, `replit-deleted` (Rob's OK)
+- [ ] Rob: grep history for friends' real names (`git log --all -p | grep -i -e name1 -e name2`)
 
 ## Next
 
@@ -36,11 +36,12 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK) — now incl. its 2026-09-18 daily
 - [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
 - [ ] Customise `.claude/commands/project-status.md` for ZouZou (drop the TEMPLATE header; fix the palette and group/priority used in the first page)
-- [ ] Update `AI+PROCESS.md` for the Cloudflare move (snapshot still says "moving")
 - [ ] Maybe: use the kept history (past daily boards, per-player stats); small Worker test suite
 
 ## Done (recent)
 
+- [x] 2026-09-24 — PLAN.md rewritten: "Off Replit" closed → "Settle in"
+- [x] 2026-09-24 — Repo made public (Quincy audit, self-host README, MIT LICENSE, grill-me removed; PR #9)
 - [x] 2026-09-24 — Rob deleted the Replit project
 - [x] 2026-09-18 — Daily-save bug fixed (win popup hidden by "Daily puzzle complete"); PR #6 merged, verified live
 - [x] 2026-09-18 — Critter picker (cats/dogs/dinosaurs/monkeys); Quincy PASS; PR #5 merged

@@ -1,49 +1,42 @@
 # Plan
 
-*Last rewritten: 2026-09-16*
+*Last rewritten: 2026-09-24. "Off Replit" (2026-09-16 → 09-24) is complete: Cloudflare Worker + D1
+live at `zouzou.minus1over12.com`, history imported, Replit project deleted, repo public (MIT).*
 
 ## Current milestone
 
-**Off Replit** — ZouZou runs as one Cloudflare Worker (static assets + Hono API + D1) at
-`zouzou.minus1over12.com`, with all leaderboard/player history imported and Replit unpublished.
-
-Detailed steps, schema, config and gates:
-`../../SKYideas/SKYresearch/experiments/ai-hosting/notes/zouzou-migration-plan-2026-09-16.md`.
+**Settle in** — ZouZou runs quietly on Cloudflare Free with no surprises for friends, and the
+migration's lessons are handed to SKYresearch.
 
 ### Definition of done
 
-- [ ] Phase 1: `cf` branch; Repl git state matches `fcf2467`; Replit platform overrides removed; `pnpm@10.34.5`; local Mac build passes.
-- [ ] Phase 2: `artifacts/worker` (Hono + D1), `0001_init.sql`, root `wrangler.jsonc`, `_headers`; transform script tested on backup against local D1.
-- [ ] Phase 2b: `wrangler dev` checklist passes (all 5 endpoints, SPA fallback, Edmonton date); Quincy signs off.
-- [ ] Phase 2c: Replit-only files/deps deleted (list shown to Rob first); rebuild + smoke pass.
-- [ ] Phases 3–4: D1 created, Workers Builds connected, custom domain + Always Use HTTPS + rate-limit rule live.
-- [ ] Phase 5: fresh ReplDB export imported and verified against counts; Replit unpublished; friends messaged.
-- [ ] "For SKYresearch" feedback block (plan §11) delivered.
+- [ ] One-week usage check (Worker requests/day, D1 reads/writes, rate-limit hits) vs Free limits.
+- [ ] No friend blocked by the rate limit, or the rule raised to 20 req/10 s.
+- [ ] Replit leftovers removed (`// @replit` comments, `.example` lines, stale CLAUDE.md / AI+PROCESS.md text).
+- [ ] "For SKYresearch" feedback block (plan §11, incl. §11.8–11.10) delivered.
 
 ### In scope
 
-- New `artifacts/worker` package, D1 schema + import, root `wrangler.jsonc`, `_headers`.
-- Removing Replit-specific code, config and deps (plan §1.2).
-- Protocol files / CLAUDE.md replace `replit.md` as the agent instructions.
+- Small fixes and cleanup; docs and protocol-file updates.
+- Friend feedback (critter choice, the move).
 
 ### Out of scope for this milestone
 
-- Gameplay or UI changes; API contract changes.
+- New gameplay features; API contract changes.
 - Cookie/progress handoff to the new domain (D5), redirect from the old URL (D6).
-- Tests beyond the Phase 2b checklist.
 
 ## Roadmap
 
-1. **Settle in** — one week on Cloudflare: check usage vs Free limits, rate-limit false positives, fix the `index.html` "built on Replit" meta description.
-2. **Cancel Replit** — after pickem's mid-season move (~Oct–Nov 2026).
-3. **Maybe** — use the kept history (past daily leaderboards, per-player stats); small test suite for the Worker.
+1. **Close the Replit account** — once conforma is off it (tracked in the conforma repo); then tick
+   PROJECT.md's "$0 / no Replit dependency" criterion.
+2. **Maybe** — use the kept history (past daily leaderboards, per-player stats); small test suite for the Worker.
 
 ## Open risks
 
-- Workers Builds + pnpm version / `minimumReleaseAge` behaviour unverified (plan §9.1).
-- Repl KV may be unreadable after unpublish — safety export first (plan §9.2).
 - Rate-limit rule counts GETs; households on one IP could hit 10 req/10 s.
 - Previews write to production D1 (accepted, D12).
+- The Phase 0 ReplDB export in `~/Documents/Backups/ZouZou/` is the only copy of pre-migration data.
+- Public repo + live link: friends' names are reachable via `/api/players/recent` (accepted 2026-09-24).
 
 ---
 

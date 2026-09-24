@@ -17,10 +17,10 @@ Code) and serves as a real-world test case for moving small apps off Replit.
 
 ## Success criteria
 
-- [ ] Friends can open one link on phone or desktop and play the daily puzzle with no sign-up.
-- [ ] Shared daily leaderboard and "recent players" are correct, with history preserved.
+- [x] Friends can open one link on phone or desktop and play the daily puzzle with no sign-up.
+- [x] Shared daily leaderboard and "recent players" are correct, with history preserved.
 - [ ] Runs at $0/month on Cloudflare Free with no Replit dependency.
-- [ ] Rob can change and deploy it from a Mac with Claude Code (push to `main` → live).
+- [x] Rob can change and deploy it from a Mac with Claude Code (push to `main` → live).
 
 ## Non-goals
 

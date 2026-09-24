@@ -53,3 +53,18 @@ writing a design doc, which belongs elsewhere.
 **Why:** Production D1 needed data before Workers Builds went live on main.
 **Trade-off:** Diverges from the documented plan order.
 **Impact:** PLAN.md / SKYresearch plan need the actual order noted.
+
+## [2026-09-24] — Make the repo public on GitHub (MIT)
+
+**Decision:** kellington/ZouZou is public under MIT; README documents generic self-hosting.
+**Why:** Nothing sensitive in the tree or the history (Quincy audit); others can host their own copy.
+**Trade-off:** A friend's first name stays in 2 old commits; the diary is public; the README link makes
+friends' names findable via /api/players/recent.
+**Impact:** Rob-specific ops stay in CLAUDE.md/STATE.md, not README; wrangler.jsonc keeps Rob's database_id.
+
+## [2026-09-24] — Close "Off Replit"; next milestone is "Settle in"
+
+**Decision:** The "Off Replit" milestone is complete; PLAN.md rewritten for "Settle in". The "Cancel Replit" roadmap step is replaced by closing the Replit account (tracked in conforma).
+**Why:** Worker + D1 live, history imported, Replit project deleted 2026-09-24.
+**Trade-off:** The old definition-of-done boxes were never ticked; git history of PLAN.md is the record.
+**Impact:** Final ReplDB re-import (plan 5d/5e) skipped (see 2026-09-17 entry); SKYresearch §11 feedback carried into Settle in.

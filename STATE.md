@@ -1,6 +1,6 @@
 # State
 
-*Last updated: 2026-09-24 (vault session: Rob deleted the Replit project). Previous: 2026-09-18 (critters + daily-save bug fix)*
+*Last updated: 2026-09-24 (repo made public on GitHub). Previous: 2026-09-24 (Replit project deleted), 2026-09-18 (critters + daily-save fix)*
 
 ## Summary
 
@@ -8,6 +8,8 @@ ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker 
 assets and a Hono API, backed by D1. **Rob deleted the Replit project on 2026-09-24** (unpublished
 2026-09-17, when friends were texted the new URL). 2026-09-18: the critter picker (cats / dogs / dinosaurs / monkeys) shipped (PR #5), and a
 daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on production.
+**2026-09-24: the repo is public** at https://github.com/kellington/ZouZou (MIT), after Quincy's audit
+(no secrets, no ReplDB data, no leaderboard data in history) and a cleanup PR #9.
 
 ## What's working
 
@@ -32,12 +34,13 @@ daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on produ
   popup, so unnamed players see the name box and Top 5 again. Before this, a daily win with no
   saved name recorded nothing (bug existed since before critters; hit everyone new to the domain).
 - **Repo:**
-  - `origin/main` @ `85ee7bc` (PRs #4 cf, #5 critters, #6 fix merged). Local `main` is 2 behind — pull.
-  - `feature/critters` @ `658571d`, merged; can be deleted. `cf` @ `95041d1`, merged.
+  - **Public** on GitHub, MIT `LICENSE`. `main` @ `58268ca` (PR #9 `replit-deleted`: self-host README,
+    grill-me skill removed, friend's name replaced in TASKS/diary).
+  - Merged branches that can be deleted (Rob's OK): `feature/critters`, `cf`, `replit-deleted`.
 
 ## In progress
 
-- Nothing mid-flight. Uncommitted: this session's STATE/TASKS/diary edits.
+- Nothing mid-flight. Uncommitted: this session's STATE/TASKS/diary edits (on `main`).
 
 ## Known issues
 
@@ -49,6 +52,9 @@ daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on produ
 - The Builds command runs `pnpm install` twice (Builds installs automatically). Harmless, adds ~2 s.
 - Build log warnings, both harmless: "Ignored build scripts: workerd" and the tooltip.tsx sourcemap.
 - 10 `// @replit` comments remain in `ui/badge.tsx` and `ui/button.tsx`.
+- **Public-repo leftovers, accepted by Rob:** a friend's first name remains in 2 old commits
+  (`f24d635`, `658571d`); no history rewrite. The diary is tracked and public. README links the live
+  site, so friends' names are reachable via `/api/players/recent`.
 - **ReplDB is gone with the Replit project (2026-09-24).** The Phase 0 export in
   `~/Documents/Backups/ZouZou/` is now the only copy of the pre-migration data. No final Repl zip
   was recorded as taken.
@@ -56,7 +62,7 @@ daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on produ
 ## Environment / setup
 
 ```
-branch: feature/critters @ 658571d (origin/main @ 85ee7bc; local main behind 2) + uncommitted STATE/TASKS/diary
+branch: main @ 58268ca (= origin/main) + uncommitted STATE/TASKS/diary
 Mac: Node 26.8.1 (no nvm), pnpm 10.34.5 global; wrangler via npx / pnpm exec (logged in)
 Backups (outside git): ~/Documents/Backups/ZouZou/ — repldb export, import SQL, pre-import D1 export
 D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-00000000-…2ce7
@@ -64,12 +70,6 @@ D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-
 
 ## Open questions
 
-- **PLAN.md drift:** the "Off Replit" milestone is effectively done. It's due a milestone rewrite
-  (next milestone: settle in, then cancel Replit, then maybe use the kept history).
-- **PLAN.md drift:** the order changed from plan §4. D1 was created, migrated and imported before
-  the merge; the final ReplDB export (5d/5e) was skipped. Rob checked the live API against the
-  backup first and found no new games.
-- **PLAN.md drift:** all definition-of-done boxes are still unticked, though Phases 1–5 are done.
 - **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
 - `.claude/commands/project-status.md` still has the TEMPLATE header. The first page chose a warm
   orange palette, group Personal / Personal Project / priority 8. Keep those when customising.
@@ -79,7 +79,10 @@ D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-
 
 ## Resolved this session
 
-- Daily-save bug: the win popup (name box + Top 5) was replaced by "Daily puzzle complete" on the
+- 2026-09-24: made the repo public. Quincy audited the tree and full history: ready after small fixes.
+  Gage rewrote README deploy docs as generic self-hosting. Rob accepted: live link, diary tracked, name in history.
+- Rob still to run: the friends'-names grep over history (`git log --all -p | grep -i -e …`).
+- 2026-09-18: Daily-save bug: the win popup (name box + Top 5) was replaced by "Daily puzzle complete" on the
   winning move. Fixed in `Game.tsx` (skip that screen while `gameState === 'won'`); merged PR #6, deployed, verified by Rob.
 - Earlier today: critter picker built, Quincy PASS, merged PR #5. Status page + README reached `main` via PR #4.
 
