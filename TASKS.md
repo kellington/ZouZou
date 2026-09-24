@@ -19,7 +19,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
-- [ ] Ask Brent (and others) how the critter choice lands
+- [ ] Ask friends how the critter choice lands
 - [ ] **Replit cleanup. Paste into a new session:**
   > ZouZou's Replit project was deleted on 2026-09-24 (STATE.md). Remove the Replit leftovers in one small PR. The build must pass, and Quincy greps for any remaining `replit` outside `project/diary/`.
   > 1. Remove the 10 `// @replit` comments in `artifacts/zouzou-friends/src/components/ui/badge.tsx` and `button.tsx`.

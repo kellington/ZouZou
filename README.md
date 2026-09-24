@@ -4,7 +4,7 @@ A cat logic puzzle for a small group of friends: one shared daily puzzle, a lead
 streaks, and endless easy / medium / hard games. It runs in the browser on phone or desktop,
 with no sign-up.
 
-**Live:** https://zouzou.minus1over12.com
+Play the original at https://zouzou.minus1over12.com, or host your own copy (see [Self-hosting](#self-hosting)).
 
 <p>
   <img src="screenshots/zouzou-friends-daily-desktop.jpg" alt="Daily puzzle on desktop" width="520">
@@ -39,8 +39,8 @@ with no sign-up.
 One Cloudflare Worker serves everything from a single origin:
 
 ```
-browser ──► zouzou.minus1over12.com   (Worker "zouzou"; WAF rate-limit rule on /api/*)
-              ├─ /api/*  → Hono app (artifacts/worker) → D1 database "zouzou" (binding DB)
+browser ──► your Worker   (<your-subdomain>.workers.dev or a custom domain)
+              ├─ /api/*  → Hono app (artifacts/worker) → D1 database (binding DB)
               └─ else    → static assets: Vite build of artifacts/zouzou-friends
                            (SPA fallback → index.html)
 ```
@@ -52,8 +52,8 @@ browser ──► zouzou.minus1over12.com   (Worker "zouzou"; WAF rate-limit rul
 - **Data:** Cloudflare D1 (SQLite). Every day's scores and every game played are kept.
 - **Contract-first:** `lib/api-spec/openapi.yaml` feeds Orval, which generates Zod schemas (used by
   the Worker) and React Query hooks (used by the client).
-- **Hosting:** Cloudflare Free plan. `noindex` is set everywhere; this is a friends' game, not a
-  public site.
+- **Hosting:** fits in the Cloudflare Free plan. `noindex` is set everywhere (`index.html`,
+  `public/_headers`, and the Worker's `X-Robots-Tag`); this is a friends' game, not a public site.
 
 ## Repo layout
 
@@ -64,8 +64,8 @@ artifacts/
     public/_headers            security headers + noindex for static responses
   worker/
     src/index.ts               Hono API
-    migrations/                D1 schema (0001_init.sql)
-    scripts/repldb-to-sql.mjs  one-off: Replit DB export → D1 import SQL
+    migrations/                D1 schema (0001_init.sql, ...)
+    scripts/repldb-to-sql.mjs  legacy one-off import; not needed for a new install
     worker-configuration.d.ts  generated Worker types (pnpm --filter @workspace/worker run cf-typegen)
 lib/
   api-spec/                    openapi.yaml + Orval config (the API contract)
@@ -94,14 +94,15 @@ Limits:
 Invalid input gets a `400 { "error": … }` response, and an unknown route gets `404`.
 
 ```bash
-curl -s https://zouzou.minus1over12.com/api/daily/leaderboard | jq .
+curl -s http://localhost:8787/api/daily/leaderboard | jq .
 ```
 
 ## Local development
 
-Requirements:
+Prerequisites:
 - Node 24 (see `.nvmrc`)
 - pnpm 10.34.5 (`npm i -g pnpm@10.34.5`, pinned via `packageManager`)
+- A Cloudflare account is **not** needed for local development
 
 ```bash
 pnpm install
@@ -116,7 +117,7 @@ pnpm --filter @workspace/zouzou-friends run dev
 ```
 
 `wrangler` is a pinned dev dependency. Run it with `pnpm exec wrangler` or `npx wrangler`; no
-global install is needed.
+global install is needed. Local D1 data lives in `.wrangler/state` and never touches Cloudflare.
 
 ### Checks
 
@@ -137,51 +138,53 @@ smoke test and manual play.
 
 ### Changing the database
 
-- `0001_init.sql` has been applied in production. Never edit it; add
-  `artifacts/worker/migrations/0002_<name>.sql`.
-- Apply it locally with `pnpm exec wrangler d1 migrations apply zouzou --local`.
-- In production, apply it with `pnpm exec wrangler d1 migrations apply zouzou --remote`, before
-  merging code that depends on the change.
+- Migrations are append-only: never edit one that has been applied; add
+  `artifacts/worker/migrations/000N_<name>.sql`.
+- Apply locally with `pnpm exec wrangler d1 migrations apply zouzou --local`, and to your hosted
+  database with `--remote` before deploying code that depends on the change.
 - If you change bindings or `compatibility_date` in `wrangler.jsonc`, regenerate types with
   `pnpm --filter @workspace/worker run cf-typegen`.
 
-## Deployment
+## Self-hosting
 
-**Workers Builds** deploys on every push to `main`:
+You need a Cloudflare account (the Free plan is enough). `wrangler.jsonc` points at the original
+game's D1 database, so you must swap in your own.
 
-| Setting | Value |
-|---|---|
-| Install | automatic (`pnpm install --frozen-lockfile`) |
-| Build command | `pnpm install --frozen-lockfile && pnpm run build` |
-| Deploy command | `npx wrangler deploy` |
-| Non-production branches | preview builds, which share the production D1 |
+1. **Log in:** `pnpm exec wrangler login`
+2. **Create a D1 database:** `pnpm exec wrangler d1 create zouzou`. Copy the `database_id` it
+   prints.
+3. **Point the config at it:** in `wrangler.jsonc`, replace the `database_id` value with
+   `<your-database-id>`. If you picked a different database name, update `database_name` too and
+   use that name in the commands below. Optionally change the Worker `name`.
+4. **Create the tables:** `pnpm exec wrangler d1 migrations apply zouzou --remote`
+5. **Deploy**, either way:
+   - **From your machine:** `pnpm run build && pnpm exec wrangler deploy`. The game is served at
+     `https://zouzou.<your-subdomain>.workers.dev`.
+   - **Workers Builds (deploy on push):** in the Cloudflare dashboard, Workers & Pages › Create ›
+     import your fork. Use build command `pnpm install --frozen-lockfile && pnpm run build` and
+     deploy command `npx wrangler deploy`. The Worker name in the dashboard must match `name` in
+     `wrangler.jsonc`. Note that preview builds of other branches use the same D1 database.
+6. **Check it:** `curl -s https://zouzou.<your-subdomain>.workers.dev/api/healthz` returns
+   `{"status":"ok"}`.
 
-- The custom domain is `zouzou.minus1over12.com`. `zouzou.rob-kellington.workers.dev` stays
-  enabled as a fallback.
-- **Zone settings:** Always Use HTTPS is on, and one rate-limiting rule blocks an IP for 10 s when
-  it sends more than 10 requests in 10 s to paths starting with `/api/`.
-- **Logs:** Workers Logs, under Worker › Observability.
+Optional:
+- **Custom domain:** if the domain's zone is on your Cloudflare account, add it under Worker ›
+  Settings › Domains & Routes › Custom domain.
+- **Rate limiting:** the API has no auth, so anyone with the URL can post scores. A zone rate-limit
+  rule on paths starting with `/api/` (for example, block an IP for 10 s after 10 requests in 10 s)
+  limits abuse. Requires a custom domain; rules apply to the zone, not `workers.dev`.
+- **Search indexing:** to allow it, remove the `noindex` lines listed under Architecture.
 
-### Rollback
+### Backups and rollback
 
-- **Code:** Worker › Deployments › Rollback (or `npx wrangler rollback`), plus a `git revert` on
-  `main`.
-- **Data:** code rollbacks don't touch D1. Use Time Travel (7 days on Free):
-  `npx wrangler d1 time-travel info zouzou`, then `... restore zouzou --bookmark=<id>`. Restore is
-  destructive.
+- **Backup:** `pnpm exec wrangler d1 export zouzou --remote --output=<path outside the repo>`.
+  Exports contain players' names; don't commit them.
+- **Code rollback:** Worker › Deployments › Rollback, or `pnpm exec wrangler rollback`.
+- **Data rollback:** code rollbacks don't touch D1. D1 Time Travel restores to an earlier point
+  (`wrangler d1 time-travel info` / `restore`); restore is destructive, and retention depends on
+  your plan.
 
-### Data safety
+## Project history and docs
 
-- Preview deployments write to the **production** database. Test with a throwaway player name.
-- Never commit database exports; they contain players' names.
-- Take a backup with
-  `npx wrangler d1 export zouzou --remote --output=<path outside the repo>`.
-
-## History
-
-- **Aug 2026:** built with Replit Agent and hosted on Replit (Express API with Replit DB).
-- **Sep 2026:** moved to Cloudflare Workers with D1, and all Replit-specific code was removed.
-  Leaderboard history and game records were imported from Replit DB; per-browser progress
-  (streaks, best times) restarted on the new domain.
-
-Project docs and agent instructions: `CLAUDE.md`, `PROJECT.md`, `PLAN.md`, `STATE.md`, `DECISIONS.md`.
+Built with Replit Agent in Aug 2026 and moved to Cloudflare Workers + D1 in Sep 2026. Project docs
+and agent instructions: `CLAUDE.md`, `PROJECT.md`, `PLAN.md`, `STATE.md`, `DECISIONS.md`.
