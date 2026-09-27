@@ -1,90 +1,98 @@
 # State
 
-*Last updated: 2026-09-24 (repo made public on GitHub). Previous: 2026-09-24 (Replit project deleted), 2026-09-18 (critters + daily-save fix)*
+*Last updated: 2026-09-27 (Results + Share shipped). Previous: 2026-09-24 (repo public), 2026-09-24 (Replit project deleted), 2026-09-18 (critters + daily-save fix)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
-assets and a Hono API, backed by D1. **Rob deleted the Replit project on 2026-09-24** (unpublished
-2026-09-17, when friends were texted the new URL). 2026-09-18: the critter picker (cats / dogs / dinosaurs / monkeys) shipped (PR #5), and a
-daily-save bug was fixed and deployed (PR #6). Rob confirmed it working on production.
-**2026-09-24: the repo is public** at https://github.com/kellington/ZouZou (MIT), after Quincy's audit
-(no secrets, no ReplDB data, no leaderboard data in history) and a cleanup PR #9.
+assets and a Hono API, backed by D1. Replit project deleted 2026-09-24; repo public (MIT) at
+https://github.com/kellington/ZouZou. **2026-09-27: Wordle-style Results + Share shipped (PR #10)**
+— stats tiles, per-difficulty bars, and a share message with the unsolved board as emoji squares.
+Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed by Workers Builds
+(~80 s after merge), confirmed live.
 
 ## What's working
 
-- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `85ee7bc`).
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `e94d2fa`).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
-- **D1 `zouzou` (WNAM):**
-  - `0001_init.sql` applied (seconds CHECK is integer-only).
-  - Phase 0 backup imported: 62 games, 4 players, 25 daily rows over 14 dates. Plus 1 `zz-test`
-    daily game from preview testing, kept by Rob's choice.
-- **Zone `minus1over12.com`:**
-  - Always Use HTTPS is on; apex and geeks-pickem unaffected.
-  - Rate-limit rule `zouzou-api` (path starts with `/api/`, 10 req/10 s per IP, block 10 s) was
-    tested: 17 × 429 on a burst of 40 parallel requests, recovered after 10 s.
-- **Verified:**
-  - Quincy 2b and 2c: 62/62 API harness passes (Worker vs Express parity, boundaries, Edmonton date
-    incl. DST, headers, SPA fallback, JSON 404/500).
-  - Rob played on desktop and phone (Phase 4).
-- **Critter picker:** a "Find:" choice on the Menu, saved in the `zouzou-player` cookie (default cat).
-  Per-critter icons, sounds (on every correct placement, as the meow was), win titles, rules copy.
-- **Daily save fix (`658571d`):** the "Daily puzzle complete" screen no longer replaces the win
-  popup, so unnamed players see the name box and Top 5 again. Before this, a daily win with no
-  saved name recorded nothing (bug existed since before critters; hit everyone new to the domain).
-- **Repo:**
-  - **Public** on GitHub, MIT `LICENSE`. `main` @ `58268ca` (PR #9 `replit-deleted`: self-host README,
-    grill-me skill removed, friend's name replaced in TASKS/diary).
-  - Branches: `main`, `vscode`. Merged branches deleted 2026-09-24.
+- **D1 `zouzou` (WNAM):** `0001_init.sql` applied. Phase 0 backup imported (62 games, 4 players,
+  25 daily rows) plus 1 `zz-test` daily game kept by Rob's choice. Unchanged this session.
+- **Zone `minus1over12.com`:** Always Use HTTPS on; rate-limit rule `zouzou-api` (10 req/10 s per IP).
+- **Results + Share (2026-09-27, `304d288`):**
+  - Once today's daily is done, the Menu's Daily button reads **Results** and opens a modal; the
+    "Daily puzzle complete" screen in Game has the same button. Modal: Played / Win % / Current
+    Streak / Max Streak tiles, Easy/Medium/Hard bars (played count, `solved/played · % · avg m:ss`),
+    today's difficulty row green, Share, then Close / Back to Menu.
+  - **Stats live in the `zouzou-player` cookie**, not D1: `stats.{easy,medium,hard} = {played,
+    solved, solvedSeconds}` + `maxDailyStreak`. Daily games count under the day's difficulty. A win
+    or a lives-out counts; abandoned games don't. Old cookies hydrate to zeros; an existing streak
+    seeds max streak; values clamped to non-negative integers. Everyone starts at zero from 09-27.
+  - **Share** = `navigator.share({ text })` → clipboard (`Copied!`) → copyable `<pre>` block. Text:
+    `ZouZou Daily - Sep/27` / `Easy Puzzle` / `Solve Time: 1:23` / blank / emoji board / blank /
+    `https://zouzou.minus1over12.com`. Board = today's `regionMap` through a 10-emoji palette
+    (`🟥🟧🟨🟩🟦🟪🟫⬛⬜🔲`, region % 10), prefilled cell as `🐱`. Text only on purpose — a `url`
+    field makes some iOS targets drop the text. Mock + rationale: `project/ideas/share-board-emoji.md`.
+  - `MODE_CONFIG` (size/lives/prefill per mode) moved from `Game.tsx` to `lib/puzzle.ts`, unchanged.
+- **Critter picker** (2026-09-18) and **daily-save fix** (`658571d`) as before.
+- **Verified:** Quincy's scratchpad harness (store hydration/arithmetic/streak sequencing, component
+  render incl. 0-division, share gating) — component 27/27; store assertions all pass except four
+  that pinned the pre-fix behaviour he reported. No test suite in the repo still.
+- **Repo:** public, MIT. `main` @ `e94d2fa` (PR #10 merge). Branches: `main`, `vscode`, `share-results`
+  (merged, not yet deleted).
 
 ## In progress
 
-- Nothing mid-flight.
+- Nothing mid-flight. `project/diary/diary-2026-09.md` has uncommitted notes (Rob's feature notes +
+  this session's entry).
 
 ## Known issues
 
-- `GET /api` with nothing after it returns the SPA HTML instead of a JSON 404 (`run_worker_first`
-  only matches `/api/*`). Cosmetic.
-- `zz-test` shows in "Recent players" indefinitely, since the list shows each name's latest game.
-  It is also on today's (2026-09-18) live daily board (98 s) from Rob's post-fix check.
-- Rob's own 2026-09-18 daily was lost to the save bug; not backfilled (Rob's call).
-- The Builds command runs `pnpm install` twice (Builds installs automatically). Harmless, adds ~2 s.
-- Build log warnings, both harmless: "Ignored build scripts: workerd" and the tooltip.tsx sourcemap.
+- **Modal (`ui.tsx`) has no reduced-motion opt-out and no dialog role / focus trap / Escape.** Pre-existing,
+  affects every modal (rules, win, lost, results). Results ships its own Close button because of this.
+- **Menu across midnight:** `Menu` holds a `useState` snapshot; a tab left open past Edmonton midnight
+  still shows "Results" (previously a disabled button — same class of staleness). Modal hides Share
+  because it recomputes today. Cosmetic.
+- Hard boards have 10 regions but only 9 square emoji exist; the tenth is `🔲`. Accepted.
+- `GET /api` with nothing after it returns the SPA HTML instead of a JSON 404. Cosmetic.
+- `zz-test` shows in "Recent players" indefinitely; also on the 2026-09-18 daily board.
+- Rob's own 2026-09-18 daily was lost to the save bug; not backfilled.
+- Builds command runs `pnpm install` twice; harmless. Build log warnings (workerd scripts, tooltip
+  sourcemap) harmless.
 - 10 `// @replit` comments remain in `ui/badge.tsx` and `ui/button.tsx`.
-- **Public-repo leftovers, accepted by Rob:** a friend's first name remains in 2 old commits
-  (`f24d635`, `658571d`); no history rewrite. The diary is tracked and public. README links the live
-  site, so friends' names are reachable via `/api/players/recent`.
-- **ReplDB is gone with the Replit project (2026-09-24).** The Phase 0 export in
-  `~/Documents/Backups/ZouZou/` is now the only copy of the pre-migration data. No final Repl zip
-  was recorded as taken.
+- Public-repo leftovers accepted by Rob: a friend's first name in 2 old commits; diary tracked; friends'
+  names reachable via `/api/players/recent`.
+- ReplDB is gone; the Phase 0 export in `~/Documents/Backups/ZouZou/` is the only pre-migration copy.
 
 ## Environment / setup
 
 ```
-branch: main @ 58268ca (= origin/main) + uncommitted STATE/TASKS/diary
+branch: main @ e94d2fa (= origin/main) + uncommitted STATE/TASKS/diary
 Mac: Node 26.8.1 (no nvm), pnpm 10.34.5 global; wrangler via npx / pnpm exec (logged in)
 Backups (outside git): ~/Documents/Backups/ZouZou/ — repldb export, import SQL, pre-import D1 export
 D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-00000000-…2ce7
+Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wrangler dev --local --port 8787
 ```
 
 ## Open questions
 
+- **PLAN drift:** "Settle in" lists new gameplay features as out of scope; Results + Share shipped
+  anyway (Rob's call, 2026-09-27). Note at the next milestone rather than editing PLAN.md now.
+- **Stats are per-device** (cookie). If friends ask for cross-device stats, that's the D1 route:
+  `0002` migration recording losses + a `/players/{name}/stats` endpoint (contract change). Not planned.
 - **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
-- `.claude/commands/project-status.md` still has the TEMPLATE header. The first page chose a warm
-  orange palette, group Personal / Personal Project / priority 8. Keep those when customising.
+- `.claude/commands/project-status.md` still has the TEMPLATE header (keep the warm orange palette,
+  Personal / Personal Project / priority 8 when customising).
 - **Any friend blocked by the rate limit?** Unknown until people play; raise to 20 req/10 s if so.
-- Rob's personal Repl URL `zou-zou-robkellington.replit.app` also showed "not live". The project is
-  deleted (2026-09-24); the Replit account closes once conforma is off it (tracked in the conforma repo).
+- Replit account closes once conforma is off it (tracked in the conforma repo).
 
 ## Resolved this session
 
-- 2026-09-24: made the repo public. Quincy audited the tree and full history: ready after small fixes.
-  Gage rewrote README deploy docs as generic self-hosting. Rob accepted: live link, diary tracked, name in history.
-- Rob ran the friends'-names grep over history: one first name only (accepted); no emails but Rob's.
-- 2026-09-18: Daily-save bug: the win popup (name box + Top 5) was replaced by "Daily puzzle complete" on the
-  winning move. Fixed in `Game.tsx` (skip that screen while `gameState === 'won'`); merged PR #6, deployed, verified by Rob.
-- Earlier today: critter picker built, Quincy PASS, merged PR #5. Status page + README reached `main` via PR #4.
+- 2026-09-27: Results + Share. Decided local cookie over D1 (nothing counts losses today either way;
+  Wordle parity; no server risk). Rob reviewed the emoji-board mock in `project/ideas/` before code:
+  squares, `🐱` for prefilled, board after the three lines, URL appended. Quincy found one blocker
+  (Results modal had no close control on the Menu) + 3 minor (legacy max streak, non-idempotent
+  updater, negative/fractional coercion); all fixed by Wren. PR #10 merged, live in ~80 s.
 
 ---
 

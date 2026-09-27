@@ -11,6 +11,8 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
+- [ ] Delete the merged `share-results` branch (local + origin) — Rob's OK
+- [ ] Ask friends how Results / Share lands; note whether anyone wants cross-device stats
 
 ## Next
 
@@ -35,9 +37,13 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
 - [ ] Customise `.claude/commands/project-status.md` for ZouZou (drop the TEMPLATE header; fix the palette and group/priority used in the first page)
 - [ ] Maybe: use the kept history (past daily boards, per-player stats); small Worker test suite
+- [ ] Maybe: cross-device stats via D1 (`0002` migration recording losses + `/players/{name}/stats`) — only if friends ask
+- [ ] Modal a11y: reduced-motion opt-out, dialog role, Escape/backdrop close (`ui.tsx`, all modals)
+- [ ] Menu re-reads the cookie on focus/visibility so a tab left open past midnight doesn't show stale "Results"
 
 ## Done (recent)
 
+- [x] 2026-09-27 — Results + Share (stats tiles, difficulty bars, emoji board share, URL); Wren built, Quincy verified, Rob device-tested; PR #10 merged, live
 - [x] 2026-09-24 — Merged branches deleted (feature/critters, cf, replit-deleted); Rob's name grep: only one first name, left in history
 - [x] 2026-09-24 — PLAN.md rewritten: "Off Replit" closed → "Settle in"
 - [x] 2026-09-24 — Repo made public (Quincy audit, self-host README, MIT LICENSE, grill-me removed; PR #9)
