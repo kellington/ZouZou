@@ -8,12 +8,13 @@ import {
   getEdmontonDateKey,
   formatDailyDate,
   formatTime,
-  type PuzzleSize,
+  MODE_CONFIG,
   type CellPos,
 } from '../lib/puzzle';
 import { HeartIcon, CritterIcon, CritterMarkIcon } from '../components/Icons';
 import { CRITTER_NOUN, CRITTER_LABEL, CRITTER_WIN_TITLE } from '../lib/critters';
 import { ActionButton, Modal } from '../components/ui';
+import { DailyResults } from '../components/DailyResults';
 import { useStore } from '../lib/store';
 import { ArrowLeft, HelpCircle, RotateCcw, Flame } from 'lucide-react';
 import {
@@ -28,12 +29,6 @@ import { playCritterSound, playMistakeSound, playNoCatSound } from '../lib/sound
 
 type GameMode = 'easy' | 'medium' | 'hard' | 'daily';
 
-const STANDARD_MODE_CONFIG = {
-  easy: { lives: 5, prefill: 1, title: 'Easy', size: 6 as PuzzleSize },
-  medium: { lives: 4, prefill: 0, title: 'Medium', size: 8 as PuzzleSize },
-  hard: { lives: 3, prefill: 0, title: 'Hard', size: 10 as PuzzleSize },
-};
-
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
 }
@@ -42,13 +37,13 @@ export function Game() {
   const { mode = 'medium' } = useParams<{ mode: string }>();
   const [, setLocation] = useLocation();
   const safeMode = (
-    mode === 'daily' || mode in STANDARD_MODE_CONFIG ? mode : 'medium'
+    mode === 'daily' || mode in MODE_CONFIG ? mode : 'medium'
   ) as GameMode;
   const dailyDifficulty = getDailyDifficulty();
   const baseConfig =
     safeMode === 'daily'
-      ? STANDARD_MODE_CONFIG[dailyDifficulty]
-      : STANDARD_MODE_CONFIG[safeMode];
+      ? MODE_CONFIG[dailyDifficulty]
+      : MODE_CONFIG[safeMode];
   const config = {
     ...baseConfig,
     title:
@@ -56,8 +51,11 @@ export function Game() {
         ? `Daily · ${baseConfig.title}`
         : baseConfig.title,
   };
-  const { store, saveBestTime, recordDailyWin, resetStreak, setPlayerName } = useStore();
+  const { store, saveBestTime, recordGameResult, recordDailyWin, resetStreak, setPlayerName } =
+    useStore();
   const today = getEdmontonDateKey();
+  const effectiveDifficulty = safeMode === 'daily' ? dailyDifficulty : safeMode;
+  const [showResults, setShowResults] = useState(false);
   const critter = store.critter;
   const critterNoun = CRITTER_NOUN[critter];
   const critterPluralCap = CRITTER_LABEL[critter];
@@ -216,6 +214,7 @@ export function Game() {
 
       if (newLives <= 0) {
         setGameState('lost');
+        recordGameResult(effectiveDifficulty, 'lost', seconds);
         if (safeMode === 'daily') {
           resetStreak();
         }
@@ -241,7 +240,8 @@ export function Game() {
       const completedSeconds = Math.max(1, seconds);
       setGameState('won');
       saveBestTime(safeMode, completedSeconds);
-      
+      recordGameResult(effectiveDifficulty, 'solved', completedSeconds);
+
       if (safeMode === 'daily') {
         recordDailyWin();
       }
@@ -276,9 +276,22 @@ export function Game() {
         <p className="text-lg font-bold text-board/70 mb-8">
           You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}.
         </p>
-        <ActionButton variant="secondary" className="w-full" onClick={() => setLocation('/')}>
-          Back to Menu
-        </ActionButton>
+        <div className="w-full space-y-3">
+          <ActionButton variant="primary" className="w-full" onClick={() => setShowResults(true)}>
+            Results
+          </ActionButton>
+          <ActionButton variant="secondary" className="w-full" onClick={() => setLocation('/')}>
+            Back to Menu
+          </ActionButton>
+        </div>
+
+        <DailyResults
+          isOpen={showResults}
+          onClose={() => setShowResults(false)}
+          heading="Daily puzzle complete"
+          showBackToMenu
+          onBackToMenu={() => setLocation('/')}
+        />
       </div>
     );
   }

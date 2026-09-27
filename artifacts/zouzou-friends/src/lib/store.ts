@@ -2,6 +2,15 @@ import { useCallback, useState } from 'react';
 import { getEdmontonDateKey } from './puzzle';
 import { normalizeCritter, type Critter } from './critters';
 
+export type ModeStats = {
+  played: number;
+  solved: number;
+  // Sum of seconds over solved games only, for computing averages.
+  solvedSeconds: number;
+};
+
+type StandardDifficulty = 'easy' | 'medium' | 'hard';
+
 type GameStore = {
   easy: number | null;
   medium: number | null;
@@ -12,10 +21,14 @@ type GameStore = {
   dailyStreak: number;
   lastPlayedDate: string | null;
   critter: Critter;
+  stats: Record<StandardDifficulty, ModeStats>;
+  maxDailyStreak: number;
 };
 
 const cookieName = 'zouzou-player';
 const cookieLifetimeSeconds = 60 * 60 * 24 * 400;
+
+const DEFAULT_MODE_STATS: ModeStats = { played: 0, solved: 0, solvedSeconds: 0 };
 
 const DEFAULT_STORE: GameStore = {
   easy: null,
@@ -27,7 +40,61 @@ const DEFAULT_STORE: GameStore = {
   dailyStreak: 0,
   lastPlayedDate: null,
   critter: 'cat',
+  stats: {
+    easy: { ...DEFAULT_MODE_STATS },
+    medium: { ...DEFAULT_MODE_STATS },
+    hard: { ...DEFAULT_MODE_STATS },
+  },
+  maxDailyStreak: 0,
 };
+
+function coerceFiniteNumber(value: unknown, fallback: number): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
+// Stats counters and streaks are never negative or fractional; clamp on the
+// way in so a garbled/hand-edited cookie can't produce e.g. -3 played games.
+function coerceNonNegativeInt(value: unknown, fallback: number): number {
+  return Math.max(0, Math.floor(coerceFiniteNumber(value, fallback)));
+}
+
+function normalizeModeStats(stats: Partial<ModeStats> | undefined | null): ModeStats {
+  return {
+    played: coerceNonNegativeInt(stats?.played, 0),
+    solved: coerceNonNegativeInt(stats?.solved, 0),
+    solvedSeconds: coerceNonNegativeInt(stats?.solvedSeconds, 0),
+  };
+}
+
+// Older cookies predate `stats` entirely, or may only have some modes. Merge
+// defaults per-mode (not just at the top level) so a partial/garbled object
+// doesn't crash a consumer doing arithmetic on it.
+function normalizeStats(
+  stats: Partial<Record<StandardDifficulty, Partial<ModeStats>>> | undefined | null,
+): GameStore['stats'] {
+  return {
+    easy: normalizeModeStats(stats?.easy),
+    medium: normalizeModeStats(stats?.medium),
+    hard: normalizeModeStats(stats?.hard),
+  };
+}
+
+// Shared merge used by both loadStore and getSharedStore so cookie hydration
+// (defaulting, critter/stats/streak coercion) only happens in one place.
+function hydrateStore(stored: Partial<GameStore> | null | undefined): GameStore {
+  const source = stored ?? {};
+  const coercedDailyStreak = coerceNonNegativeInt(source.dailyStreak, 0);
+  const coercedMaxDailyStreak = coerceNonNegativeInt(source.maxDailyStreak, 0);
+  return {
+    ...DEFAULT_STORE,
+    ...source,
+    critter: normalizeCritter(source.critter),
+    stats: normalizeStats(source.stats),
+    // A legacy cookie may carry a live dailyStreak with no maxDailyStreak yet
+    // (the field is new): never report a max lower than the current streak.
+    maxDailyStreak: Math.max(coercedMaxDailyStreak, coercedDailyStreak),
+  };
+}
 
 function yesterdayEdmontonDateKey(): string {
   return getEdmontonDateKey(new Date(Date.now() - 86_400_000));
@@ -96,11 +163,7 @@ function normalizeForToday(store: GameStore): GameStore {
 function loadStore(): GameStore {
   try {
     const stored = readCookie() ?? readLegacyStore() ?? {};
-    const next = normalizeForToday({
-      ...DEFAULT_STORE,
-      ...stored,
-      critter: normalizeCritter(stored.critter),
-    });
+    const next = normalizeForToday(hydrateStore(stored));
     writeCookie(next);
     return next;
   } catch (error) {
@@ -132,11 +195,7 @@ function getSharedStore(): GameStore {
   }
 
   if (fromCookie) {
-    sharedStore = normalizeForToday({
-      ...DEFAULT_STORE,
-      ...fromCookie,
-      critter: normalizeCritter(fromCookie.critter),
-    });
+    sharedStore = normalizeForToday(hydrateStore(fromCookie));
     try {
       writeCookie(sharedStore);
     } catch {
@@ -204,6 +263,29 @@ export function useStore() {
     [updateStore],
   );
 
+  const recordGameResult = useCallback(
+    (difficulty: StandardDifficulty, outcome: 'solved' | 'lost', seconds: number) => {
+      const previous = getSharedStore();
+      const modeStats = previous.stats[difficulty];
+      const nextModeStats: ModeStats = {
+        played: modeStats.played + 1,
+        solved: outcome === 'solved' ? modeStats.solved + 1 : modeStats.solved,
+        solvedSeconds:
+          outcome === 'solved'
+            ? modeStats.solvedSeconds + Math.max(1, Math.floor(seconds))
+            : modeStats.solvedSeconds,
+      };
+      const next: GameStore = {
+        ...previous,
+        stats: { ...previous.stats, [difficulty]: nextModeStats },
+      };
+      writeCookie(next);
+      sharedStore = next;
+      setStore(next);
+    },
+    [],
+  );
+
   const recordDailyWin = useCallback(() => {
     const today = getEdmontonDateKey();
     const yesterday = yesterdayEdmontonDateKey();
@@ -220,6 +302,7 @@ export function useStore() {
         ...previous,
         dailyStreak,
         lastPlayedDate: today,
+        maxDailyStreak: Math.max(previous.maxDailyStreak, dailyStreak),
       };
       writeCookie(next);
       sharedStore = next;
@@ -236,6 +319,7 @@ export function useStore() {
     saveBestTime,
     setPlayerName,
     setCritter,
+    recordGameResult,
     recordDailyWin,
     resetStreak,
   };
