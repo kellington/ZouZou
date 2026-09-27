@@ -284,6 +284,15 @@ function createPrefilledCells(
   return prefilled;
 }
 
+// Per-difficulty board config shared by the standard-mode screens and the
+// daily challenge (daily picks its difficulty via getDailyDifficulty, then
+// uses this same config). Single source of truth — don't duplicate.
+export const MODE_CONFIG = {
+  easy: { lives: 5, prefill: 1, title: 'Easy', size: 6 as PuzzleSize },
+  medium: { lives: 4, prefill: 0, title: 'Medium', size: 8 as PuzzleSize },
+  hard: { lives: 3, prefill: 0, title: 'Hard', size: 10 as PuzzleSize },
+};
+
 export function generatePuzzle(
   size: PuzzleSize,
   seed?: number,
@@ -349,4 +358,21 @@ export function formatTime(seconds: number): string {
   const minutes = Math.floor(wholeSeconds / 60);
   const remainder = wholeSeconds % 60;
   return `${minutes}:${remainder.toString().padStart(2, '0')}`;
+}
+
+// Square emoji, indexed by region number. Only 9 exist as squares, so a hard
+// board's 10th region (index 9) falls back to 🔲.
+const REGION_EMOJI = ['🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '🟫', '⬛', '⬜', '🔲'];
+
+// Renders an unsolved board as emoji rows for sharing — one emoji per cell,
+// coloured by region, with the prefilled cell (if any) shown as 🐱 since it's
+// already visible to every player before they start.
+export function buildShareBoard(puzzle: Puzzle): string {
+  return puzzle.regionMap
+    .map((row, r) =>
+      row
+        .map((region, c) => (puzzle.prefilled[r] === c ? '🐱' : REGION_EMOJI[region % 10]))
+        .join(''),
+    )
+    .join('\n');
 }

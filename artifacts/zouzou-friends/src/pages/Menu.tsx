@@ -12,12 +12,14 @@ import {
 import { Star, Zap, Coffee, Skull, Edit2, Flame } from 'lucide-react';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 import { RecentPlayers } from '../components/RecentPlayers';
+import { DailyResults } from '../components/DailyResults';
 import { useState } from 'react';
 
 export function Menu() {
   const [, setLocation] = useLocation();
   const { store, setPlayerName, setCritter } = useStore();
   const [isEditingName, setIsEditingName] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const dailyDifficulty = getDailyDifficulty();
   const today = getEdmontonDateKey();
   const hasCompletedDaily =
@@ -81,14 +83,15 @@ export function Menu() {
 
         <div className="space-y-4">
           <div className="flex flex-col items-center relative">
-            <ActionButton 
-              variant="secondary" 
+            <ActionButton
+              variant="secondary"
               className="w-full text-lg shadow-[0_6px_0_0_#7BA898] active:translate-y-[6px]"
-              onClick={() => setLocation('/play/daily')}
-              disabled={hasCompletedDaily}
+              onClick={() =>
+                hasCompletedDaily ? setShowResults(true) : setLocation('/play/daily')
+              }
             >
               <Star className="w-5 h-5 fill-current" />
-              Daily Challenge
+              {hasCompletedDaily ? 'Results' : 'Daily Challenge'}
             </ActionButton>
             <span className="text-xs font-black uppercase tracking-wider text-board/45 mt-2">
               Today: {dailyDifficulty} board
@@ -156,6 +159,12 @@ export function Menu() {
           </div>
         </div>
       </div>
+
+      <DailyResults
+        isOpen={showResults}
+        onClose={() => setShowResults(false)}
+        heading="Daily puzzle complete"
+      />
     </div>
   );
 }
