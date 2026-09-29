@@ -39,7 +39,8 @@ export function getEdmontonDateKey(date = new Date()): string {
 const boardQuery = (db: D1Database, date: string) =>
   db
     .prepare(
-      "SELECT name, seconds FROM daily_scores WHERE date = ?1 ORDER BY seconds, name LIMIT ?2",
+      // Fewest attempts first (a first-try solve beats a faster retry), then time.
+      "SELECT name, seconds, attempts FROM daily_scores WHERE date = ?1 ORDER BY attempts, seconds, name LIMIT ?2",
     )
     .bind(date, maximumEntries);
 
@@ -64,6 +65,7 @@ app.get("/daily/leaderboard", async (c) => {
   const { results } = await boardQuery(c.env.DB, date).all<{
     name: string;
     seconds: number;
+    attempts: number;
   }>();
   return c.json(GetDailyLeaderboardResponse.parse({ date, entries: results }));
 });
@@ -76,25 +78,29 @@ app.post("/daily/leaderboard", async (c) => {
 
   const name = normalizeName(parsed.data.name);
   const seconds = parsed.data.seconds;
-  if (!name || !Number.isInteger(seconds)) {
+  // Optional in the contract so an older cached client still works; it counts as a first try.
+  const attempts = parsed.data.attempts ?? 1;
+  if (!name || !Number.isInteger(seconds) || !Number.isInteger(attempts)) {
     return c.json(
-      { error: "Name is required and seconds must be a whole number." },
+      { error: "Name is required and seconds and attempts must be whole numbers." },
       400,
     );
   }
 
   const date = getEdmontonDateKey();
   const db = c.env.DB;
-  // One implicit transaction: keep-best-time upsert, then read the board back.
-  const [, board] = await db.batch<{ name: string; seconds: number }>([
+  // One implicit transaction: keep-best-result upsert (fewer attempts, then
+  // faster time), then read the board back.
+  const [, board] = await db.batch<{ name: string; seconds: number; attempts: number }>([
     db
       .prepare(
-        `INSERT INTO daily_scores (date, name_key, name, seconds) VALUES (?1, ?2, ?3, ?4)
+        `INSERT INTO daily_scores (date, name_key, name, seconds, attempts) VALUES (?1, ?2, ?3, ?4, ?5)
          ON CONFLICT (date, name_key) DO UPDATE
-           SET name = excluded.name, seconds = excluded.seconds
-           WHERE excluded.seconds < daily_scores.seconds`,
+           SET name = excluded.name, seconds = excluded.seconds, attempts = excluded.attempts
+           WHERE excluded.attempts < daily_scores.attempts
+              OR (excluded.attempts = daily_scores.attempts AND excluded.seconds < daily_scores.seconds)`,
       )
-      .bind(date, nameKey(name), name, seconds),
+      .bind(date, nameKey(name), name, seconds, attempts),
     boardQuery(db, date),
   ]);
 

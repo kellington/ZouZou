@@ -23,6 +23,13 @@ type GameStore = {
   critter: Critter;
   stats: Record<StandardDifficulty, ModeStats>;
   maxDailyStreak: number;
+  // Tries at today's daily puzzle (a try starts on its first move). Reset when
+  // dailyAttemptsDate isn't today. Honour system: it lives in this cookie only.
+  dailyAttempts: number;
+  dailyAttemptsDate: string | null;
+  // Tries today's daily win took (0 = won before tries were tracked). Reset
+  // with dailyAttempts when the date rolls.
+  dailyWinAttempts: number;
 };
 
 const cookieName = 'zouzou-player';
@@ -46,6 +53,9 @@ const DEFAULT_STORE: GameStore = {
     hard: { ...DEFAULT_MODE_STATS },
   },
   maxDailyStreak: 0,
+  dailyAttempts: 0,
+  dailyAttemptsDate: null,
+  dailyWinAttempts: 0,
 };
 
 function coerceFiniteNumber(value: unknown, fallback: number): number {
@@ -93,6 +103,8 @@ function hydrateStore(stored: Partial<GameStore> | null | undefined): GameStore 
     // A legacy cookie may carry a live dailyStreak with no maxDailyStreak yet
     // (the field is new): never report a max lower than the current streak.
     maxDailyStreak: Math.max(coercedMaxDailyStreak, coercedDailyStreak),
+    dailyAttempts: coerceNonNegativeInt(source.dailyAttempts, 0),
+    dailyWinAttempts: coerceNonNegativeInt(source.dailyWinAttempts, 0),
   };
 }
 
@@ -147,6 +159,12 @@ function normalizeForToday(store: GameStore): GameStore {
 
   if (next.lastDailyDate !== today) {
     next.daily = null;
+  }
+
+  if (next.dailyAttemptsDate !== today) {
+    next.dailyAttempts = 0;
+    next.dailyWinAttempts = 0;
+    next.dailyAttemptsDate = today;
   }
 
   if (
@@ -310,6 +328,37 @@ export function useStore() {
     });
   }, []);
 
+  // Counts a new try at today's daily puzzle and returns its number (1 = first try).
+  // Once today's daily is won (e.g. in another tab) the count is frozen.
+  const startDailyAttempt = useCallback((): number => {
+    const previous = getSharedStore();
+    if (previous.lastDailyDate === getEdmontonDateKey() && previous.daily !== null) {
+      return previous.dailyAttempts;
+    }
+    const next: GameStore = {
+      ...previous,
+      dailyAttempts: previous.dailyAttempts + 1,
+      dailyAttemptsDate: getEdmontonDateKey(),
+    };
+    writeCookie(next);
+    sharedStore = next;
+    setStore(next);
+    return next.dailyAttempts;
+  }, []);
+
+  // Records the tries today's daily win took and returns it. Uses every try
+  // started today (any tab), not just this game's number, so exploring in a
+  // second tab and winning in the first still counts both tries.
+  const recordDailyWinAttempts = useCallback((tryNumber: number): number => {
+    const previous = getSharedStore();
+    const attempts = Math.max(1, tryNumber, previous.dailyAttempts);
+    const next: GameStore = { ...previous, dailyWinAttempts: attempts };
+    writeCookie(next);
+    sharedStore = next;
+    setStore(next);
+    return attempts;
+  }, []);
+
   const resetStreak = useCallback(() => {
     updateStore({ dailyStreak: 0, lastPlayedDate: null });
   }, [updateStore]);
@@ -321,6 +370,8 @@ export function useStore() {
     setCritter,
     recordGameResult,
     recordDailyWin,
+    startDailyAttempt,
+    recordDailyWinAttempts,
     resetStreak,
   };
 }

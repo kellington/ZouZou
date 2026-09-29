@@ -1,5 +1,5 @@
 import { useGetDailyLeaderboard } from '@workspace/api-client-react';
-import { formatTime } from '../lib/puzzle';
+import { formatAttempts, formatTime } from '../lib/puzzle';
 import { Trophy, AlertCircle } from 'lucide-react';
 
 export function DailyLeaderboard() {
@@ -42,7 +42,12 @@ export function DailyLeaderboard() {
               <span className="font-bold text-board/80">
                 <span className="inline-block w-4 text-board/40">{i + 1}.</span> {entry.name}
               </span>
-              <span className="font-mono text-board font-black">{formatTime(entry.seconds)}</span>
+              <span className="flex items-baseline gap-2">
+                {entry.attempts > 1 && (
+                  <span className="text-xs font-bold text-board/50">{formatAttempts(entry.attempts)}</span>
+                )}
+                <span className="font-mono text-board font-black">{formatTime(entry.seconds)}</span>
+              </span>
             </div>
           ))}
         </div>

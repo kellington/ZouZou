@@ -4,6 +4,7 @@ import { ActionButton, Modal } from './ui';
 import { useStore, type ModeStats } from '../lib/store';
 import {
   buildShareBoard,
+  formatAttempts,
   formatDailyDate,
   formatTime,
   generatePuzzle,
@@ -42,12 +43,15 @@ function buildShareText(params: {
   today: string;
   difficulty: Difficulty;
   seconds: number;
+  attempts: number;
   boardText: string;
 }): string {
+  // attempts is 0 only for a win recorded before attempts were tracked.
+  const attemptsSuffix = params.attempts > 0 ? ` (${formatAttempts(params.attempts)})` : '';
   return [
     `ZouZou Daily - ${formatDailyDate(params.today).replace('-', '/')}`,
     `${capitalize(params.difficulty)} Puzzle`,
-    `Solve Time: ${formatTime(params.seconds)}`,
+    `Solve Time: ${formatTime(params.seconds)}${attemptsSuffix}`,
     '',
     params.boardText,
     '',
@@ -114,6 +118,7 @@ export function DailyResults({
           today,
           difficulty: dailyDifficulty,
           seconds: store.daily,
+          attempts: store.dailyWinAttempts,
           boardText,
         })
       : '';

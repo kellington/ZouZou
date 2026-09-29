@@ -143,7 +143,7 @@ export const getGetDailyLeaderboardUrl = () => {
 }
 
 /**
- * Returns the top daily puzzle times for the current Edmonton date.
+ * Returns the top daily puzzle results for the current Edmonton date, ranked by fewest attempts, then fastest time.
  * @summary Get today's shared leaderboard
  */
 export const getDailyLeaderboard = async ( options?: Parameters<typeof customFetch>[1]): Promise<DailyLeaderboardResponse> => {
