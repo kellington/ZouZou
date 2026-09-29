@@ -1,23 +1,39 @@
 # State
 
-*Last updated: 2026-09-27 (Results + Share shipped). Previous: 2026-09-24 (repo public), 2026-09-24 (Replit project deleted), 2026-09-18 (critters + daily-save fix)*
+*Last updated: 2026-09-29 (daily tries + News shipped). Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
 assets and a Hono API, backed by D1. Replit project deleted 2026-09-24; repo public (MIT) at
-https://github.com/kellington/ZouZou. **2026-09-27: Wordle-style Results + Share shipped (PR #10)**
+https://github.com/kellington/ZouZou. **2026-09-29: daily tries shipped (PR #11).** The leaderboard
+ranks fewest tries, then time, and the menu has a "📣 News!" button. **2026-09-27: Wordle-style Results + Share shipped (PR #10)**
 — stats tiles, per-difficulty bars, and a share message with the unsolved board as emoji squares.
 Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed by Workers Builds
 (~80 s after merge), confirmed live.
 
 ## What's working
 
-- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `e94d2fa`).
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `cebfbe8`).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
-- **D1 `zouzou` (WNAM):** `0001_init.sql` applied. Phase 0 backup imported (62 games, 4 players,
-  25 daily rows) plus 1 `zz-test` daily game kept by Rob's choice. Unchanged this session.
+- **D1 `zouzou` (WNAM):** `0001_init.sql` + `0002_daily_attempts.sql` applied (0002 by Rob,
+  2026-09-29, before the merge; existing rows got `attempts = 1`). Phase 0 backup imported (62 games,
+  4 players, 25 daily rows) plus 1 `zz-test` daily game kept by Rob's choice.
+- **Daily tries + News (2026-09-29, `11a4519`):**
+  - A try starts on a daily game's first move (tap, drag or double-tap). Reloading mid-game costs a
+    try; wrong guesses within a game don't. The count is in the cookie (`dailyAttempts` /
+    `dailyAttemptsDate`, reset per Edmonton day) and frozen once today's daily is won. The win
+    records `dailyWinAttempts` = the day's total try count across all tabs.
+  - `POST /daily/leaderboard` takes an optional `attempts` (default 1, so old clients still work).
+    The upsert keeps the player's best result (fewer tries, then faster), and the board sorts the same way.
+  - UI: the Top 5 shows "N tries" when more than 1; the win modal, completed screens and share text show
+    "first try" / "N tries"; the out-of-lives modal on the daily explains retries.
+  - "📣 News!" button in the Menu's top-right corner, with an unread dot (localStorage
+    `zouzou-news-seen`). Messages live in `src/lib/news.ts`; first message: "Daily now counts your tries".
+  - Verified: Quincy drove headless Chrome against local wrangler + D1. Ready to ship. His two-tab bug
+    was fixed before commit; that fix wasn't re-tested by QA. Live curl showed `attempts: 1` on
+    today's 3 entries.
 - **Zone `minus1over12.com`:** Always Use HTTPS on; rate-limit rule `zouzou-api` (10 req/10 s per IP).
 - **Results + Share (2026-09-27, `304d288`):**
   - Once today's daily is done, the Menu's Daily button reads **Results** and opens a modal; the
@@ -38,13 +54,12 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 - **Verified:** Quincy's scratchpad harness (store hydration/arithmetic/streak sequencing, component
   render incl. 0-division, share gating) — component 27/27; store assertions all pass except four
   that pinned the pre-fix behaviour he reported. No test suite in the repo still.
-- **Repo:** public, MIT. `main` @ `e94d2fa` (PR #10 merge). Branches: `main`, `vscode`, `share-results`
-  (merged, not yet deleted).
+- **Repo:** public, MIT. `main` @ `cebfbe8` (PR #11 merge). Branches: `main`, `vscode`.
 
 ## In progress
 
-- Nothing mid-flight. `project/diary/diary-2026-09.md` has uncommitted notes (Rob's feature notes +
-  this session's entry).
+- Nothing mid-flight. Uncommitted on `main`: STATE / TASKS / DECISIONS / CLAUDE.md (Project Reference
+  updated for 0002, attempts and News) and the diary.
 
 ## Known issues
 
@@ -53,6 +68,12 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 - **Menu across midnight:** `Menu` holds a `useState` snapshot; a tab left open past Edmonton midnight
   still shows "Results" (previously a disabled button — same class of staleness). Modal hides Share
   because it recomputes today. Cosmetic.
+- **Daily Reset Board doesn't reset the streak** (running out of lives does). It does cost a try now.
+  Fix is in TASKS Next.
+- **Daily tries are honour-system:** a private window, cleared cookies, another device, blocked cookies
+  or an old cached client all start at 1. Accepted (DECISIONS 2026-09-29).
+- **Daily open across midnight:** keeps yesterday's board, or a wrong board if the difficulty changes, and
+  a win counts as today's. Won't fix (DECISIONS 2026-09-29).
 - Hard boards have 10 regions but only 9 square emoji exist; the tenth is `🔲`. Accepted.
 - `GET /api` with nothing after it returns the SPA HTML instead of a JSON 404. Cosmetic.
 - `zz-test` shows in "Recent players" indefinitely; also on the 2026-09-18 daily board.
@@ -67,7 +88,7 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 ## Environment / setup
 
 ```
-branch: main @ e94d2fa (= origin/main) + uncommitted STATE/TASKS/diary
+branch: main @ cebfbe8 (= origin/main) + uncommitted STATE/TASKS/DECISIONS/CLAUDE.md/diary
 Mac: Node 26.8.1 (no nvm), pnpm 10.34.5 global; wrangler via npx / pnpm exec (logged in)
 Backups (outside git): ~/Documents/Backups/ZouZou/ — repldb export, import SQL, pre-import D1 export
 D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-00000000-…2ce7
@@ -76,8 +97,9 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
 
 ## Open questions
 
-- **PLAN drift:** "Settle in" lists new gameplay features as out of scope; Results + Share shipped
-  anyway (Rob's call, 2026-09-27). Note at the next milestone rather than editing PLAN.md now.
+- **PLAN drift:** "Settle in" lists new gameplay features and API contract changes as out of scope.
+  Results + Share (2026-09-27) and daily tries (2026-09-29, including a contract change and migration 0002)
+  shipped anyway (Rob's call). Note at the next milestone rather than editing PLAN.md now.
 - **Stats are per-device** (cookie). If friends ask for cross-device stats, that's the D1 route:
   `0002` migration recording losses + a `/players/{name}/stats` endpoint (contract change). Not planned.
 - **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
@@ -87,6 +109,13 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
 - Replit account closes once conforma is off it (tracked in the conforma repo).
 
 ## Resolved this session
+
+- 2026-09-29: Daily tries + News. Rob's spec: allow restarts, but rank by tries, then time. Built
+  in the main session, QA by Quincy; the two-tab loophole was closed; News copy toned down on
+  Quincy's advice. Migration 0002 applied remotely before merging PR #11; confirmed live. Midnight
+  cases → won't fix (decision); Reset-Board streak → task.
+
+## Resolved 2026-09-27
 
 - 2026-09-27: Results + Share. Decided local cookie over D1 (nothing counts losses today either way;
   Wordle parity; no server risk). Rob reviewed the emoji-board mock in `project/ideas/` before code:

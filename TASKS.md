@@ -11,11 +11,11 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Delete the merged `share-results` branch (local + origin) — Rob's OK
-- [ ] Ask friends how Results / Share lands; note whether anyone wants cross-device stats
+- [ ] Ask friends how Results / Share and the tries count land; note whether anyone wants cross-device stats
 
 ## Next
 
+- [ ] Daily "Reset Board" after a move = a given-up try: reset the daily streak (as running out of lives does). The next move already counts as a new try. Found by Quincy 2026-09-29.
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9

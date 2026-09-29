@@ -68,3 +68,17 @@ friends' names findable via /api/players/recent.
 **Why:** Worker + D1 live, history imported, Replit project deleted 2026-09-24.
 **Trade-off:** The old definition-of-done boxes were never ticked; git history of PLAN.md is the record.
 **Impact:** Final ReplDB re-import (plan 5d/5e) skipped (see 2026-09-17 entry); SKYresearch §11 feedback carried into Settle in.
+
+## [2026-09-29] — Daily leaderboard ranks by tries, then time
+
+**Decision:** Retrying the daily is allowed, but every try counts. The board sorts by fewest tries, then fastest time, and shows "N tries". A try starts on a game's first move. The count lives in the player cookie, per Edmonton day, and stops once today's daily is won. D1 `0002_daily_attempts.sql` adds `daily_scores.attempts` (existing rows = 1).
+**Why:** A retry reuses what the player learned about the board, so a fast retry isn't comparable to a clean first try.
+**Trade-off:** Honour system: a private window, cleared cookies, another device or an old cached client all start at 1. Closing that would need accounts.
+**Impact:** The API contract gained an optional `attempts` field (default 1). The remote migration must run before any Worker that reads the column deploys (done 2026-09-29 before merging PR #11).
+
+## [2026-09-29] — Don't fix the daily's midnight mid-game edge cases
+
+**Decision:** Leave as-is: a daily left open across Edmonton midnight keeps yesterday's board (or, if the difficulty changes, silently resets to a board that isn't the real daily). Winning it counts as today's daily.
+**Why:** Rob's call; rare, and low stakes for a friends' game.
+**Trade-off:** A player can post a wrong-puzzle time to today's board, and the tries count resets at midnight, so that win shows no tries label.
+**Impact:** No task filed. Reopen only if a friend actually hits it.

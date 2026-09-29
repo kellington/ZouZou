@@ -113,7 +113,7 @@ report instead of proceeding.
   smoke + manual play; Quincy verifies migration phases (plan Phase 2b checklist).
 - **Commits:**
 - **Branching:** `main` = production (Replit publishes it manually today; Workers Builds
-  deploys it after Phase 3). `cf` = Cloudflare migration branch. `vscode` = protocol-file work.
+  deploys it after Phase 3). `cf` = Cloudflare migration branch. `vscode` = protocol-file work — commit there, then PR `vscode` → `main` (no direct commits to `main`).
 - **Secrets / env:** no app secrets — the Worker only has the D1 binding `DB`. Cloudflare
   account IDs etc. go in `SECRETS.PRIVATE.YAML` — local scratchpad, gitignored, copied
   from the `.example` twin — never the deployed secret store.
@@ -171,17 +171,21 @@ Replit (legacy, until cutover — ReplDB KV):
 D1 (`artifacts/worker/migrations/0001_init.sql`): `daily_scores (date, name_key, name, seconds)`
 PK `(date, name_key)` — best time per player per day, every day kept; `player_games (id, name_key,
 name, date, game, seconds)` — every game. `seconds` CHECK: integer, 1–36000. `name_key` =
-lowercased, whitespace-normalised name. `0001` is applied remotely — schema changes need `0002_*.sql`.
+lowercased, whitespace-normalised name. `0002_daily_attempts.sql` adds `daily_scores.attempts`
+(integer 1–1000, default 1). `0001`–`0002` are applied remotely — schema changes need `0003_*.sql`,
+applied `--remote` **before** the Worker that reads them deploys.
 
 Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store` /
 `zouzou-best-times`): best times per mode, `daily`, `lastDailyDate`, `playerName`,
-`dailyStreak`, `lastPlayedDate`. Per-origin — does not survive the domain change (plan D5).
+`dailyStreak`, `lastPlayedDate`, `stats`, `maxDailyStreak`, `dailyAttempts` /
+`dailyAttemptsDate` / `dailyWinAttempts`. Per-origin — does not survive the domain change (plan D5).
 
 ### API (`/api`, contract in `lib/api-spec/openapi.yaml`)
 
 - `GET /healthz` → `{status:"ok"}`
 - `GET /daily/leaderboard` → `{date, entries}` for today (Edmonton)
-- `POST /daily/leaderboard` `{name 1–24, seconds 1–36000 int}` → updated board
+- `POST /daily/leaderboard` `{name 1–24, seconds 1–36000 int, attempts? 1–1000 int (default 1)}` → updated board
+  (entries are `{name, seconds, attempts}`)
 - `GET /players/recent` → latest game per named player, newest date first
 - `POST /players/games` `{name, game: daily|easy|medium|hard, seconds}` → entry
 
@@ -207,8 +211,11 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
 - "Day" = **America/Edmonton** date, on client and server (`getEdmontonDateKey`).
 - Daily streak: +1 on consecutive-day daily wins; a missed day or running out of lives
   on daily resets it.
-- Leaderboard keeps a player's best time for the day; names matched case-insensitively,
-  whitespace-normalised.
+- Leaderboard keeps a player's best result for the day — fewest tries, then fastest time — and
+  sorts the same way; names matched case-insensitively, whitespace-normalised.
+- Daily tries: a try starts on a game's first move (reload mid-game costs one), counted per day
+  in the cookie (honour system), frozen once today's daily is won; the win posts the day's total.
+- News: menu "📣 News!" messages live in `artifacts/zouzou-friends/src/lib/news.ts` (newest first).
 
 ### Commands
 
