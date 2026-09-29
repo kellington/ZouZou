@@ -20,11 +20,18 @@ export interface DailyScoreInput {
      * @maximum 36000
      */
   seconds: number;
+  /**
+     * Tries needed to solve today's puzzle (1 = first try). Defaults to 1.
+     * @minimum 1
+     * @maximum 1000
+     */
+  attempts?: number;
 }
 
 export interface DailyScoreEntry {
   name: string;
   seconds: number;
+  attempts: number;
 }
 
 export interface DailyLeaderboardResponse {

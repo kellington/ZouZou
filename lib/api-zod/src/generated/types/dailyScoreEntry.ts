@@ -9,4 +9,5 @@
 export interface DailyScoreEntry {
   name: string;
   seconds: number;
+  attempts: number;
 }

@@ -360,6 +360,11 @@ export function formatTime(seconds: number): string {
   return `${minutes}:${remainder.toString().padStart(2, '0')}`;
 }
 
+/** Daily attempt count for display: "first try", "3 tries". */
+export function formatAttempts(attempts: number): string {
+  return attempts <= 1 ? 'first try' : `${attempts} tries`;
+}
+
 // Square emoji, indexed by region number. Only 9 exist as squares, so a hard
 // board's 10th region (index 9) falls back to 🔲.
 const REGION_EMOJI = ['🟥', '🟧', '🟨', '🟩', '🟦', '🟪', '🟫', '⬛', '⬜', '🔲'];

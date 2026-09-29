@@ -4,6 +4,7 @@ import { CritterPicker } from '../components/CritterPicker';
 import { ActionButton } from '../components/ui';
 import { useStore } from '../lib/store';
 import {
+  formatAttempts,
   formatDailyDate,
   formatTime,
   getDailyDifficulty,
@@ -13,6 +14,7 @@ import { Star, Zap, Coffee, Skull, Edit2, Flame } from 'lucide-react';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 import { RecentPlayers } from '../components/RecentPlayers';
 import { DailyResults } from '../components/DailyResults';
+import { NewsButton } from '../components/NewsButton';
 import { useState } from 'react';
 
 export function Menu() {
@@ -26,9 +28,12 @@ export function Menu() {
     store.lastDailyDate === today && store.daily !== null;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-[hsl(var(--background))]">
+    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center p-6 bg-[hsl(var(--background))]">
+      <div className="absolute top-4 right-4 z-10">
+        <NewsButton />
+      </div>
       <div className="w-full max-w-md mx-auto text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
+
         <div className="flex justify-center mb-6">
           <div className="relative">
             <CritterIcon critter={store.critter} className="w-24 h-24 text-[#AAB3BC] animate-bounce duration-[2000ms]" />
@@ -98,7 +103,8 @@ export function Menu() {
             </span>
             {hasCompletedDaily && store.daily !== null ? (
               <span className="text-sm font-bold text-board/60 mt-2 max-w-xs">
-                You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}.
+                You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}
+                {store.dailyWinAttempts > 0 && ` (${formatAttempts(store.dailyWinAttempts)})`}.
               </span>
             ) : store.daily !== null ? (
               <span className="text-sm font-bold text-board/50 mt-2">

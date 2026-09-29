@@ -18,7 +18,7 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
- * Returns the top daily puzzle times for the current Edmonton date.
+ * Returns the top daily puzzle results for the current Edmonton date, ranked by fewest attempts, then fastest time.
  * @summary Get today's shared leaderboard
  */
 export const getDailyLeaderboardResponseDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
@@ -28,7 +28,8 @@ export const GetDailyLeaderboardResponse = zod.object({
   "date": zod.string().regex(getDailyLeaderboardResponseDateRegExp),
   "entries": zod.array(zod.object({
   "name": zod.string(),
-  "seconds": zod.number()
+  "seconds": zod.number(),
+  "attempts": zod.number()
 }))
 })
 
@@ -41,11 +42,14 @@ export const submitDailyScoreBodyNameMax = 24;
 
 export const submitDailyScoreBodySecondsMax = 36000;
 
+export const submitDailyScoreBodyAttemptsMax = 1000;
+
 
 
 export const SubmitDailyScoreBody = zod.object({
   "name": zod.string().min(1).max(submitDailyScoreBodyNameMax),
-  "seconds": zod.number().min(1).max(submitDailyScoreBodySecondsMax)
+  "seconds": zod.number().min(1).max(submitDailyScoreBodySecondsMax),
+  "attempts": zod.number().min(1).max(submitDailyScoreBodyAttemptsMax).optional().describe('Tries needed to solve today\'s puzzle (1 = first try). Defaults to 1.')
 })
 
 export const submitDailyScoreResponseDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
@@ -55,7 +59,8 @@ export const SubmitDailyScoreResponse = zod.object({
   "date": zod.string().regex(submitDailyScoreResponseDateRegExp),
   "entries": zod.array(zod.object({
   "name": zod.string(),
-  "seconds": zod.number()
+  "seconds": zod.number(),
+  "attempts": zod.number()
 }))
 })
 

@@ -6,6 +6,7 @@ import {
   getDailyDifficulty,
   getDailySeed,
   getEdmontonDateKey,
+  formatAttempts,
   formatDailyDate,
   formatTime,
   MODE_CONFIG,
@@ -51,8 +52,16 @@ export function Game() {
         ? `Daily · ${baseConfig.title}`
         : baseConfig.title,
   };
-  const { store, saveBestTime, recordGameResult, recordDailyWin, resetStreak, setPlayerName } =
-    useStore();
+  const {
+    store,
+    saveBestTime,
+    recordGameResult,
+    recordDailyWin,
+    startDailyAttempt,
+    recordDailyWinAttempts,
+    resetStreak,
+    setPlayerName,
+  } = useStore();
   const today = getEdmontonDateKey();
   const effectiveDifficulty = safeMode === 'daily' ? dailyDifficulty : safeMode;
   const [showResults, setShowResults] = useState(false);
@@ -62,6 +71,11 @@ export function Game() {
   
   const queryClient = useQueryClient();
   const hasRecordedGame = useRef(false);
+  // Which try at today's daily this game is; set on the game's first move so a
+  // reload mid-game still costs a try. null until then (and for non-daily modes).
+  const dailyAttempt = useRef<number | null>(null);
+  // Tries the daily win took, fixed at the winning move (see recordDailyWinAttempts).
+  const winAttempts = useRef(1);
   const { mutate: submitScore, isPending: isSubmitting } = useSubmitDailyScore({
     mutation: {
       onSuccess: () => {
@@ -91,7 +105,7 @@ export function Game() {
 
     if (safeMode === 'daily') {
       submitScore({
-        data: { name, seconds: completedSeconds },
+        data: { name, seconds: completedSeconds, attempts: winAttempts.current },
       });
     }
   }, [recordGame, safeMode, submitScore]);
@@ -129,6 +143,7 @@ export function Game() {
 
   useEffect(() => {
     hasRecordedGame.current = false;
+    dailyAttempt.current = null;
     setGrid(initGrid());
     setLives(config.lives);
     setGameState('playing');
@@ -150,6 +165,7 @@ export function Game() {
 
   const handleRestart = () => {
     hasRecordedGame.current = false;
+    dailyAttempt.current = null;
     setGrid(initGrid());
     setLives(config.lives);
     setGameState('playing');
@@ -165,9 +181,16 @@ export function Game() {
     }
   };
 
+  const countDailyAttempt = () => {
+    if (safeMode === 'daily' && dailyAttempt.current === null) {
+      dailyAttempt.current = startDailyAttempt();
+    }
+  };
+
   const handleCellClick = (r: number, c: number) => {
     if (gameState !== 'playing') return;
     if (puzzle.prefilled[r] === c) return;
+    countDailyAttempt();
 
     playNoCatSound();
     const current = grid[r][c];
@@ -186,6 +209,7 @@ export function Game() {
   ) => {
     if (gameState !== 'playing') return;
     if (puzzle.prefilled[r] === c) return;
+    countDailyAttempt();
 
     setGrid((currentGrid) => {
       if (currentGrid[r]?.[c] === state) return currentGrid;
@@ -199,6 +223,7 @@ export function Game() {
   const handleCellDoubleClick = (r: number, c: number) => {
     if (gameState !== 'playing') return;
     if (puzzle.prefilled[r] === c) return;
+    countDailyAttempt();
 
     if (puzzle.solution[r] !== c) {
       playMistakeSound();
@@ -243,6 +268,7 @@ export function Game() {
       recordGameResult(effectiveDifficulty, 'solved', completedSeconds);
 
       if (safeMode === 'daily') {
+        winAttempts.current = recordDailyWinAttempts(dailyAttempt.current ?? 1);
         recordDailyWin();
       }
 
@@ -274,7 +300,8 @@ export function Game() {
         <CritterIcon critter={critter} className="w-24 h-24 text-[#AAB3BC] animate-bounce mb-6" />
         <h1 className="text-3xl font-black text-board mb-4">Daily puzzle complete</h1>
         <p className="text-lg font-bold text-board/70 mb-8">
-          You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}.
+          You already completed the {formatDailyDate(today)} puzzle; you did it in {formatTime(store.daily)}
+          {store.dailyWinAttempts > 0 && ` (${formatAttempts(store.dailyWinAttempts)})`}.
         </p>
         <div className="w-full space-y-3">
           <ActionButton variant="primary" className="w-full" onClick={() => setShowResults(true)}>
@@ -372,7 +399,14 @@ export function Game() {
           <CritterIcon critter={critter} className="w-20 h-20 text-board animate-bounce" />
         </div>
         <p className="text-xl mb-1 text-center">You solved it in</p>
-        <p className="text-4xl font-black font-mono mb-6 text-center">{formatTime(seconds)}</p>
+        <p className={`text-4xl font-black font-mono text-center ${safeMode === 'daily' ? 'mb-1' : 'mb-6'}`}>
+          {formatTime(seconds)}
+        </p>
+        {safeMode === 'daily' && (
+          <p className="text-sm font-bold text-board/60 mb-6 text-center">
+            {formatAttempts(winAttempts.current)}
+          </p>
+        )}
         
         {!store.playerName && !hasRecordedGame.current && (
           <div className="bg-board/5 p-4 rounded-xl border border-board/10 mb-6">
@@ -420,7 +454,12 @@ export function Game() {
         <div className="text-center">
           <p className="text-lg font-bold mb-2">You ran out of lives.</p>
           {safeMode === 'daily' && (
-            <p className="text-sm text-red-500 font-bold mb-6">Your daily streak was reset.</p>
+            <>
+              <p className="text-sm text-red-500 font-bold mb-2">Your daily streak was reset.</p>
+              <p className="text-sm text-board/60 font-bold mb-6">
+                You can try again — the leaderboard shows how many tries you needed.
+              </p>
+            </>
           )}
         </div>
         <div className="space-y-3 mt-6">

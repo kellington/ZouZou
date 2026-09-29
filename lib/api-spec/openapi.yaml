@@ -33,7 +33,7 @@ paths:
       operationId: getDailyLeaderboard
       tags: [daily]
       summary: Get today's shared leaderboard
-      description: Returns the top daily puzzle times for the current Edmonton date.
+      description: Returns the top daily puzzle results for the current Edmonton date, ranked by fewest attempts, then fastest time.
       responses:
         "200":
           description: Today's leaderboard
@@ -123,6 +123,11 @@ components:
           type: number
           minimum: 1
           maximum: 36000
+        attempts:
+          type: number
+          minimum: 1
+          maximum: 1000
+          description: Tries needed to solve today's puzzle (1 = first try). Defaults to 1.
       required:
         - name
         - seconds
@@ -133,9 +138,12 @@ components:
           type: string
         seconds:
           type: number
+        attempts:
+          type: number
       required:
         - name
         - seconds
+        - attempts
     DailyLeaderboardResponse:
       type: object
       properties:
