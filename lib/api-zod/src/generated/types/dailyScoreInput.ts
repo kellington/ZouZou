@@ -23,4 +23,10 @@ export interface DailyScoreInput {
      * @maximum 1000
      */
   attempts?: number;
+  /**
+     * Lives (hearts) lost on the winning try (0 = no mistakes). Optional.
+     * @minimum 0
+     * @maximum 10
+     */
+  livesLost?: number;
 }
