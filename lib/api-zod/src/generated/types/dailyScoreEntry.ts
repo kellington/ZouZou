@@ -10,4 +10,9 @@ export interface DailyScoreEntry {
   name: string;
   seconds: number;
   attempts: number;
+  /**
+     * Lives lost on the winning try; null for results saved before it was tracked.
+     * @nullable
+     */
+  livesLost: number | null;
 }
