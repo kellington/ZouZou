@@ -11,11 +11,11 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Ask friends how Results / Share and the tries count land; note whether anyone wants cross-device stats
+- [ ] Rob is polling friends on the new bits (tries, hearts on Top 5, Pause, Show Reward, Personal Stats); record results + whether anyone wants cross-device stats
+- [ ] Rob: one real-phone play-through to a win → tap Show Reward (photo + credit link) — QA was headless only
 
 ## Next
 
-- [ ] Daily "Reset Board" after a move = a given-up try: reset the daily streak (as running out of lives does). The next move already counts as a new try. Found by Quincy 2026-09-29.
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
@@ -39,28 +39,24 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] Maybe: use the kept history (past daily boards, per-player stats); small Worker test suite
 - [ ] Maybe: cross-device stats via D1 (`0002` migration recording losses + `/players/{name}/stats`) — only if friends ask
 - [ ] Modal a11y: reduced-motion opt-out, dialog role, Escape/backdrop close (`ui.tsx`, all modals)
+- [ ] Maybe: auto-pause when the tab is hidden (Pause currently manual only)
+- [ ] Maybe: more reward images / dino variety (add via Rex shortlist → Rob approval → `rewards.ts` + `CREDITS.md`)
 - [ ] Menu re-reads the cookie on focus/visibility so a tab left open past midnight doesn't show stale "Results"
 
 ## Done (recent)
 
+- [x] 2026-09-29 — Personal Stats card on the menu (PR #15); Wren built, Quincy verified
+- [x] 2026-09-29 — Daily Reset Board resets the streak (PR #14, Rob)
+- [x] 2026-09-29 — Show Reward: 85 approved photos + Fluent 3D dinos, modal scroll fix (PR #13); Rex/Wren/Quincy
+- [x] 2026-09-29 — Hearts lost on Top 5 (migration 0003, applied remotely by Rob) + Pause button (PR #12)
+- [x] 2026-09-29 — Daily tries + News button (PR #11)
+- [x] 2026-09-29 — Merged branches (pause-and-lives, show-reward, personal-stats) and worktrees deleted
 - [x] 2026-09-27 — Results + Share (stats tiles, difficulty bars, emoji board share, URL); Wren built, Quincy verified, Rob device-tested; PR #10 merged, live
 - [x] 2026-09-24 — Merged branches deleted (feature/critters, cf, replit-deleted); Rob's name grep: only one first name, left in history
 - [x] 2026-09-24 — PLAN.md rewritten: "Off Replit" closed → "Settle in"
 - [x] 2026-09-24 — Repo made public (Quincy audit, self-host README, MIT LICENSE, grill-me removed; PR #9)
 - [x] 2026-09-24 — Rob deleted the Replit project
 - [x] 2026-09-18 — Daily-save bug fixed (win popup hidden by "Daily puzzle complete"); PR #6 merged, verified live
-- [x] 2026-09-18 — Critter picker (cats/dogs/dinosaurs/monkeys); Quincy PASS; PR #5 merged
-- [x] 2026-09-18 — `cf` → `main` (PR #4): README, status page, protocol files
-- [x] 2026-09-17 — Phase 1: Mac build (pnpm 10.34.5, overrides removed, vite defaults, index.html noindex)
-- [x] 2026-09-17 — Phase 2/2b: Hono worker, D1 schema, transform, wrangler.jsonc, _headers; Quincy PASS
-- [x] 2026-09-17 — Phase 2c: Replit code/config/deps removed; Quincy PASS; CLAUDE.md updated
-- [x] 2026-09-17 — Phase 3: remote D1 created, migrated, backup imported; PR #3 merged; Workers Builds live
-- [x] 2026-09-17 — Phase 4: preview played on desktop + phone
-- [x] 2026-09-17 — Phase 5: Always Use HTTPS, custom domain, rate-limit rule, Replit unpublished, friends texted
-- [x] 2026-09-17 — Logged 3 migration decisions in DECISIONS.md
-- [x] 2026-09-17 — First status page (`project/status/status-2026-09-17.html`, STATUS-SUMMARY.md)
-- [x] 2026-09-17 — README rewritten; committed on `cf` (`33eb7b6`)
-- [x] 2026-09-16 — Protocol files initialised; Phase 0 ReplDB backup
 
 ---
 

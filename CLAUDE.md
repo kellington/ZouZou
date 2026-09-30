@@ -151,7 +151,7 @@ and business rules out of STATE.md, where they'd rot.
 | Path | What |
 |---|---|
 | `wrangler.jsonc` | Worker `zouzou`: assets = client build (SPA fallback), `run_worker_first: /api/*`, D1 binding `DB` → `zouzou` |
-| `artifacts/zouzou-friends` | The game (React/Vite). Build → `dist/public` (Worker static assets); `public/_headers` |
+| `artifacts/zouzou-friends` | The game (React/Vite). Build → `dist/public` (Worker static assets); `public/_headers`; reward images `public/rewards/<critter>/` (+ `CREDITS.md`), listed in `src/lib/rewards.ts` |
 | `artifacts/worker` | Hono API (`src/index.ts`), D1 migrations (`migrations/`), ReplDB → SQL transform (`scripts/repldb-to-sql.mjs`), generated `worker-configuration.d.ts` |
 | `lib/api-spec` | `openapi.yaml` + Orval config — **the API contract** |
 | `lib/api-zod` | Generated Zod schemas (used by the Worker) |
@@ -172,8 +172,9 @@ D1 (`artifacts/worker/migrations/0001_init.sql`): `daily_scores (date, name_key,
 PK `(date, name_key)` — best time per player per day, every day kept; `player_games (id, name_key,
 name, date, game, seconds)` — every game. `seconds` CHECK: integer, 1–36000. `name_key` =
 lowercased, whitespace-normalised name. `0002_daily_attempts.sql` adds `daily_scores.attempts`
-(integer 1–1000, default 1). `0001`–`0002` are applied remotely — schema changes need `0003_*.sql`,
-applied `--remote` **before** the Worker that reads them deploys.
+(integer 1–1000, default 1). `0003_daily_lives_lost.sql` adds nullable `daily_scores.lives_lost`
+(integer 0–10; NULL = saved before tracking). `0001`–`0003` are applied remotely — schema changes need
+`0004_*.sql`, applied `--remote` (from a checkout that has the file) **before** the Worker that reads them deploys.
 
 Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store` /
 `zouzou-best-times`): best times per mode, `daily`, `lastDailyDate`, `playerName`,
@@ -184,8 +185,8 @@ Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store
 
 - `GET /healthz` → `{status:"ok"}`
 - `GET /daily/leaderboard` → `{date, entries}` for today (Edmonton)
-- `POST /daily/leaderboard` `{name 1–24, seconds 1–36000 int, attempts? 1–1000 int (default 1)}` → updated board
-  (entries are `{name, seconds, attempts}`)
+- `POST /daily/leaderboard` `{name 1–24, seconds 1–36000 int, attempts? 1–1000 int (default 1), livesLost? 0–10 int}`
+  → updated board (entries are `{name, seconds, attempts, livesLost: number|null}`)
 - `GET /players/recent` → latest game per named player, newest date first
 - `POST /players/games` `{name, game: daily|easy|medium|hard, seconds}` → entry
 
@@ -200,7 +201,9 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
    diagonally. Tap = mark no-cat / clear; double-tap = cat. Wrong cat costs a life.
 3. Win → best time saved in cookie; named player POSTs to `/players/games` (and
    `/daily/leaderboard` for daily).
-4. Menu shows shared daily leaderboard + recent players (polled ~60 s).
+4. Menu shows shared daily leaderboard (time + hearts lost), Personal Stats (cookie) and recent
+   players (polled ~60 s). Win modal offers "Show Reward" (random critter image). Pause button hides
+   the board and stops the timer.
 
 ### Business rules
 
@@ -209,12 +212,15 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
   the seed; one completion per day (`src/pages/Game.tsx`, `src/lib/puzzle.ts`).
   Puzzles are generated client-side; the server never sees the board.
 - "Day" = **America/Edmonton** date, on client and server (`getEdmontonDateKey`).
-- Daily streak: +1 on consecutive-day daily wins; a missed day or running out of lives
-  on daily resets it.
+- Daily streak: +1 on consecutive-day daily wins; a missed day, running out of lives, or
+  Reset Board after a move on daily resets it (not once today's daily is won).
 - Leaderboard keeps a player's best result for the day — fewest tries, then fastest time — and
   sorts the same way; names matched case-insensitively, whitespace-normalised.
 - Daily tries: a try starts on a game's first move (reload mid-game costs one), counted per day
   in the cookie (honour system), frozen once today's daily is won; the win posts the day's total.
+- Top 5 shows hearts lost on the winning try (`(N♥)`); it doesn't affect ranking.
+- Rewards: only Rob-approved images (Unsplash/Pexels licence or MIT/CC0 art), self-hosted, credited in
+  `public/rewards/CREDITS.md`; no live third-party image APIs.
 - News: menu "📣 News!" messages live in `artifacts/zouzou-friends/src/lib/news.ts` (newest first).
 
 ### Commands
