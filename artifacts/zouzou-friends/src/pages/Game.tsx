@@ -17,6 +17,7 @@ import { CRITTER_NOUN, CRITTER_LABEL, CRITTER_WIN_TITLE } from '../lib/critters'
 import { ActionButton, Modal } from '../components/ui';
 import { DailyResults } from '../components/DailyResults';
 import { useStore } from '../lib/store';
+import { pickReward, rewardSrc, type Reward } from '../lib/rewards';
 import { ArrowLeft, HelpCircle, RotateCcw, Flame, Pause, Play } from 'lucide-react';
 import {
   useSubmitDailyScore,
@@ -133,6 +134,8 @@ export function Game() {
   const [showRules, setShowRules] = useState(false);
   // Paused stops the clock and hides the board, so it can't be thinking time.
   const [paused, setPaused] = useState(false);
+  const [reward, setReward] = useState<Reward | null>(null);
+  const [showReward, setShowReward] = useState(false);
   const [tempName, setTempName] = useState(store.playerName);
 
   const initGrid = useCallback(() => {
@@ -159,6 +162,8 @@ export function Game() {
     setSeconds(0);
     setMistakeCell(null);
     setPaused(false);
+    setReward(null);
+    setShowReward(false);
   }, [puzzle, config.lives, initGrid]);
 
   useEffect(() => {
@@ -182,6 +187,8 @@ export function Game() {
     setSeconds(0);
     setMistakeCell(null);
     setPaused(false);
+    setReward(null);
+    setShowReward(false);
   };
 
   const handleNewPuzzle = () => {
@@ -275,6 +282,8 @@ export function Game() {
     if (catsCount === size) {
       const completedSeconds = Math.max(1, seconds);
       setGameState('won');
+      setReward(pickReward(critter));
+      setShowReward(false);
       saveBestTime(safeMode, completedSeconds);
       recordGameResult(effectiveDifficulty, 'solved', completedSeconds);
 
@@ -475,7 +484,30 @@ export function Game() {
           </div>
         )}
         
+        {reward && showReward && (
+          <div className="mb-6 flex flex-col items-center">
+            <img
+              src={rewardSrc(reward)}
+              alt={reward.alt}
+              className={`w-full max-w-[280px] aspect-square max-h-[40dvh] rounded-2xl border-2 border-board/10 ${reward.credit ? 'object-cover' : 'object-contain'}`}
+            />
+            {reward.credit && (
+              <p className="mt-2 text-xs text-board/60">
+                Photo:{' '}
+                <a href={reward.credit.url} target="_blank" rel="noopener" className="underline">
+                  {reward.credit.name} / {reward.credit.site}
+                </a>
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="space-y-3">
+          {reward && (
+            <ActionButton variant="board" className="w-full" aria-expanded={showReward} onClick={() => setShowReward(v => !v)}>
+              {showReward ? 'Hide Reward' : 'Show Reward'}
+            </ActionButton>
+          )}
           {safeMode !== 'daily' && (
              <ActionButton className="w-full" onClick={handleNewPuzzle}>Next Puzzle</ActionButton>
           )}
