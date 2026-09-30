@@ -12,6 +12,7 @@ import {
 } from '../lib/puzzle';
 import { Star, Zap, Coffee, Skull, Edit2, Flame } from 'lucide-react';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
+import { PersonalStats } from '../components/PersonalStats';
 import { RecentPlayers } from '../components/RecentPlayers';
 import { DailyResults } from '../components/DailyResults';
 import { NewsButton } from '../components/NewsButton';
@@ -159,6 +160,9 @@ export function Menu() {
 
           <div className="mt-8">
             <DailyLeaderboard />
+          </div>
+          <div className="mt-4">
+            <PersonalStats />
           </div>
           <div className="mt-4">
             <RecentPlayers />
