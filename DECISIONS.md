@@ -82,3 +82,24 @@ friends' names findable via /api/players/recent.
 **Why:** Rob's call; rare, and low stakes for a friends' game.
 **Trade-off:** A player can post a wrong-puzzle time to today's board, and the tries count resets at midnight, so that win shows no tries label.
 **Impact:** No task filed. Reopen only if a friend actually hits it.
+
+## [2026-09-29] — Show hearts lost on the daily Top 5; don't rank by it
+
+**Decision:** The Top 5 shows hearts lost on the winning try, e.g. `1:20 (2♥)`. It doesn't change the order; ranking stays fewest tries, then fastest time. Migration `0003` adds a nullable `lives_lost` column; the POST takes an optional `livesLost`, and entries return `livesLost` (a number or null). A better result replaces lives too.
+**Why:** Friend feedback (Lexi). It's extra detail about the win, not a new way to rank.
+**Trade-off:** Scores saved earlier, or sent from an old cached client, show no hearts. Honour system, like tries.
+**Impact:** API contract change plus migration, applied remotely before the merge (PR #12). The next migration is `0004`.
+
+## [2026-09-29] — Reward images: a hand-picked set stored with the game, not a live image API
+
+**Decision:** "Show Reward" draws from images stored with the game: photos (Unsplash/Pexels licences) for cat, dog and monkey, and Microsoft Fluent Emoji 3D (MIT) for dinosaurs. It picks a random image per win and shows a small credit linking to the photo page. Rob approves every image before it's added; 85 photos to start.
+**Why (Rex's research):** No live API covers all four animals. The free cat and dog APIs take unchecked uploads and don't state who owns the images. A live API would also send friends' IP addresses to a third party on every win. Unsplash's API requires hotlinking, while Pixabay's forbids it.
+**Trade-off:** Adding images is manual (shortlist → Rob approves → commit). About 5.8 MB of images in the repo.
+**Impact:** No server or contract change. Images live in `public/rewards/`, with credits in `CREDITS.md`.
+
+## [2026-09-29] — Personal Stats read the local cookie; no Daily row
+
+**Decision:** The menu's Personal Stats card is built from the cookie's existing `stats`, not D1. Daily games count toward their board size. There's no separate Daily row, because the Results button covers the daily.
+**Why:** The data already exists and it's the same source Results uses. No server change needed.
+**Trade-off:** Stats are per device and only go back to 2026-09-27. Cross-device stats would need the D1 route (TASKS Later).
+**Impact:** Front-end-only change (PR #15). Same formulas as Results so the two screens agree.
