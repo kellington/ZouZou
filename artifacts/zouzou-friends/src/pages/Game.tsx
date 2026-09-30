@@ -179,6 +179,9 @@ export function Game() {
   }, [gameState, paused, safeMode, store.lastDailyDate, store.daily, today]);
 
   const handleRestart = () => {
+    if (safeMode === 'daily' && dailyAttempt.current !== null) {
+      resetStreak();
+    }
     hasRecordedGame.current = false;
     dailyAttempt.current = null;
     setGrid(initGrid());

@@ -359,7 +359,11 @@ export function useStore() {
     return attempts;
   }, []);
 
+  // No-op once today's daily is won (e.g. in another tab): judged from the
+  // cookie at call time, so a stale tab can't wipe a streak earned today.
   const resetStreak = useCallback(() => {
+    const previous = getSharedStore();
+    if (previous.lastDailyDate === getEdmontonDateKey() && previous.daily !== null) return;
     updateStore({ dailyStreak: 0, lastPlayedDate: null });
   }, [updateStore]);
 
