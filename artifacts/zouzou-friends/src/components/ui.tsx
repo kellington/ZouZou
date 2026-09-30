@@ -47,7 +47,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[hsl(var(--background))] border-4 border-board rounded-3xl p-6 w-full max-w-sm shadow-xl animate-in zoom-in-95 duration-200">
+      <div className="bg-[hsl(var(--background))] border-4 border-board rounded-3xl p-6 w-full max-w-sm max-h-full overflow-y-auto shadow-xl animate-in zoom-in-95 duration-200">
         <h2 className="text-2xl font-black text-board mb-6 text-center tracking-tight">{title}</h2>
         <div className="mb-6 text-board/90 font-medium text-center">
           {children}

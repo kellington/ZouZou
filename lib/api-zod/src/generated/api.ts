@@ -29,7 +29,8 @@ export const GetDailyLeaderboardResponse = zod.object({
   "entries": zod.array(zod.object({
   "name": zod.string(),
   "seconds": zod.number(),
-  "attempts": zod.number()
+  "attempts": zod.number(),
+  "livesLost": zod.number().nullable().describe('Lives lost on the winning try; null for results saved before it was tracked.')
 }))
 })
 
@@ -44,12 +45,16 @@ export const submitDailyScoreBodySecondsMax = 36000;
 
 export const submitDailyScoreBodyAttemptsMax = 1000;
 
+export const submitDailyScoreBodyLivesLostMin = 0;
+export const submitDailyScoreBodyLivesLostMax = 10;
+
 
 
 export const SubmitDailyScoreBody = zod.object({
   "name": zod.string().min(1).max(submitDailyScoreBodyNameMax),
   "seconds": zod.number().min(1).max(submitDailyScoreBodySecondsMax),
-  "attempts": zod.number().min(1).max(submitDailyScoreBodyAttemptsMax).optional().describe('Tries needed to solve today\'s puzzle (1 = first try). Defaults to 1.')
+  "attempts": zod.number().min(1).max(submitDailyScoreBodyAttemptsMax).optional().describe('Tries needed to solve today\'s puzzle (1 = first try). Defaults to 1.'),
+  "livesLost": zod.number().min(submitDailyScoreBodyLivesLostMin).max(submitDailyScoreBodyLivesLostMax).optional().describe('Lives (hearts) lost on the winning try (0 = no mistakes). Optional.')
 })
 
 export const submitDailyScoreResponseDateRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
@@ -60,7 +65,8 @@ export const SubmitDailyScoreResponse = zod.object({
   "entries": zod.array(zod.object({
   "name": zod.string(),
   "seconds": zod.number(),
-  "attempts": zod.number()
+  "attempts": zod.number(),
+  "livesLost": zod.number().nullable().describe('Lives lost on the winning try; null for results saved before it was tracked.')
 }))
 })
 

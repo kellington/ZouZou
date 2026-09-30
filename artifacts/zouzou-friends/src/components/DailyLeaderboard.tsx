@@ -1,5 +1,6 @@
 import { useGetDailyLeaderboard } from '@workspace/api-client-react';
 import { formatAttempts, formatTime } from '../lib/puzzle';
+import { HeartIcon } from './Icons';
 import { Trophy, AlertCircle } from 'lucide-react';
 
 export function DailyLeaderboard() {
@@ -47,6 +48,15 @@ export function DailyLeaderboard() {
                   <span className="text-xs font-bold text-board/50">{formatAttempts(entry.attempts)}</span>
                 )}
                 <span className="font-mono text-board font-black">{formatTime(entry.seconds)}</span>
+                {entry.livesLost !== null && (
+                  <span
+                    className="text-xs font-bold text-board/50 inline-flex items-center gap-0.5"
+                    title={`${entry.livesLost} ${entry.livesLost === 1 ? 'life' : 'lives'} lost`}
+                  >
+                    ({entry.livesLost}
+                    <HeartIcon className="w-3 h-3 text-[#D6453A] self-center" />)
+                  </span>
+                )}
               </span>
             </div>
           ))}

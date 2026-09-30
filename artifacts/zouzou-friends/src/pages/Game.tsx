@@ -17,7 +17,8 @@ import { CRITTER_NOUN, CRITTER_LABEL, CRITTER_WIN_TITLE } from '../lib/critters'
 import { ActionButton, Modal } from '../components/ui';
 import { DailyResults } from '../components/DailyResults';
 import { useStore } from '../lib/store';
-import { ArrowLeft, HelpCircle, RotateCcw, Flame } from 'lucide-react';
+import { pickReward, rewardSrc, type Reward } from '../lib/rewards';
+import { ArrowLeft, HelpCircle, RotateCcw, Flame, Pause, Play } from 'lucide-react';
 import {
   useSubmitDailyScore,
   getGetDailyLeaderboardQueryKey,
@@ -76,6 +77,8 @@ export function Game() {
   const dailyAttempt = useRef<number | null>(null);
   // Tries the daily win took, fixed at the winning move (see recordDailyWinAttempts).
   const winAttempts = useRef(1);
+  // Lives the daily win cost, fixed at the winning move for the leaderboard.
+  const winLivesLost = useRef(0);
   const { mutate: submitScore, isPending: isSubmitting } = useSubmitDailyScore({
     mutation: {
       onSuccess: () => {
@@ -105,7 +108,12 @@ export function Game() {
 
     if (safeMode === 'daily') {
       submitScore({
-        data: { name, seconds: completedSeconds, attempts: winAttempts.current },
+        data: {
+          name,
+          seconds: completedSeconds,
+          attempts: winAttempts.current,
+          livesLost: winLivesLost.current,
+        },
       });
     }
   }, [recordGame, safeMode, submitScore]);
@@ -124,6 +132,10 @@ export function Game() {
   const [seconds, setSeconds] = useState(0);
   const [mistakeCell, setMistakeCell] = useState<CellPos | null>(null);
   const [showRules, setShowRules] = useState(false);
+  // Paused stops the clock and hides the board, so it can't be thinking time.
+  const [paused, setPaused] = useState(false);
+  const [reward, setReward] = useState<Reward | null>(null);
+  const [showReward, setShowReward] = useState(false);
   const [tempName, setTempName] = useState(store.playerName);
 
   const initGrid = useCallback(() => {
@@ -149,11 +161,14 @@ export function Game() {
     setGameState('playing');
     setSeconds(0);
     setMistakeCell(null);
+    setPaused(false);
+    setReward(null);
+    setShowReward(false);
   }, [puzzle, config.lives, initGrid]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    if (gameState === 'playing' && !(
+    if (gameState === 'playing' && !paused && !(
       safeMode === 'daily' &&
       store.lastDailyDate === today &&
       store.daily !== null
@@ -161,7 +176,7 @@ export function Game() {
       interval = setInterval(() => setSeconds(s => s + 1), 1000);
     }
     return () => clearInterval(interval);
-  }, [gameState, safeMode, store.lastDailyDate, store.daily, today]);
+  }, [gameState, paused, safeMode, store.lastDailyDate, store.daily, today]);
 
   const handleRestart = () => {
     if (safeMode === 'daily' && dailyAttempt.current !== null) {
@@ -174,6 +189,9 @@ export function Game() {
     setGameState('playing');
     setSeconds(0);
     setMistakeCell(null);
+    setPaused(false);
+    setReward(null);
+    setShowReward(false);
   };
 
   const handleNewPuzzle = () => {
@@ -191,7 +209,7 @@ export function Game() {
   };
 
   const handleCellClick = (r: number, c: number) => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || paused) return;
     if (puzzle.prefilled[r] === c) return;
     countDailyAttempt();
 
@@ -210,7 +228,7 @@ export function Game() {
     c: number,
     state: 'blank' | 'note',
   ) => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || paused) return;
     if (puzzle.prefilled[r] === c) return;
     countDailyAttempt();
 
@@ -224,7 +242,7 @@ export function Game() {
   };
 
   const handleCellDoubleClick = (r: number, c: number) => {
-    if (gameState !== 'playing') return;
+    if (gameState !== 'playing' || paused) return;
     if (puzzle.prefilled[r] === c) return;
     countDailyAttempt();
 
@@ -267,10 +285,13 @@ export function Game() {
     if (catsCount === size) {
       const completedSeconds = Math.max(1, seconds);
       setGameState('won');
+      setReward(pickReward(critter));
+      setShowReward(false);
       saveBestTime(safeMode, completedSeconds);
       recordGameResult(effectiveDifficulty, 'solved', completedSeconds);
 
       if (safeMode === 'daily') {
+        winLivesLost.current = config.lives - lives;
         winAttempts.current = recordDailyWinAttempts(dailyAttempt.current ?? 1);
         recordDailyWin();
       }
@@ -355,22 +376,43 @@ export function Game() {
             />
           ))}
         </div>
-        <div className="text-2xl font-black font-mono text-board bg-white px-4 py-1 rounded-full border-2 border-board shadow-[0_3px_0_0_var(--board)]">
-          {formatTime(seconds)}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPaused(p => !p)}
+            disabled={gameState !== 'playing'}
+            aria-label={paused ? 'Resume' : 'Pause'}
+            className="p-2 text-board hover:bg-black/5 rounded-full transition-colors disabled:opacity-30"
+          >
+            {paused ? <Play size={24} className="fill-current" /> : <Pause size={24} className="fill-current" />}
+          </button>
+          <div className="text-2xl font-black font-mono text-board bg-white px-4 py-1 rounded-full border-2 border-board shadow-[0_3px_0_0_var(--board)]">
+            {formatTime(seconds)}
+          </div>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col justify-center mb-8">
-        <Board 
-          puzzle={puzzle} 
-          grid={grid} 
-          mistakeCell={mistakeCell} 
-          onCellClick={handleCellClick} 
-          onCellDoubleClick={handleCellDoubleClick}
-          onCellPaint={handleCellPaint}
-          isWon={gameState === 'won'}
-          critter={critter}
-        />
+        <div className="relative w-full max-w-[400px] mx-auto">
+          <Board 
+            puzzle={puzzle} 
+            grid={grid} 
+            mistakeCell={mistakeCell} 
+            onCellClick={handleCellClick} 
+            onCellDoubleClick={handleCellDoubleClick}
+            onCellPaint={handleCellPaint}
+            isWon={gameState === 'won'}
+            critter={critter}
+          />
+          {paused && (
+            <div className="absolute inset-0 z-10 rounded-2xl border-[4px] border-board bg-[#AAB3BC] flex flex-col items-center justify-center gap-4 text-board">
+              <Pause size={48} className="fill-current" />
+              <p className="text-2xl font-black">Paused</p>
+              <ActionButton onClick={() => setPaused(false)} className="px-8">
+                <Play size={20} className="fill-current" /> Resume
+              </ActionButton>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-center mb-4">
@@ -445,7 +487,30 @@ export function Game() {
           </div>
         )}
         
+        {reward && showReward && (
+          <div className="mb-6 flex flex-col items-center">
+            <img
+              src={rewardSrc(reward)}
+              alt={reward.alt}
+              className={`w-full max-w-[280px] aspect-square max-h-[40dvh] rounded-2xl border-2 border-board/10 ${reward.credit ? 'object-cover' : 'object-contain'}`}
+            />
+            {reward.credit && (
+              <p className="mt-2 text-xs text-board/60">
+                Photo:{' '}
+                <a href={reward.credit.url} target="_blank" rel="noopener" className="underline">
+                  {reward.credit.name} / {reward.credit.site}
+                </a>
+              </p>
+            )}
+          </div>
+        )}
+
         <div className="space-y-3">
+          {reward && (
+            <ActionButton variant="board" className="w-full" aria-expanded={showReward} onClick={() => setShowReward(v => !v)}>
+              {showReward ? 'Hide Reward' : 'Show Reward'}
+            </ActionButton>
+          )}
           {safeMode !== 'daily' && (
              <ActionButton className="w-full" onClick={handleNewPuzzle}>Next Puzzle</ActionButton>
           )}
