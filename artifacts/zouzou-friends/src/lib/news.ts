@@ -3,6 +3,7 @@
 export type NewsItem = { date: string; message: string };
 
 export const NEWS: NewsItem[] = [
+  { date: '2026-09-29', message: 'Personal Stats (stored on your phone only)' },
   { date: '2026-09-29', message: 'Reward feature!' },
   { date: '2026-09-29', message: 'New Pause feature added' },
   { date: '2026-09-29', message: 'Daily now counts your tries' },
