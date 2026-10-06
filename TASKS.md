@@ -35,7 +35,6 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] `/api` with nothing after it → JSON 404 (add `/api` to `run_worker_first`)
 - [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK) — now incl. its 2026-09-18 daily
 - [ ] Optional: set `workers_dev` / `preview_urls` explicitly in `wrangler.jsonc` (silences deploy warnings)
-- [ ] Customise `.claude/commands/project-status.md` for ZouZou (drop the TEMPLATE header; fix the palette and group/priority used in the first page)
 - [ ] Maybe: use the kept history (past daily boards, per-player stats); small Worker test suite
 - [ ] Maybe: cross-device stats via D1 (`0002` migration recording losses + `/players/{name}/stats`) — only if friends ask
 - [ ] Modal a11y: reduced-motion opt-out, dialog role, Escape/backdrop close (`ui.tsx`, all modals)
