@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZouZou Status 2026-10-06</title>
+<style>
+:root{
+ --bg:#fbf7f1;--card:#ffffff;--ink:#2b2420;--muted:#6f625a;--line:#e8dfd4;
+ --brand:#d9622b;--brand-soft:#fbe6da;
+ --green:#2f8a4c;--green-soft:#e1f2e6;--amber:#b7791f;--amber-soft:#fbefd9;--red:#c0392b;--red-soft:#f8e0dd;
+ --grey:#8a8079;--grey-soft:#efeae4;
+}
+@media (prefers-color-scheme:dark){:root{
+ --bg:#1b1714;--card:#25201c;--ink:#f1e9e1;--muted:#b3a59a;--line:#3a322c;
+ --brand:#f08a55;--brand-soft:#43291c;
+ --green:#6cc98a;--green-soft:#1f3a28;--amber:#e8b35a;--amber-soft:#3d3020;--red:#ef7d70;--red-soft:#402421;
+ --grey:#a39990;--grey-soft:#302a25;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px 48px}
+header{background:var(--brand);color:#fff;padding:22px 0}
+header .wrap{padding-bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+header h1{margin:0;font-size:24px;letter-spacing:-.01em}
+header .badge{background:#fff;color:var(--brand);font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+header a{color:#fff}
+header .date{margin-left:auto;opacity:.9;font-variant-numeric:tabular-nums}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:34px 0 10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px}
+.pill b{color:var(--muted);font-weight:600;margin-right:4px}
+.purpose{font-size:18px;margin:18px 0 0}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+ul{margin:0;padding-left:20px}
+li{margin:4px 0}
+ul.check{list-style:none;padding:0}
+ul.check li{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)}
+ul.check li:last-child{border-bottom:0}
+.dot{flex:none;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:1px}
+.ok{background:var(--green-soft);color:var(--green)}
+.warn{background:var(--amber-soft);color:var(--amber)}
+.bad{background:var(--red-soft);color:var(--red)}
+.na{background:var(--grey-soft);color:var(--grey)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;text-transform:uppercase;letter-spacing:.04em;vertical-align:1px}
+.card h3{margin:0 0 8px;font-size:15px}
+.src{font-size:12px;color:var(--muted);margin-top:8px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.tw{overflow-x:auto}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--grey-soft);padding:1px 5px;border-radius:4px}
+.lbl{font-weight:700;font-size:13px;color:var(--muted);margin:10px 0 2px}
+.lbl:first-child{margin-top:0}
+footer{margin-top:40px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:600px){header .date{margin-left:0}.g2,.g3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+ <h1>ZouZou &amp; Friends</h1>
+ <span class="badge">Live · Settle in</span>
+ <a href="https://zouzou.minus1over12.com">zouzou.minus1over12.com</a>
+ <span class="date">2026-10-06</span>
+</div></header>
+
+<div class="wrap">
+
+<div class="pills">
+ <span class="pill"><b>Stack</b>React 19 + Vite · Hono · D1</span>
+ <span class="pill"><b>Hosting</b>Cloudflare Worker (Free)</span>
+ <span class="pill"><b>Milestone</b>Settle in — 0/4 done</span>
+ <span class="pill"><b>Tasks</b>Now 2 · Next 5 · Later 10 · Done (recent) 12</span>
+ <span class="pill"><b>main</b><code>d05d2aa</code> · <code>vscode</code> 3 commits ahead</span>
+</div>
+
+<p class="purpose">A cat-placement logic puzzle in the browser — a daily challenge everyone shares, plus endless easy/medium/hard games — for Rob's circle of friends.</p>
+<div class="src">Source: PROJECT.md · git log</div>
+
+<h2>Since last status (2026-09-17)</h2>
+<div class="card">
+ <div class="lbl">Milestone change</div>
+ <p style="margin:0">"Off Replit" closed 2026-09-24 (Replit project deleted, repo public, MIT) → new milestone <b>Settle in</b>.</p>
+ <div class="lbl">New decisions (6)</div>
+ <ul>
+  <li>2026-09-24 — Close "Off Replit"; next milestone "Settle in"</li>
+  <li>2026-09-29 — Daily leaderboard ranks by tries, then time</li>
+  <li>2026-09-29 — Don't fix the daily's midnight mid-game edge cases</li>
+  <li>2026-09-29 — Show hearts lost on the Top 5; don't rank by it</li>
+  <li>2026-09-29 — Reward images: hand-picked, self-hosted set</li>
+  <li>2026-09-29 — Personal Stats read the local cookie; no Daily row</li>
+ </ul>
+ <div class="lbl">Now-list change</div>
+ <p style="margin:0">Was: merge README/protocol commit to main; PLAN rewrite. Now: Rob polling friends on the new features; Rob real-phone play-through of Show Reward.</p>
+ <div class="lbl">Shipped (PRs #6–#15)</div>
+ <p style="margin:0">Daily-save fix, critter picker, Results + Share, daily tries + News, hearts lost on Top 5 + Pause, Show Reward (85 photos), daily Reset fix, Personal Stats. Migrations <code>0002</code> and <code>0003</code> applied remotely. Since 09-29: only portfolio-coordination housekeeping (2026-10-06).</p>
+ <div class="src">Source: status-2026-09-17.html (baseline) · DECISIONS.md · TASKS.md · STATE.md · git log</div>
+</div>
+
+<h2>Current milestone — Settle in</h2>
+<div class="card">
+ <ul class="check">
+  <li><span class="dot warn">~</span><div><b>One-week usage check</b> (Worker requests/day, D1 reads/writes, rate-limit hits) vs Free limits — planned ~2026-09-24, not yet done (overdue).</div></li>
+  <li><span class="dot warn">~</span><div><b>No friend blocked by the rate limit</b>, or rule raised to 20 req/10 s — no reports recorded; unknown.</div></li>
+  <li><span class="dot warn">~</span><div><b>Replit leftovers removed</b> — not done: 10 <code>// @replit</code> comments, <code>.example</code> lines, stale CLAUDE.md / AI+PROCESS.md text. Ready-made prompt in TASKS Next.</div></li>
+  <li><span class="dot warn">~</span><div><b>"For SKYresearch" feedback block</b> (§11 incl. 11.8–11.10) — 11.8/11.9/11.10 waiting on the items above.</div></li>
+ </ul>
+ <p class="src">Drift (STATE.md open questions): five feature PRs shipped outside the milestone's "no new gameplay / no contract change" scope, by Rob's call — milestone is really "friend-feedback features". PLAN.md rewrite due at next milestone.</p>
+ <div class="src">Source: PLAN.md · STATE.md · TASKS.md</div>
+</div>
+
+<h2>Success criteria</h2>
+<div class="card">
+ <ul class="check">
+  <li><span class="dot ok">✓</span><div>One link, phone or desktop, no sign-up</div></li>
+  <li><span class="dot ok">✓</span><div>Shared daily leaderboard + recent players correct, history preserved</div></li>
+  <li><span class="dot warn">~</span><div>$0/month on Cloudflare Free, no Replit dependency — Replit project deleted; Replit <i>account</i> closes once conforma is off it (tracked in conforma)</div></li>
+  <li><span class="dot ok">✓</span><div>Change + deploy from a Mac (push to <code>main</code> → live in ~80 s)</div></li>
+ </ul>
+ <div class="src">Source: PROJECT.md · PLAN.md roadmap</div>
+</div>
+
+<h2>Working · In progress · Known issues</h2>
+<div class="grid g3">
+ <div class="card"><h3>Working</h3><ul>
+  <li>Worker <code>zouzou</code> on custom domain (workers.dev fallback); Workers Builds on push to main</li>
+  <li>D1 <code>zouzou</code>: 0001–0003 applied; next is <code>0004</code></li>
+  <li>Daily tries ranking, hearts lost on Top 5, Pause</li>
+  <li>Results + Share (emoji board), Personal Stats, Show Reward</li>
+  <li>📣 News button (4 messages)</li>
+  <li>HTTPS + rate-limit rule <code>zouzou-api</code> (10 req/10 s)</li>
+ </ul></div>
+ <div class="card"><h3>In progress</h3><ul>
+  <li>Nothing mid-flight</li>
+  <li><code>vscode</code> carries end-session + portfolio-coord commits, not yet PR'd to main</li>
+ </ul></div>
+ <div class="card"><h3>Known issues</h3><ul>
+  <li>Show Reward / Personal Stats: headless QA only; iOS <code>dvh</code> unverified</li>
+  <li>Modal: no reduced-motion opt-out, dialog role, Escape</li>
+  <li>Menu stale across Edmonton midnight (cosmetic)</li>
+  <li>Daily tries honour-system (accepted)</li>
+  <li><code>GET /api</code> returns SPA HTML (cosmetic)</li>
+  <li><code>zz-test</code> visible in Recent players</li>
+  <li>10 <code>// @replit</code> comments remain</li>
+ </ul></div>
+</div>
+<div class="src">Source: STATE.md</div>
+
+<h2>Platform</h2>
+<div class="card">
+ <p style="margin:0"><span class="tag ok">Live</span> Cloudflare Worker + static assets + Hono API + D1 (WNAM), Free plan. Public repo (MIT). Last code change merged 2026-09-29 (PR #15); last repo activity 2026-10-06.</p>
+ <div class="src">Source: STATE.md · CLAUDE.md Project Reference · git log</div>
+</div>
+
+<h2>Task board</h2>
+<div class="grid g3">
+ <div class="card"><h3>Now (2)</h3><ul>
+  <li>Rob polling friends on tries / hearts / Pause / Reward / Personal Stats; record results + cross-device interest</li>
+  <li>Rob: one real-phone play-through to a win → Show Reward</li>
+ </ul></div>
+ <div class="card"><h3>Next (5)</h3><ul>
+  <li>One-week usage check vs Free limits → §11.10</li>
+  <li>Watch for 429s; raise rule if needed → §11.8</li>
+  <li>Friends' reaction to the move → §11.9</li>
+  <li>Ask friends how the critter choice lands</li>
+  <li>Replit cleanup PR (prompt ready)</li>
+ </ul></div>
+ <div class="card"><h3>Later — top 5 of 10</h3><ul>
+  <li>Simplify Workers Builds command</li>
+  <li><code>/api</code> → JSON 404</li>
+  <li>Optional: delete <code>zz-test</code> rows (Rob's OK)</li>
+  <li>Optional: explicit <code>workers_dev</code> / <code>preview_urls</code></li>
+  <li>Modal a11y</li>
+ </ul></div>
+</div>
+<div class="src">Source: TASKS.md</div>
+
+<h2>Recent decisions</h2>
+<div class="card tw"><table>
+ <tr><th>Date</th><th>Decision</th></tr>
+ <tr><td>2026-09-29</td><td>Personal Stats read the local cookie; no Daily row</td></tr>
+ <tr><td>2026-09-29</td><td>Reward images: hand-picked set stored with the game, not a live image API</td></tr>
+ <tr><td>2026-09-29</td><td>Show hearts lost on the daily Top 5; don't rank by it</td></tr>
+ <tr><td>2026-09-29</td><td>Don't fix the daily's midnight mid-game edge cases</td></tr>
+ <tr><td>2026-09-29</td><td>Daily leaderboard ranks by tries, then time</td></tr>
+</table>
+<div class="src">Source: DECISIONS.md</div></div>
+
+<h2>Next session</h2>
+<div class="card">
+ <ol style="margin:0;padding-left:20px">
+  <li>Run the overdue one-week usage check (Cloudflare dashboard) and note it for SKYresearch §11.10.</li>
+  <li>Record friend-poll results from Rob (Now).</li>
+  <li>Replit cleanup PR (TASKS Next prompt) — clears a milestone box.</li>
+  <li>PR <code>vscode</code> → <code>main</code> for the pending protocol commits.</li>
+ </ol>
+ <div class="src">Source: TASKS.md · PLAN.md (derived)</div>
+</div>
+
+<h2>Risks</h2>
+<div class="card tw"><table>
+ <tr><th>#</th><th>Risk</th><th>Severity</th><th>Next move</th></tr>
+ <tr><td>1</td><td>Free-tier usage never measured; check is ~12 days overdue</td><td><span class="tag warn">Amber</span></td><td>Pull Worker/D1/rate-limit numbers from the dashboard next session</td></tr>
+ <tr><td>2</td><td>Phase 0 ReplDB export is the only pre-migration copy</td><td><span class="tag warn">Amber</span></td><td>Confirm backup intact (Replit cleanup step 6)</td></tr>
+ <tr><td>3</td><td>Rate limit counts GETs; households on one IP could hit 10 req/10 s</td><td><span class="tag warn">Amber</span></td><td>Ask friends about errors; raise to 20 req/10 s if any</td></tr>
+ <tr><td>4</td><td>Show Reward / Personal Stats not tested on a real phone by QA</td><td><span class="tag warn">Amber</span></td><td>Rob's real-phone play-through (Now)</td></tr>
+ <tr><td>5</td><td>Previews write to production D1</td><td><span class="tag na">Accepted</span></td><td>Test only with <code>zz-test</code> (D12)</td></tr>
+ <tr><td>6</td><td>Friends' names reachable via public <code>/api/players/recent</code></td><td><span class="tag na">Accepted</span></td><td>Accepted 2026-09-24; revisit if a friend objects</td></tr>
+</table>
+<div class="src">Source: PLAN.md open risks · STATE.md · TASKS.md</div></div>
+
+<h2>Source freshness</h2>
+<div class="card tw"><table>
+ <tr><th>Source</th><th>Last change (git)</th><th></th></tr>
+ <tr><td>STATE.md</td><td>2026-10-06</td><td><span class="tag ok">Current</span></td></tr>
+ <tr><td>TASKS.md</td><td>2026-10-06</td><td><span class="tag ok">Current</span></td></tr>
+ <tr><td>CLAUDE.md</td><td>2026-10-06</td><td><span class="tag ok">Current</span></td></tr>
+ <tr><td>DECISIONS.md</td><td>2026-09-29</td><td><span class="tag ok">Current</span></td></tr>
+ <tr><td>PLAN.md</td><td>2026-09-24</td><td><span class="tag ok">Current</span></td></tr>
+ <tr><td>PROJECT.md</td><td>2026-09-24</td><td><span class="tag ok">Current</span></td></tr>
+ <tr><td>project/diary/diary-2026-10.md</td><td>untracked</td><td><span class="tag na">n/a</span></td></tr>
+</table>
+<p class="src">Newest source: 2026-10-06 (0 days) — repo active. Note: 10-06 edits to STATE/TASKS were housekeeping; substantive STATE snapshot is 2026-09-29. AI+PROCESS.md exists (no HTML version) and still says "moving to Cloudflare".</p>
+</div>
+
+<footer>
+Generated 2026-10-06 · derived from PROJECT.md, PLAN.md, STATE.md, TASKS.md, DECISIONS.md, CLAUDE.md (Project Reference), project/diary/diary-2026-10.md, status-2026-09-17.html (baseline), git log.<br>
+Colours: red = blocks use, high-severity security, or no owner/next action · amber = known gap with an accepted next action · green = shipped and recently verified · grey = deliberately deferred/accepted (never red).
+</footer>
+
+</div>
+</body>
+</html>

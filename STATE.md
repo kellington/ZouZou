@@ -128,8 +128,8 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
 - **Stats are per-device** (cookie). If friends ask for cross-device stats, that's the D1 route:
   `0002` migration recording losses + a `/players/{name}/stats` endpoint (contract change). Not planned.
 - **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
-- `.claude/commands/project-status.md` still has the TEMPLATE header (keep the warm orange palette,
-  Personal / Personal Project / priority 8 when customising).
+- Status page: global `/project-status` skill, configured by the `## Project status` block in
+  `CLAUDE.md` (group/profile/priority from the workspace README table). No per-repo command.
 - **Any friend blocked by the rate limit?** Unknown until people play; raise to 20 req/10 s if so.
 - Replit account closes once conforma is off it (tracked in the conforma repo).
 
