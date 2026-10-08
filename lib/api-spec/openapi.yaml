@@ -133,6 +133,11 @@ components:
           minimum: 0
           maximum: 10
           description: Lives (hearts) lost on the winning try (0 = no mistakes). Optional.
+        streak:
+          type: number
+          minimum: 1
+          maximum: 100000
+          description: Player's daily streak including today's win. Optional.
       required:
         - name
         - seconds
@@ -148,11 +153,15 @@ components:
         livesLost:
           type: [number, "null"]
           description: Lives lost on the winning try; null for results saved before it was tracked.
+        streak:
+          type: [number, "null"]
+          description: Player's daily streak including that day's win; null for results saved before it was tracked.
       required:
         - name
         - seconds
         - attempts
         - livesLost
+        - streak
     DailyLeaderboardResponse:
       type: object
       properties:

@@ -32,6 +32,12 @@ export interface DailyScoreInput {
      * @maximum 10
      */
   livesLost?: number;
+  /**
+     * Player's daily streak including today's win. Optional.
+     * @minimum 1
+     * @maximum 100000
+     */
+  streak?: number;
 }
 
 export interface DailyScoreEntry {
@@ -43,6 +49,11 @@ export interface DailyScoreEntry {
      * @nullable
      */
   livesLost: number | null;
+  /**
+     * Player's daily streak including that day's win; null for results saved before it was tracked.
+     * @nullable
+     */
+  streak: number | null;
 }
 
 export interface DailyLeaderboardResponse {

@@ -29,4 +29,10 @@ export interface DailyScoreInput {
      * @maximum 10
      */
   livesLost?: number;
+  /**
+     * Player's daily streak including today's win. Optional.
+     * @minimum 1
+     * @maximum 100000
+     */
+  streak?: number;
 }
