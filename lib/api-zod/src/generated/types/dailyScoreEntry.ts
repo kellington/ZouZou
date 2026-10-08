@@ -15,4 +15,9 @@ export interface DailyScoreEntry {
      * @nullable
      */
   livesLost: number | null;
+  /**
+     * Player's daily streak including that day's win; null for results saved before it was tracked.
+     * @nullable
+     */
+  streak: number | null;
 }

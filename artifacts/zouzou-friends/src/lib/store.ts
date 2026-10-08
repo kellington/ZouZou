@@ -304,28 +304,29 @@ export function useStore() {
     [],
   );
 
-  const recordDailyWin = useCallback(() => {
+  // Returns the daily streak including today's win (unchanged if today was
+  // already counted, e.g. in another tab).
+  const recordDailyWin = useCallback((): number => {
     const today = getEdmontonDateKey();
     const yesterday = yesterdayEdmontonDateKey();
 
-    setStore(() => {
-      const previous = getSharedStore();
-      if (previous.lastPlayedDate === today) return previous;
+    const previous = getSharedStore();
+    if (previous.lastPlayedDate === today) return previous.dailyStreak;
 
-      const dailyStreak =
-        previous.lastPlayedDate === yesterday
-          ? previous.dailyStreak + 1
-          : 1;
-      const next = {
-        ...previous,
-        dailyStreak,
-        lastPlayedDate: today,
-        maxDailyStreak: Math.max(previous.maxDailyStreak, dailyStreak),
-      };
-      writeCookie(next);
-      sharedStore = next;
-      return next;
-    });
+    const dailyStreak =
+      previous.lastPlayedDate === yesterday
+        ? previous.dailyStreak + 1
+        : 1;
+    const next: GameStore = {
+      ...previous,
+      dailyStreak,
+      lastPlayedDate: today,
+      maxDailyStreak: Math.max(previous.maxDailyStreak, dailyStreak),
+    };
+    writeCookie(next);
+    sharedStore = next;
+    setStore(next);
+    return dailyStreak;
   }, []);
 
   // Counts a new try at today's daily puzzle and returns its number (1 = first try).

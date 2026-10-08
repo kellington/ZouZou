@@ -178,8 +178,9 @@ PK `(date, name_key)` — best time per player per day, every day kept; `player_
 name, date, game, seconds)` — every game. `seconds` CHECK: integer, 1–36000. `name_key` =
 lowercased, whitespace-normalised name. `0002_daily_attempts.sql` adds `daily_scores.attempts`
 (integer 1–1000, default 1). `0003_daily_lives_lost.sql` adds nullable `daily_scores.lives_lost`
-(integer 0–10; NULL = saved before tracking). `0001`–`0003` are applied remotely — schema changes need
-`0004_*.sql`, applied `--remote` (from a checkout that has the file) **before** the Worker that reads them deploys.
+(integer 0–10; NULL = saved before tracking). `0004_daily_streak.sql` adds nullable `daily_scores.streak`
+(integer 1–100000; NULL = saved before tracking). `0001`–`0003` are applied remotely (`0004` pending) — schema changes need
+`0005_*.sql`, applied `--remote` (from a checkout that has the file) **before** the Worker that reads them deploys.
 
 Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store` /
 `zouzou-best-times`): best times per mode, `daily`, `lastDailyDate`, `playerName`,
@@ -190,8 +191,8 @@ Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store
 
 - `GET /healthz` → `{status:"ok"}`
 - `GET /daily/leaderboard` → `{date, entries}` for today (Edmonton)
-- `POST /daily/leaderboard` `{name 1–24, seconds 1–36000 int, attempts? 1–1000 int (default 1), livesLost? 0–10 int}`
-  → updated board (entries are `{name, seconds, attempts, livesLost: number|null}`)
+- `POST /daily/leaderboard` `{name 1–24, seconds 1–36000 int, attempts? 1–1000 int (default 1), livesLost? 0–10 int, streak? 1–100000 int}`
+  → updated board (entries are `{name, seconds, attempts, livesLost: number|null, streak: number|null}`)
 - `GET /players/recent` → latest game per named player, newest date first
 - `POST /players/games` `{name, game: daily|easy|medium|hard, seconds}` → entry
 
@@ -223,7 +224,8 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
   sorts the same way; names matched case-insensitively, whitespace-normalised.
 - Daily tries: a try starts on a game's first move (reload mid-game costs one), counted per day
   in the cookie (honour system), frozen once today's daily is won; the win posts the day's total.
-- Top 5 shows hearts lost on the winning try (`(N♥)`); it doesn't affect ranking.
+- Top 10 shows hearts lost on the winning try (`(N♥)`) and the player's streak next to their name
+  (`(🔥 N Day Streak)`, from their cookie at win time); neither affects ranking.
 - Rewards: only Rob-approved images (Unsplash/Pexels licence or MIT/CC0 art), self-hosted, credited in
   `public/rewards/CREDITS.md`; no live third-party image APIs.
 - News: menu "📣 News!" messages live in `artifacts/zouzou-friends/src/lib/news.ts` (newest first).

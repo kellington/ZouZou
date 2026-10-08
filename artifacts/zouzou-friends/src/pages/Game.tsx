@@ -79,6 +79,7 @@ export function Game() {
   const winAttempts = useRef(1);
   // Lives the daily win cost, fixed at the winning move for the leaderboard.
   const winLivesLost = useRef(0);
+  const winStreak = useRef<number | null>(null);
   const { mutate: submitScore, isPending: isSubmitting } = useSubmitDailyScore({
     mutation: {
       onSuccess: () => {
@@ -113,6 +114,7 @@ export function Game() {
           seconds: completedSeconds,
           attempts: winAttempts.current,
           livesLost: winLivesLost.current,
+          streak: winStreak.current ?? undefined,
         },
       });
     }
@@ -293,7 +295,7 @@ export function Game() {
       if (safeMode === 'daily') {
         winLivesLost.current = config.lives - lives;
         winAttempts.current = recordDailyWinAttempts(dailyAttempt.current ?? 1);
-        recordDailyWin();
+        winStreak.current = recordDailyWin() || null;
       }
 
       if (store.playerName) {

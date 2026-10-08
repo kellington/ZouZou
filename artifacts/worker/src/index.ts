@@ -40,7 +40,7 @@ const boardQuery = (db: D1Database, date: string) =>
   db
     .prepare(
       // Fewest attempts first (a first-try solve beats a faster retry), then time.
-      "SELECT name, seconds, attempts, lives_lost AS livesLost FROM daily_scores WHERE date = ?1 ORDER BY attempts, seconds, name LIMIT ?2",
+      "SELECT name, seconds, attempts, lives_lost AS livesLost, streak FROM daily_scores WHERE date = ?1 ORDER BY attempts, seconds, name LIMIT ?2",
     )
     .bind(date, maximumEntries);
 
@@ -67,6 +67,7 @@ app.get("/daily/leaderboard", async (c) => {
     seconds: number;
     attempts: number;
     livesLost: number | null;
+    streak: number | null;
   }>();
   return c.json(GetDailyLeaderboardResponse.parse({ date, entries: results }));
 });
@@ -83,14 +84,16 @@ app.post("/daily/leaderboard", async (c) => {
   const attempts = parsed.data.attempts ?? 1;
   // Optional for the same reason; an older client's result shows without it.
   const livesLost = parsed.data.livesLost ?? null;
+  const streak = parsed.data.streak ?? null;
   if (
     !name ||
     !Number.isInteger(seconds) ||
     !Number.isInteger(attempts) ||
-    (livesLost !== null && !Number.isInteger(livesLost))
+    (livesLost !== null && !Number.isInteger(livesLost)) ||
+    (streak !== null && !Number.isInteger(streak))
   ) {
     return c.json(
-      { error: "Name is required and seconds, attempts and lives lost must be whole numbers." },
+      { error: "Name is required and seconds, attempts, lives lost and streak must be whole numbers." },
       400,
     );
   }
@@ -104,17 +107,18 @@ app.post("/daily/leaderboard", async (c) => {
     seconds: number;
     attempts: number;
     livesLost: number | null;
+    streak: number | null;
   }>([
     db
       .prepare(
-        `INSERT INTO daily_scores (date, name_key, name, seconds, attempts, lives_lost) VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+        `INSERT INTO daily_scores (date, name_key, name, seconds, attempts, lives_lost, streak) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
          ON CONFLICT (date, name_key) DO UPDATE
            SET name = excluded.name, seconds = excluded.seconds, attempts = excluded.attempts,
-               lives_lost = excluded.lives_lost
+               lives_lost = excluded.lives_lost, streak = excluded.streak
            WHERE excluded.attempts < daily_scores.attempts
               OR (excluded.attempts = daily_scores.attempts AND excluded.seconds < daily_scores.seconds)`,
       )
-      .bind(date, nameKey(name), name, seconds, attempts, livesLost),
+      .bind(date, nameKey(name), name, seconds, attempts, livesLost, streak),
     boardQuery(db, date),
   ]);
 

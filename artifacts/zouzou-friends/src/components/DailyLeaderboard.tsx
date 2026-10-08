@@ -1,7 +1,7 @@
 import { useGetDailyLeaderboard } from '@workspace/api-client-react';
 import { formatAttempts, formatTime } from '../lib/puzzle';
 import { HeartIcon } from './Icons';
-import { Trophy, AlertCircle } from 'lucide-react';
+import { Trophy, AlertCircle, Flame } from 'lucide-react';
 
 export function DailyLeaderboard() {
   const { data, isLoading, isError } = useGetDailyLeaderboard();
@@ -32,16 +32,21 @@ export function DailyLeaderboard() {
     <div className="bg-white p-4 rounded-xl border-2 border-board/10">
       <h3 className="font-black text-board mb-3 flex items-center justify-center gap-2 text-lg">
         <Trophy size={20} className="text-[#D97736]" />
-        Today's Top 5
+        Today's Top 10
       </h3>
       {(!data || data.entries.length === 0) ? (
         <p className="text-sm text-board/50 text-center font-bold">No times yet. Be the first!</p>
       ) : (
         <div className="space-y-2">
-          {data.entries.slice(0, 5).map((entry, i) => (
+          {data.entries.slice(0, 10).map((entry, i) => (
             <div key={i} className="flex justify-between items-center text-sm">
               <span className="font-bold text-board/80">
-                <span className="inline-block w-4 text-board/40">{i + 1}.</span> {entry.name}
+                <span className="inline-block w-6 text-board/40">{i + 1}.</span> {entry.name}
+                {entry.streak !== null && entry.streak > 0 && (
+                  <span className="ml-1 text-xs font-bold text-[#D97736] whitespace-nowrap">
+                    (<Flame size={12} className="inline fill-current -mt-0.5" /> {entry.streak} Day Streak)
+                  </span>
+                )}
               </span>
               <span className="flex items-baseline gap-2">
                 {entry.attempts > 1 && (
