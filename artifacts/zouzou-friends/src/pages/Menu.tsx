@@ -10,7 +10,7 @@ import {
   getDailyDifficulty,
   getEdmontonDateKey,
 } from '../lib/puzzle';
-import { Star, Zap, Coffee, Skull, Edit2, Flame } from 'lucide-react';
+import { Star, Zap, Coffee, Skull, Edit2, Flame, Lightbulb } from 'lucide-react';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 import { PersonalStats } from '../components/PersonalStats';
 import { RecentPlayers } from '../components/RecentPlayers';
@@ -155,6 +155,18 @@ export function Menu() {
               {store.hard !== null && (
                 <span className="text-xs font-bold text-board/50 mt-1 text-center">Best: {formatTime(store.hard)}</span>
               )}
+            </div>
+
+            <div className="flex flex-col mt-2">
+              <ActionButton
+                variant="board"
+                onClick={() => setLocation('/play/teach')}
+                className="w-full bg-white"
+              >
+                <Lightbulb className="w-5 h-5" />
+                Teach Me
+              </ActionButton>
+              <span className="text-xs font-bold text-board/50 mt-1 text-center">Medium board with hints · not scored</span>
             </div>
           </div>
 

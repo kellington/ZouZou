@@ -202,7 +202,7 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
 
 ### Key flows
 
-1. Menu → pick Daily / Easy / Medium / Hard (`/play/:mode`; `/play/normal` → medium).
+1. Menu → pick Daily / Easy / Medium / Hard / Teach Me (`/play/:mode`, `teach` for Teach Me; `/play/normal` → medium).
 2. Play: place one cat per row, column and coloured region; cats can't touch, even
    diagonally. Tap = mark no-cat / clear; double-tap = cat. Wrong cat costs a life.
 3. Win → best time saved in cookie; named player POSTs to `/players/games` (and
@@ -217,6 +217,11 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
   daily = one puzzle per day, same for everyone — seed `YYYYMMDD`, difficulty picked from
   the seed; one completion per day (`src/pages/Game.tsx`, `src/lib/puzzle.ts`).
   Puzzles are generated client-side; the server never sees the board.
+- No-guess puzzles: the generator only accepts boards a logic solver (`src/lib/logic.ts`) can finish
+  at the mode's `logic` level — easy 0 basic, medium 1 intermediate, hard 2 one-move test. Changing the
+  generator changes every puzzle, including the daily, for everyone on deploy.
+- Teach Me (`/play/teach`): random Medium board with a Hint button (next logical step from the player's
+  board, via `getHint`). Not saved anywhere — no stats, best time or player history. Hints exist only here.
 - "Day" = **America/Edmonton** date, on client and server (`getEdmontonDateKey`).
 - Daily streak: +1 on consecutive-day daily wins; a missed day, running out of lives, or
   Reset Board after a move on daily resets it (not once today's daily is won).
@@ -226,7 +231,7 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
   in the cookie (honour system), frozen once today's daily is won; the win posts the day's total.
 - Top 10 shows hearts lost on the winning try (`(N♥)`) and the player's streak next to their name
   (`(🔥 N Day Streak)`, from their cookie at win time); neither affects ranking.
-- Rewards: only Rob-approved images (Unsplash/Pexels licence or MIT/CC0 art), self-hosted, credited in
+- Rewards: only Rob-approved images (Unsplash/Pexels licence, MIT/CC0 or public-domain art), self-hosted, credited in
   `public/rewards/CREDITS.md`; no live third-party image APIs.
 - News: menu "📣 News!" messages live in `artifacts/zouzou-friends/src/lib/news.ts` (newest first).
 

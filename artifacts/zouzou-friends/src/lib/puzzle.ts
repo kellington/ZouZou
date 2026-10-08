@@ -1,3 +1,5 @@
+import { isLogicSolvable, type LogicLevel } from './logic';
+
 export type CellPos = { r: number; c: number };
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type PuzzleSize = 6 | 8 | 10;
@@ -171,6 +173,7 @@ function createRegionMap(
   solution: number[],
   size: PuzzleSize,
   random: RandomSource,
+  logic: LogicLevel,
 ): number[][] {
   const backgroundRegion = size - 1;
   const regionMap = Array.from({ length: size }, () =>
@@ -237,10 +240,14 @@ function createRegionMap(
           backgroundRegion,
           size,
         );
-        const remainsUnique =
-          remainsConnected && countSolutions(regionMap, size) === 1;
+        // Unique first (cheap), then solvable without guessing at this
+        // mode's logic level (see logic.ts).
+        const remainsSolvable =
+          remainsConnected &&
+          countSolutions(regionMap, size) === 1 &&
+          isLogicSolvable(regionMap, size, logic);
 
-        if (remainsUnique) {
+        if (remainsSolvable) {
           regionSizes[region] += 1;
           regionSizes[backgroundRegion] -= 1;
           moves += 1;
@@ -287,21 +294,23 @@ function createPrefilledCells(
 // Per-difficulty board config shared by the standard-mode screens and the
 // daily challenge (daily picks its difficulty via getDailyDifficulty, then
 // uses this same config). Single source of truth — don't duplicate.
+// `logic` = the hardest deduction a board may need (logic.ts); no board needs a guess.
 export const MODE_CONFIG = {
-  easy: { lives: 5, prefill: 1, title: 'Easy', size: 6 as PuzzleSize },
-  medium: { lives: 4, prefill: 0, title: 'Medium', size: 8 as PuzzleSize },
-  hard: { lives: 3, prefill: 0, title: 'Hard', size: 10 as PuzzleSize },
+  easy: { lives: 5, prefill: 1, title: 'Easy', size: 6 as PuzzleSize, logic: 0 as LogicLevel },
+  medium: { lives: 4, prefill: 0, title: 'Medium', size: 8 as PuzzleSize, logic: 1 as LogicLevel },
+  hard: { lives: 3, prefill: 0, title: 'Hard', size: 10 as PuzzleSize, logic: 2 as LogicLevel },
 };
 
 export function generatePuzzle(
   size: PuzzleSize,
   seed?: number,
   prefillCount = 0,
+  logic: LogicLevel = 2,
 ): Puzzle {
   const random =
     seed === undefined ? Math.random : createSeededRandom(seed);
   const solution = createSolution(size, random);
-  const regionMap = createRegionMap(solution, size, random);
+  const regionMap = createRegionMap(solution, size, random, logic);
 
   return {
     size,

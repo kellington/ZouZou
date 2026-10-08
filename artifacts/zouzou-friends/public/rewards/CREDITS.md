@@ -95,5 +95,15 @@ Each photo links to its source page.
 
 ## Dinosaurs
 
-`dino/sauropod-3d.png` and `dino/t-rex-3d.png` are from Microsoft Fluent Emoji (3D), MIT licence.
-See `dino/LICENSE-fluentui-emoji.txt`.
+Public domain images from Public Domain Pictures (https://www.publicdomainpictures.net),
+free downloads, resized to 600x600. Several are AI-generated (as labelled on the site).
+Found via https://www.publicdomainpictures.net/en/hledej.php?hleda=baby+dinosaur
+
+| id | Contributor | Original file | Licence |
+|---|---|---|---|
+| dino-01 | Maeve Alcorn | pictures/710000/velka/cute-baby-dinosaur-1753076985DaJ.jpg (image 706135) | Public domain |
+| dino-02 | Maeve Alcorn | pictures/710000/velka/cute-baby-dinosaur-175307706337a.jpg | Public domain |
+| dino-03 | Maeve Alcorn | pictures/710000/velka/cute-baby-dinosaur.jpg | Public domain |
+| dino-04 | Linnaea Mallette | pictures/770000/velka/cute-baby-dinosaur-1776274277fXh.jpg | Public domain |
+| dino-05 | Linnaea Mallette | pictures/770000/velka/pink-watercolor-dinosaur-1773302415K53.jpg | Public domain |
+| dino-06 | (AI generated, no contributor listed) | pictures/810000/velka/cute-green-dinosaur-cartoon-17835845768IA.jpg | Public domain |
