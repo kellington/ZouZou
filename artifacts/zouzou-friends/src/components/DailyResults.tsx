@@ -108,7 +108,7 @@ export function DailyResults({
   const boardText = useMemo(() => {
     if (!hasCompletedToday) return '';
     const config = MODE_CONFIG[dailyDifficulty];
-    const puzzle = generatePuzzle(config.size, getDailySeed(), config.prefill);
+    const puzzle = generatePuzzle(config.size, getDailySeed(), config.prefill, config.logic);
     return buildShareBoard(puzzle);
   }, [hasCompletedToday, dailyDifficulty]);
 

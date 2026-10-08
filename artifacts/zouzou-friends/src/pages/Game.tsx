@@ -17,8 +17,9 @@ import { CRITTER_NOUN, CRITTER_LABEL, CRITTER_WIN_TITLE } from '../lib/critters'
 import { ActionButton, Modal } from '../components/ui';
 import { DailyResults } from '../components/DailyResults';
 import { useStore } from '../lib/store';
+import { getHint, type Hint } from '../lib/logic';
 import { pickReward, rewardSrc, type Reward } from '../lib/rewards';
-import { ArrowLeft, HelpCircle, RotateCcw, Flame, Pause, Play } from 'lucide-react';
+import { ArrowLeft, HelpCircle, RotateCcw, Flame, Pause, Play, Lightbulb, X } from 'lucide-react';
 import {
   useSubmitDailyScore,
   getGetDailyLeaderboardQueryKey,
@@ -29,7 +30,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 import { playCritterSound, playMistakeSound, playNoCatSound } from '../lib/sounds';
 
-type GameMode = 'easy' | 'medium' | 'hard' | 'daily';
+type GameMode = 'easy' | 'medium' | 'hard' | 'daily' | 'teach';
+
+// Teach Me: a random Medium board with the Hint button, for learning the
+// deductions. Not saved anywhere — no stats, best time or player history.
+const TEACH_CONFIG = { ...MODE_CONFIG.medium, title: 'Teach Me' };
 
 function randomSeed() {
   return Math.floor(Math.random() * 0xffffffff);
@@ -39,13 +44,15 @@ export function Game() {
   const { mode = 'medium' } = useParams<{ mode: string }>();
   const [, setLocation] = useLocation();
   const safeMode = (
-    mode === 'daily' || mode in MODE_CONFIG ? mode : 'medium'
+    mode === 'daily' || mode === 'teach' || mode in MODE_CONFIG ? mode : 'medium'
   ) as GameMode;
   const dailyDifficulty = getDailyDifficulty();
   const baseConfig =
     safeMode === 'daily'
       ? MODE_CONFIG[dailyDifficulty]
-      : MODE_CONFIG[safeMode];
+      : safeMode === 'teach'
+        ? TEACH_CONFIG
+        : MODE_CONFIG[safeMode];
   const config = {
     ...baseConfig,
     title:
@@ -64,7 +71,8 @@ export function Game() {
     setPlayerName,
   } = useStore();
   const today = getEdmontonDateKey();
-  const effectiveDifficulty = safeMode === 'daily' ? dailyDifficulty : safeMode;
+  const effectiveDifficulty =
+    safeMode === 'daily' ? dailyDifficulty : safeMode === 'teach' ? null : safeMode;
   const [showResults, setShowResults] = useState(false);
   const critter = store.critter;
   const critterNoun = CRITTER_NOUN[critter];
@@ -96,7 +104,7 @@ export function Game() {
   });
 
   const recordCompletedGame = useCallback((name: string, completedSeconds: number) => {
-    if (hasRecordedGame.current) return;
+    if (hasRecordedGame.current || safeMode === 'teach') return;
 
     hasRecordedGame.current = true;
     recordGame({
@@ -125,8 +133,8 @@ export function Game() {
   );
 
   const puzzle = useMemo(
-    () => generatePuzzle(config.size, puzzleSeed, config.prefill),
-    [config.size, puzzleSeed, config.prefill],
+    () => generatePuzzle(config.size, puzzleSeed, config.prefill, config.logic),
+    [config.size, puzzleSeed, config.prefill, config.logic],
   );
 
   const [gameState, setGameState] = useState<'playing' | 'won' | 'lost'>('playing');
@@ -139,6 +147,9 @@ export function Game() {
   const [reward, setReward] = useState<Reward | null>(null);
   const [showReward, setShowReward] = useState(false);
   const [tempName, setTempName] = useState(store.playerName);
+  // Hints only in Teach Me — never on the daily or the scored modes.
+  const hintsAllowed = safeMode === 'teach';
+  const [hint, setHint] = useState<Hint | null>(null);
 
   const initGrid = useCallback(() => {
     const size = puzzle.size || 6;
@@ -150,6 +161,14 @@ export function Game() {
   }, [puzzle]);
 
   const [grid, setGrid] = useState<CellState[][]>(initGrid);
+
+  // Any change to the board (a move, reset, new puzzle) clears the hint.
+  useEffect(() => setHint(null), [grid]);
+
+  const handleHint = () => {
+    if (gameState !== 'playing' || paused) return;
+    setHint(getHint(puzzle.regionMap, puzzle.solution, grid, config.logic, critterNoun.singular));
+  };
 
   useEffect(() => {
     setPuzzleSeed(safeMode === 'daily' ? getDailySeed() : randomSeed());
@@ -262,7 +281,7 @@ export function Game() {
 
       if (newLives <= 0) {
         setGameState('lost');
-        recordGameResult(effectiveDifficulty, 'lost', seconds);
+        if (effectiveDifficulty) recordGameResult(effectiveDifficulty, 'lost', seconds);
         if (safeMode === 'daily') {
           resetStreak();
         }
@@ -289,8 +308,10 @@ export function Game() {
       setGameState('won');
       setReward(pickReward(critter));
       setShowReward(false);
-      saveBestTime(safeMode, completedSeconds);
-      recordGameResult(effectiveDifficulty, 'solved', completedSeconds);
+      if (safeMode !== 'teach' && effectiveDifficulty) {
+        saveBestTime(safeMode, completedSeconds);
+        recordGameResult(effectiveDifficulty, 'solved', completedSeconds);
+      }
 
       if (safeMode === 'daily') {
         winLivesLost.current = config.lives - lives;
@@ -393,6 +414,25 @@ export function Game() {
         </div>
       </div>
 
+      {hintsAllowed && (
+        <div className="mb-4">
+          <div className="flex justify-center">
+            <ActionButton variant="board" onClick={handleHint} className="px-6 bg-white" disabled={gameState !== 'playing' || paused}>
+              <Lightbulb size={20} /> Hint
+            </ActionButton>
+          </div>
+          {hint && (
+            <div className="flex items-start gap-2 mt-3 bg-[#D97736]/10 border-2 border-[#D97736]/40 rounded-xl p-3 text-sm font-bold text-board">
+              <Lightbulb size={18} className="shrink-0 mt-0.5 text-[#D97736]" />
+              <p className="flex-1">{hint.message}</p>
+              <button onClick={() => setHint(null)} aria-label="Close hint" className="shrink-0 text-board/50 hover:text-board">
+                <X size={18} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col justify-center mb-8">
         <div className="relative w-full max-w-[400px] mx-auto">
           <Board 
@@ -404,6 +444,7 @@ export function Game() {
             onCellPaint={handleCellPaint}
             isWon={gameState === 'won'}
             critter={critter}
+            hint={hint}
           />
           {paused && (
             <div className="absolute inset-0 z-10 rounded-2xl border-[4px] border-board bg-[#AAB3BC] flex flex-col items-center justify-center gap-4 text-board">
@@ -455,7 +496,7 @@ export function Game() {
           </p>
         )}
         
-        {!store.playerName && !hasRecordedGame.current && (
+        {safeMode !== 'teach' && !store.playerName && !hasRecordedGame.current && (
           <div className="bg-board/5 p-4 rounded-xl border border-board/10 mb-6">
             <p className="text-sm font-bold mb-3 text-center">
               {safeMode === 'daily' ? 'Save your time to the leaderboard!' : 'Add your name to save this game!'}

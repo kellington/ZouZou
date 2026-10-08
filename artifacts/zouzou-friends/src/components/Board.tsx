@@ -15,6 +15,8 @@ interface BoardProps {
   onCellPaint: (r: number, c: number, state: 'blank' | 'note') => void;
   isWon?: boolean;
   critter: Critter;
+  // Hint (Medium only): flashing target squares and softly highlighted focus.
+  hint?: { action: 'cat' | 'mark' | 'clear'; targets: CellPos[]; focus: CellPos[] } | null;
 }
 
 export function Board({
@@ -26,6 +28,7 @@ export function Board({
   onCellPaint,
   isWon,
   critter,
+  hint,
 }: BoardProps) {
   const noun = CRITTER_NOUN[critter];
   const size = puzzle.size || 6;
@@ -195,6 +198,8 @@ export function Board({
             const isPrefilled = puzzle.prefilled[r] === c;
             const state = grid[r]?.[c] || 'blank';
             const reg = puzzle.regionMap[r]?.[c] ?? 0;
+            const isHintTarget = hint?.targets.some((cell) => cell.r === r && cell.c === c);
+            const isHintFocus = !isHintTarget && hint?.focus.some((cell) => cell.r === r && cell.c === c);
 
             return (
               <button
@@ -210,6 +215,8 @@ export function Board({
                   ${getBorders(r, c)}
                   ${getRegionClass(reg)}
                   ${isMistake ? 'animate-shakeX !bg-red-400' : ''}
+                  ${isHintTarget ? 'shadow-[inset_0_0_0_4px_#D97736] animate-pulse' : ''}
+                  ${isHintFocus ? 'shadow-[inset_0_0_0_3px_rgba(217,119,54,0.9)]' : ''}
                   ${isPrefilled ? 'opacity-90 cursor-default' : 'hover:brightness-95 active:brightness-90'}
                 `}
               >
@@ -219,6 +226,12 @@ export function Board({
                     className={`w-[70%] h-[70%] text-board drop-shadow-sm ${isWon ? 'animate-bounce' : 'animate-bounceIn'}`}
                     style={isWon ? { animationDelay: `${(r + c) * 0.1}s` } : {}}
                   />
+                )}
+                {isHintTarget && state === 'blank' && hint?.action === 'cat' && (
+                  <CritterIcon critter={critter} className="w-[60%] h-[60%] text-board opacity-35" />
+                )}
+                {isHintTarget && state === 'blank' && hint?.action === 'mark' && (
+                  <CritterMarkIcon critter={critter} className="w-[40%] h-[40%] text-board opacity-45" />
                 )}
                 {state === 'note' && (
                   <CritterMarkIcon critter={critter} className="w-[40%] h-[40%] text-board opacity-25 animate-zoomIn" />
