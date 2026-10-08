@@ -563,9 +563,13 @@ export const REWARDS: Record<Critter, Reward[]> = {
     },
   ],
   dino: [
-    // Microsoft Fluent Emoji 3D (MIT) — see public/rewards/dino/LICENSE-fluentui-emoji.txt
-    { src: '/rewards/dino/sauropod-3d.png', alt: 'A cute sauropod dinosaur' },
-    { src: '/rewards/dino/t-rex-3d.png', alt: 'A cute T-Rex dinosaur' },
+    // Public domain (publicdomainpictures.net) — see public/rewards/CREDITS.md
+    { src: '/rewards/dino/dino-01.jpg', alt: 'A cute green baby dinosaur hatching from a blue egg' },
+    { src: '/rewards/dino/dino-02.jpg', alt: 'A cute orange baby dinosaur giggling in its egg' },
+    { src: '/rewards/dino/dino-03.jpg', alt: 'A cute teal baby dinosaur laughing in a cracked egg' },
+    { src: '/rewards/dino/dino-04.jpg', alt: 'A soft blue watercolour baby dinosaur' },
+    { src: '/rewards/dino/dino-05.jpg', alt: 'A pink watercolour dinosaur with hearts' },
+    { src: '/rewards/dino/dino-06.jpg', alt: 'A cute green cartoon dinosaur with rosy cheeks' },
   ],
   monkey: [
     {
