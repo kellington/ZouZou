@@ -11,12 +11,13 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Rob is polling friends on the new bits (tries, hearts on Top 5, Pause, Show Reward, Personal Stats); record results + whether anyone wants cross-device stats
-- [ ] Rob: one real-phone play-through to a win → tap Show Reward (photo + credit link) — QA was headless only
+- [ ] Rob: real-phone check of the 10-08 release — Teach Me (Hint on first tap, highlights, wording), streak badge on Top 10, a dino reward
+- [ ] Rob is polling friends on the new bits (tries, hearts, Pause, Show Reward, Personal Stats, Teach Me, no-guess puzzles); record results + whether anyone wants cross-device stats
 
 ## Next
 
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
+- [ ] Standing: any new `/api` route → Rob adds it to the `zouzou-api` rate-limit rule (dashboard; rule now lists only `/api/daily*`, `/api/players*`, `/api/healthz`, 2026-10-17)
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
 - [ ] Ask friends how the critter choice lands
@@ -24,13 +25,16 @@ is the real record. Don't let this file become the project's second STATE.md.
   > ZouZou's Replit project was deleted on 2026-09-24 (STATE.md). Remove the Replit leftovers in one small PR. The build must pass, and Quincy greps for any remaining `replit` outside `project/diary/`.
   > 1. Remove the 10 `// @replit` comments in `artifacts/zouzou-friends/src/components/ui/badge.tsx` and `button.tsx`.
   > 2. Remove the old deployment URL and `REPLIT_DB_URL` lines from `SECRETS.PRIVATE.YAML.example`.
-  > 3. Fix the stale Replit text in CLAUDE.md (l.14 "migrating off Replit", l.89 "Replit URL until cutover", l.115 "Replit publishes it manually", l.166 "legacy, until cutover").
+  > 3. ~~Fix the stale Replit text in CLAUDE.md~~ — done 2026-10-17 (handoff H-20261016-05).
   > 4. Update `AI+PROCESS.md`; its snapshot still says "moving".
   > 5. Tick PROJECT.md's "$0 / no Replit dependency" criterion only after the Replit account itself is closed (tracked in conforma).
   > 6. Confirm the ReplDB export in `~/Documents/Backups/ZouZou/` is intact. It's now the only copy.
 
 ## Later
 
+- [ ] Delete merged branches `top-10`, `no-guess` (local + origin)
+- [ ] Teach Me: prefer hints that touch fewer squares; stop the board jumping when the hint message appears
+- [ ] Maybe: Quincy pass on Teach Me / hints / streaks (built and checked in the main session only)
 - [ ] Simplify the Workers Builds command to `pnpm run build` (install is automatic)
 - [ ] `/api` with nothing after it → JSON 404 (add `/api` to `run_worker_first`)
 - [ ] Optional: delete the `zz-test` rows from remote D1 (Rob's OK) — now incl. its 2026-09-18 daily
@@ -39,10 +43,12 @@ is the real record. Don't let this file become the project's second STATE.md.
 - [ ] Maybe: cross-device stats via D1 (`0002` migration recording losses + `/players/{name}/stats`) — only if friends ask
 - [ ] Modal a11y: reduced-motion opt-out, dialog role, Escape/backdrop close (`ui.tsx`, all modals)
 - [ ] Maybe: auto-pause when the tab is hidden (Pause currently manual only)
-- [ ] Maybe: more reward images / dino variety (add via Rex shortlist → Rob approval → `rewards.ts` + `CREDITS.md`)
 - [ ] Menu re-reads the cookie on focus/visibility so a tab left open past midnight doesn't show stale "Results"
 
 ## Done (recent)
+
+- [x] 2026-10-17 — CLAUDE.md: stale Replit-migration wording replaced (Cloudflare Workers, Workers Builds); rate-limit route list recorded (handoffs H-20261016-05, H-20261017-06)
+- [x] 2026-10-08 — PR #19 live: Top 10 + daily streak on board (0004 applied remote), no-guess generator, Teach Me + hints, 6 public-domain dino rewards, News ×4, diary
 
 - [x] 2026-09-29 — Personal Stats card on the menu (PR #15); Wren built, Quincy verified
 - [x] 2026-09-29 — Daily Reset Board resets the streak (PR #14, Rob)
