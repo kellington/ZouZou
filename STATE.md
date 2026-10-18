@@ -1,6 +1,6 @@
 # State
 
-*Last updated: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
+*Last updated: 2026-10-17 (unattended refresh: no open handoffs, status page current, no app changes; PR #20 docs merged → `main` @ `8bec6cf`). Previous: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
 
 ## Summary
 
@@ -20,7 +20,7 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 
 ## What's working
 
-- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `c58ed88`).
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `8bec6cf`, PR #20 docs-only; last app change `c58ed88`).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
 - **D1 `zouzou` (WNAM):** `0001`–`0004` applied (0002 and 0003 by Rob 2026-09-29; `0004_daily_streak.sql`
@@ -103,7 +103,7 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 - **Verified:** Quincy's scratchpad harness (store hydration/arithmetic/streak sequencing, component
   render incl. 0-division, share gating) — component 27/27; store assertions all pass except four
   that pinned the pre-fix behaviour he reported. No test suite in the repo still.
-- **Repo:** public, MIT. `main` @ `c58ed88` (PR #19 merge). Branches: `main`, `vscode`, plus merged `top-10` and `no-guess` (local + origin) not yet deleted.
+- **Repo:** public, MIT. `main` @ `8bec6cf` (PR #20 merge); `vscode` is ahead by the status commit `f54abea` + the 2026-10-17 refresh commit (needs a PR, Rob's merge). Branches: `main`, `vscode`, plus merged `top-10` and `no-guess` (local + origin) not yet deleted.
 
 ## In progress
 
@@ -143,7 +143,7 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 ## Environment / setup
 
 ```
-branch: vscode @ d05d2aa (= origin/main) + end-session edits
+branch: vscode @ f54abea (origin/main 8bec6cf + 1) + 2026-10-17 refresh commit
 Mac: Node 26.8.1 (no nvm), pnpm 10.34.5 global; wrangler via npx / pnpm exec (logged in)
 Backups (outside git): ~/Documents/Backups/ZouZou/ — repldb export, import SQL, pre-import D1 export
 D1 Time Travel bookmarks: pre-migration 00000001-…a411fe, pre-import 00000002-00000000-…2ce7

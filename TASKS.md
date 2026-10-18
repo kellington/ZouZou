@@ -16,6 +16,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Next
 
+- [ ] PR `vscode` → `main` for `f54abea` (status page) + 2026-10-17 refresh commit — docs only; push + merge are Rob's
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
 - [ ] Standing: any new `/api` route → Rob adds it to the `zouzou-api` rate-limit rule (dashboard; rule now lists only `/api/daily*`, `/api/players*`, `/api/healthz`, 2026-10-17)
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
