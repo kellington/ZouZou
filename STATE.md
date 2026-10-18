@@ -1,12 +1,16 @@
 # State
 
-*Last updated: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix shipped). Earlier 2026-09-29: daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
+*Last updated: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
 assets and a Hono API, backed by D1. Replit project deleted 2026-09-24; repo public (MIT) at
-https://github.com/kellington/ZouZou. **2026-09-29 (evening): five more changes shipped** — hearts lost
+https://github.com/kellington/ZouZou. **2026-10-08: PR #19 shipped (supersedes #18), live ~60 s after
+merge** — Today's Top 10 + daily streak next to names (migration 0004), no-guess puzzle generator, new
+**Teach Me** mode with hints, 6 public-domain baby-dino rewards, 4 News entries. Built in the main session
+(no Wren/Quincy); verified by typecheck, local wrangler dev + local D1, solver simulations and Chrome on
+localhost. **2026-09-29 (evening): five more changes shipped** — hearts lost
 on the Top 5 + Pause (PR #12, migration 0003), Show Reward (PR #13), daily Reset fix (PR #14, Rob),
 Personal Stats card (PR #15). All merged and live; Rob: "things look good" after #15. **2026-09-29: daily tries shipped (PR #11).** The leaderboard
 ranks fewest tries, then time, and the menu has a "📣 News!" button. **2026-09-27: Wordle-style Results + Share shipped (PR #10)**
@@ -16,14 +20,33 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 
 ## What's working
 
-- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `d05d2aa`).
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `c58ed88`).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
-- **D1 `zouzou` (WNAM):** `0001_init.sql`, `0002_daily_attempts.sql`, `0003_daily_lives_lost.sql` applied
-  (0002 and 0003 by Rob, 2026-09-29, each before its merge; existing rows got `attempts = 1`,
-  `lives_lost = NULL`). Next migration is `0004_*`. Note: run `migrations apply --remote` from a checkout
+- **D1 `zouzou` (WNAM):** `0001`–`0004` applied (0002 and 0003 by Rob 2026-09-29; `0004_daily_streak.sql`
+  by Claude with Rob's OK 2026-10-08, before the merge; existing rows got `attempts = 1`,
+  `lives_lost = NULL`, `streak = NULL`). Next migration is `0005_*`. Note: run `migrations apply --remote` from a checkout
   that *has* the new file — the first 0003 attempt ran from `vscode` and found nothing to apply. Phase 0 backup imported (62 games,
   4 players, 25 daily rows) plus 1 `zz-test` daily game kept by Rob's choice.
+- **Top 10 + streaks (2026-10-08, PR #19, commit `5cec1d8`):** board shows 10 (server already returned 10).
+  Daily POST takes optional `streak` (1–100000); entries carry `streak: number|null`, shown after the name
+  as `(🔥 N Day Streak)`. `recordDailyWin` now returns the streak incl. today's win. Rows saved before the
+  deploy show no badge.
+- **No-guess puzzles (2026-10-08, `1055396`):** `src/lib/logic.ts` solver — tier 0 basic (singles,
+  confinement), 1 intermediate (2–4 colours in k lines, "cat here empties a unit"), 2 one-move test.
+  The generator keeps a region-growth step only if the board stays unique **and** solvable at the mode's
+  `MODE_CONFIG.logic` (easy 0, medium 1, hard 2 — Rob: hard stays). Before: 25% of medium / 36% of hard
+  needed more than intermediate. Hard boards are effectively unchanged (all already passed tier 2).
+  Load time ~same (hard ~80 ms typical, 0.4 s worst). Every puzzle changed on deploy, incl. the 10-08 daily mid-day (Rob's call, no as-of date).
+- **Teach Me (2026-10-08, `1055396`):** `/play/teach`, menu button under Hard ("Medium board with hints ·
+  not scored"). Random Medium board + Hint button above the board. `getHint` checks wrong ✕ marks first,
+  then the easiest next deduction (single → confined → blocked → 2/3/4-colour groups); messages name
+  colours (`COLOUR_NAMES`, must match `--region-N`) and row/column numbers; target squares pulse with a
+  faint ✕/critter, reasoning cells get an orange outline. Hints exist only here. Nothing saved (no
+  stats, best time, player games, name prompt). 100 hint-only games all finish, no fallback reveal.
+- **Dino rewards (2026-10-08, `4eb4352`):** 6 public-domain images from publicdomainpictures.net
+  (most AI-generated), 600×600, `public/rewards/dino/dino-01…06.jpg`, credited in `CREDITS.md`;
+  Fluent Emoji dinos removed.
 - **Hearts lost + Pause (2026-09-29, PR #12, `d14455b`):**
   - Top 5 shows hearts lost on the winning try after the time: `1:20 (2♥)`; `(0♥)` = clean solve. Rows saved
     before 0003 (or from an old cached client) show no brackets. Doesn't affect ranking (tries, then time).
@@ -59,6 +82,8 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
     was fixed before commit; that fix wasn't re-tested by QA. Live curl showed `attempts: 1` on
     today's 3 entries.
 - **Zone `minus1over12.com`:** Always Use HTTPS on; rate-limit rule `zouzou-api` (10 req/10 s per IP).
+  As of 2026-10-17 the rule matches only `/api/daily*`, `/api/players*`, `/api/healthz` — **any new
+  `/api` route must be added to it** (Cloudflare dashboard, Rob's change).
 - **Results + Share (2026-09-27, `304d288`):**
   - Once today's daily is done, the Menu's Daily button reads **Results** and opens a modal; the
     "Daily puzzle complete" screen in Game has the same button. Modal: Played / Win % / Current
@@ -78,13 +103,19 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 - **Verified:** Quincy's scratchpad harness (store hydration/arithmetic/streak sequencing, component
   render incl. 0-division, share gating) — component 27/27; store assertions all pass except four
   that pinned the pre-fix behaviour he reported. No test suite in the repo still.
-- **Repo:** public, MIT. `main` @ `d05d2aa` (PR #15 merge). Branches: `main`, `vscode` (merged feature branches and worktrees deleted).
+- **Repo:** public, MIT. `main` @ `c58ed88` (PR #19 merge). Branches: `main`, `vscode`, plus merged `top-10` and `no-guess` (local + origin) not yet deleted.
 
 ## In progress
 
-- Nothing mid-flight. End-session edits (STATE / TASKS / DECISIONS / CLAUDE.md / diary) on `vscode`.
+- Nothing mid-flight. End-session edits (STATE / TASKS / DECISIONS) on `vscode`.
 
 ## Known issues
+
+- **2026-10-08 features not device-tested:** Teach Me / hints / streak badge / new dinos checked in desktop
+  Chrome on localhost + live asset checks only; no Quincy pass. In Chrome automation the first Hint tap right
+  after page load showed nothing (second worked) — probably the tool; unconfirmed on a phone.
+- **Hint highlight can be busy:** a "confined" hint early on can flash 20+ squares (correct, just noisy).
+- **10-08 daily changed mid-day** with the generator deploy; anyone mid-try got a new board.
 
 - **Not device-tested by QA:** Show Reward and Personal Stats were checked in headless Chrome only
   (375×667, 390×844); Rob confirmed live "looks good". iOS Safari `dvh` behaviour unverified.
@@ -123,17 +154,23 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
 
 - **PLAN drift (growing):** "Settle in" lists new gameplay features and API contract changes as out of
   scope. Shipped anyway (Rob's call): Results + Share (09-27); daily tries (09-29, contract + 0002); hearts
-  lost (contract + 0003), Pause, Show Reward, Personal Stats (all 09-29). The milestone is now really
+  lost (contract + 0003), Pause, Show Reward, Personal Stats (all 09-29); Top 10 + streaks (contract +
+  0004), no-guess generator, Teach Me, dino rewards (all 10-08). The milestone is now really
   "friend-feedback features". Rewrite PLAN.md at the next milestone.
 - **Stats are per-device** (cookie). If friends ask for cross-device stats, that's the D1 route:
   `0002` migration recording losses + a `/players/{name}/stats` endpoint (contract change). Not planned.
 - **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
-- Status page: global `/project-status` skill, configured by the `## Project status` block in
-  `CLAUDE.md` (group/profile/priority from the workspace README table). No per-repo command.
 - **Any friend blocked by the rate limit?** Unknown until people play; raise to 20 req/10 s if so.
 - Replit account closes once conforma is off it (tracked in the conforma repo).
 
-## Resolved this session (2026-09-29 evening)
+## Resolved this session (2026-10-08)
+
+- Rob's diary asks → Top 10, streak sharing, "guessing" analysis (solver showed 25–36% of medium/hard
+  boards needed beyond-intermediate logic) → no-guess generator, Hint → reshaped by Rob into Teach Me,
+  hint wording fixed twice from Rob's screenshots, cuter dinos from his chosen source. Rob OK'd the remote
+  migration, then commit/push/merge/release; live and checked.
+
+## Resolved 2026-09-29 evening
 
 - Friend (Lexi) feedback → hearts lost on Top 5 + Pause; built in main session, migration 0003 applied by
   Rob, PR #12. Rob's own ideas → Show Reward (Rex researched sources + shortlisted; Wren built; Quincy 3

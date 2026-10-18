@@ -11,7 +11,8 @@ plus durable project reference that agents need on hand.
 
 ZouZou & Friends — a browser cat-placement logic puzzle (daily challenge + easy/medium/hard)
 for Rob's friends, with a shared daily leaderboard; pnpm workspace, React 19 + Vite
-client served with a Hono API by one Cloudflare Worker + D1 (migrating off Replit, 2026-09).
+client served with a Hono API by one Cloudflare Worker + D1 at `zouzou.minus1over12.com`,
+auto-deployed by Workers Builds on push to `main` (moved off Replit 2026-09; Replit project deleted 2026-09-24).
 
 ## Source of truth
 
@@ -25,7 +26,7 @@ If any of these conflict, ask me which one is right. Don't silently reconcile.
 
 Only the main session writes these files — subagents read them but never edit them.
 
-**Migration plan (external, authoritative for the Cloudflare move):**
+**Migration plan (external, historical — the Cloudflare move is done):**
 `../../SKYideas/SKYresearch/experiments/ai-hosting/notes/zouzou-migration-plan-2026-09-16.md`
 (decisions §8, guardrail items §7, SKYresearch feedback §11). Companion:
 `../../SKYideas/SKYresearch/experiments/ai-hosting/notes/static-site-playbook-2026-09-16.md`.
@@ -44,9 +45,8 @@ anything repo-specific under the heading below and it will be picked up.
 ### Session supplements for this repo
 
 - Session notes / next prompts live in `project/diary/diary-YYYY-MM.md`.
-- During the migration, check which branch you're on: migration work goes on `cf`
-  (plan §4) until it merges to `main`. Don't do migration work on `main` or `vscode`.
-- At end of the migration, produce a "for SKYresearch" block answering plan §11.
+- Feature work goes on a feature branch → PR → `main`; protocol-file work on `vscode`.
+- Open SKYresearch feedback items (plan §11) are tracked in TASKS.md.
 
 ## Milestones
 
@@ -91,18 +91,17 @@ report instead of proceeding.
 ### Guardrails specific to this repo
 
 - **Friends' data is real.** The live leaderboard and player history hold friends'
-  names. Never write to the production API (Replit URL until cutover, then
-  `zouzou.minus1over12.com` / workers.dev) or production D1 (`zouzou`) to "test" — use local D1, or the `zz-test` user with Rob's OK.
+  names. Never write to the production API
+  (`zouzou.minus1over12.com` / workers.dev) or production D1 (`zouzou`) to "test" — use local D1, or the `zz-test` user with Rob's OK.
 - **Every `wrangler … --remote` command needs Rob's OK at the moment** — D1 create,
   migrations, import, deletes (incl. `zz-test` cleanup), Time Travel restore. Previews
   share production D1 (plan D12), so a preview write *is* a production write.
 - **Never commit ReplDB exports or backups.** `zouzou-repldb-*.json` holds friends'
   names; it lives outside git (`~/Documents/Backups/ZouZou/`).
-- **Don't echo `REPLIT_DB_URL`** in the Repl shell — it's a full-access token.
-- **Replit unpublish, Workers Builds import, `cf` → `main` merge** are Rob's clicks, with
-  explicit OK. No rollback to Replit exists by decision (plan D9).
-- **Don't change the API contract** (`lib/api-spec/openapi.yaml`) during the migration —
-  the React client must work unchanged against the Worker.
+- **Merges to `main` deploy to production** (Workers Builds) — Rob's click, with explicit OK.
+  No rollback to Replit exists by decision (plan D9).
+- **API contract changes** (`lib/api-spec/openapi.yaml`) need Rob's OK; keep new request fields
+  optional so cached clients keep working.
 - **Lockfile changes** (`pnpm install` that rewrites `pnpm-lock.yaml`) — show the diff
   first. Never disable `minimumReleaseAge` in `pnpm-workspace.yaml`.
 
@@ -115,10 +114,10 @@ report instead of proceeding.
 - **Naming:** workspace packages are `@workspace/<name>`; deployables in `artifacts/`,
   shared libs in `lib/`.
 - **Testing:** no test suite yet. Verify with `pnpm run typecheck` + build + `wrangler dev`
-  smoke + manual play; Quincy verifies migration phases (plan Phase 2b checklist).
+  smoke + manual play; Quincy verifies features.
 - **Commits:**
-- **Branching:** `main` = production (Replit publishes it manually today; Workers Builds
-  deploys it after Phase 3). `cf` = Cloudflare migration branch. `vscode` = protocol-file work — commit there, then PR `vscode` → `main` (no direct commits to `main`).
+- **Branching:** `main` = production (Workers Builds deploys every push). Feature branches
+  → PR → `main`. `vscode` = protocol-file work — commit there, then PR `vscode` → `main` (no direct commits to `main`).
 - **Secrets / env:** no app secrets — the Worker only has the D1 binding `DB`. Cloudflare
   account IDs etc. go in `SECRETS.PRIVATE.YAML` — local scratchpad, gitignored, copied
   from the `.example` twin — never the deployed secret store.
@@ -168,7 +167,7 @@ Removed in Phase 2c (2026-09-17): Express `api-server` (ReplDB), `mockup-sandbox
 
 ### Data model
 
-Replit (legacy, until cutover — ReplDB KV):
+Replit ReplDB (retired 2026-09-24; shape of the Phase 0 export in `~/Documents/Backups/ZouZou/`):
 - `zouzou:daily-leaderboard` → `{ date, entries: [{name, seconds}] }` — **only today**;
   overwritten when the Edmonton date rolls. Top 10, one best time per name (case-insensitive).
 - `zouzou:player:<encodeURIComponent(lowercase name)>` → `{ name, entries: [{date, game, seconds}] }` — every game.
@@ -259,7 +258,7 @@ pnpm --filter @workspace/worker run cf-typegen      # after changing wrangler.js
 # Remote D1 (Rob's OK every time): wrangler d1 … --remote; Time Travel 7 days on Free.
 ```
 
-Live: https://zouzou-and-friends.replit.app (until cutover) → `zouzou.minus1over12.com`.
+Live: https://zouzou.minus1over12.com (fallback `zouzou.rob-kellington.workers.dev`).
 Quick check: `curl -fsSL <host>/api/daily/leaderboard | jq .`
 
 ### Known gotchas
