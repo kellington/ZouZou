@@ -6,6 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './comment';
+export * from './commentInput';
+export * from './commentsResponse';
 export * from './dailyLeaderboardResponse';
 export * from './dailyScoreEntry';
 export * from './dailyScoreInput';

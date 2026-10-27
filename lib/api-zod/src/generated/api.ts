@@ -119,3 +119,40 @@ export const RecordPlayerGameResponse = zod.object({
 })
 
 
+/**
+ * Returns the newest 100 comments, newest first.
+ * @summary Get recent comments
+ */
+export const GetCommentsResponse = zod.object({
+  "entries": zod.array(zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "message": zod.string(),
+  "createdAt": zod.string().describe('ISO 8601 UTC timestamp.')
+}))
+})
+
+
+/**
+ * Adds a comment from a named player.
+ * @summary Post a comment
+ */
+export const postCommentBodyNameMax = 24;
+
+export const postCommentBodyMessageMax = 200;
+
+
+
+export const PostCommentBody = zod.object({
+  "name": zod.string().min(1).max(postCommentBodyNameMax),
+  "message": zod.string().min(1).max(postCommentBodyMessageMax)
+})
+
+export const PostCommentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "message": zod.string(),
+  "createdAt": zod.string().describe('ISO 8601 UTC timestamp.')
+})
+
+
