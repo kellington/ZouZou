@@ -11,7 +11,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Rob is polling friends on the new bits (tries, hearts, Pause, Show Reward, Personal Stats, Teach Me, no-guess puzzles); record results + whether anyone wants cross-device stats
+- [ ] Rob is polling friends on the new bits (tries, hearts, Pause, Show Reward, Personal Stats, Teach Me, no-guess puzzles, Trash Talk); record results + whether anyone wants cross-device stats
 
 ## Next
 
@@ -46,6 +46,7 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Done (recent)
 
+- [x] 2026-11-05 — PR #24 live: darker footprints (55%) + News entry
 - [x] 2026-11-05 — Rob: real-phone check of the 10-08 release passed (Teach Me, streak badge, dino reward)
 - [x] 2026-11-05 — PR #22 live: Trash Talk comments under Today's Top 10 (0005 applied remote, `/api/comments` in rate-limit rule, News entry); Rob confirmed on production
 - [x] 2026-10-17 — CLAUDE.md: stale Replit-migration wording replaced (Cloudflare Workers, Workers Builds); rate-limit route list recorded (handoffs H-20261016-05, H-20261017-06)

@@ -1,6 +1,6 @@
 # State
 
-*Last updated: 2026-11-05 (Trash Talk shipped, PR #22, `main` @ `3758ab3`). Previous: 2026-10-17 (unattended refresh: no open handoffs, status page current, no app changes; PR #20 docs merged → `main` @ `8bec6cf`). Previous: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
+*Last updated: 2026-11-05 (Trash Talk PR #22, darker footprints PR #24, docs PR #23; `main` @ `e28403c`). Previous: 2026-10-17 (unattended refresh: no open handoffs, status page current, no app changes; PR #20 docs merged → `main` @ `8bec6cf`). Previous: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
 
 ## Summary
 
@@ -8,6 +8,7 @@ ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker 
 assets and a Hono API, backed by D1. Replit project deleted 2026-09-24; repo public (MIT) at
 https://github.com/kellington/ZouZou. **2026-11-05: Trash Talk shipped (PR #22)** — comment card under Today's
 Top 10, popup with newest 100 and a post box, migration 0005, two new routes. Rob confirmed it works on production.
+Darker board footprints also shipped (PR #24, friend request, checked by Rob on the preview).
 **2026-10-08: PR #19 shipped (supersedes #18), live ~60 s after
 merge** — Today's Top 10 + daily streak next to names (migration 0004), no-guess puzzle generator, new
 **Teach Me** mode with hints, 6 public-domain baby-dino rewards, 4 News entries. Built in the main session
@@ -22,7 +23,7 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 
 ## What's working
 
-- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `3758ab3`, PR #22).
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `e28403c`, PR #24).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
 - **D1 `zouzou` (WNAM):** `0001`–`0005` applied (`0005_comments.sql` was already applied when checked 2026-11-05, before the merge; who ran it isn't recorded. 0002 and 0003 by Rob 2026-09-29; `0004_daily_streak.sql`
@@ -33,6 +34,8 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 - **Trash Talk (2026-11-05, PR #22):** `src/components/TrashTalk.tsx`, `GET`/`POST /api/comments`. Card polls every 60 s and
   refreshes after a post; a failed background refresh keeps the cached comments on screen. Verified by typecheck, build,
   local wrangler + D1 API checks and Rob's post on production.
+- **Darker footprints (2026-11-05, PR #24):** board's marked-square footprint raised from 25% to 55% opacity for all critters (`Board.tsx`);
+  the Teach Me hint preview stays at 45%. News entry added, naming the friend who asked.
 - **Top 10 + streaks (2026-10-08, PR #19, commit `5cec1d8`):** board shows 10 (server already returned 10).
   Daily POST takes optional `streak` (1–100000); entries carry `streak: number|null`, shown after the name
   as `(🔥 N Day Streak)`. `recordDailyWin` now returns the streak incl. today's win. Rows saved before the
@@ -154,6 +157,7 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
 
 ## Open questions
 
+- **Rate limit on `/api/comments` not burst-tested:** Rob updated the rule on 2026-11-05; no 429 test was run.
 - **PLAN drift (growing):** "Settle in" lists new gameplay features and API contract changes as out of
   scope. Shipped anyway (Rob's call): Results + Share (09-27); daily tries (09-29, contract + 0002); hearts
   lost (contract + 0003), Pause, Show Reward, Personal Stats (all 09-29); Top 10 + streaks (contract +
@@ -171,6 +175,7 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
   background refresh; News entry re-dated. `/api/comments` added to the rate-limit rule. Rob accepted the
   moderation risk (DECISIONS).
 - Rob's real-phone check of the 10-08 release passed: Teach Me, streak badge and dino rewards all work.
+- Friend's footprint request shipped (PR #24) after Rob checked 45%, then 55%, on the preview.
 
 ## Resolved this session (2026-10-08)
 
