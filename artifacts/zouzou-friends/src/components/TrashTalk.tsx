@@ -81,7 +81,7 @@ export function TrashTalk() {
     );
   }
 
-  if (isError) {
+  if (isError && !data) {
     return (
       <div className="bg-red-50 p-4 rounded-xl border-2 border-red-200 text-center flex flex-col items-center">
         <AlertCircle className="text-red-500 mb-2" />
