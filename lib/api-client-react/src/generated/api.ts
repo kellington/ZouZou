@@ -20,6 +20,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Comment,
+  CommentInput,
+  CommentsResponse,
   DailyLeaderboardResponse,
   DailyScoreInput,
   ErrorResponse,
@@ -432,5 +435,155 @@ export const useRecordPlayerGame = <TError = ErrorType<ErrorResponse>,
         TContext
       > => {
       return useMutation(getRecordPlayerGameMutationOptions(options));
+    }
+
+export const getGetCommentsUrl = () => {
+
+
+
+
+  return `/api/comments`
+}
+
+/**
+ * Returns the newest 100 comments, newest first.
+ * @summary Get recent comments
+ */
+export const getComments = async ( options?: Parameters<typeof customFetch>[1]): Promise<CommentsResponse> => {
+
+  return customFetch<CommentsResponse>(getGetCommentsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCommentsQueryKey = () => {
+    return [
+    `/api/comments`
+    ] as const;
+    }
+
+
+export const getGetCommentsQueryOptions = <TData = Awaited<ReturnType<typeof getComments>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getComments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCommentsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getComments>>> = ({ signal }) => getComments({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getComments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCommentsQueryResult = NonNullable<Awaited<ReturnType<typeof getComments>>>
+export type GetCommentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get recent comments
+ */
+
+export function useGetComments<TData = Awaited<ReturnType<typeof getComments>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getComments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCommentsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPostCommentUrl = () => {
+
+
+
+
+  return `/api/comments`
+}
+
+/**
+ * Adds a comment from a named player.
+ * @summary Post a comment
+ */
+export const postComment = async (commentInput: CommentInput, options?: Parameters<typeof customFetch>[1]): Promise<Comment> => {
+
+  return customFetch<Comment>(getPostCommentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(commentInput)
+  }
+);}
+
+
+
+
+
+export const getPostCommentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postComment>>, TError,{data: BodyType<CommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postComment>>, TError,{data: BodyType<CommentInput>}, TContext> => {
+
+const mutationKey = ['postComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postComment>>, {data: BodyType<CommentInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postComment(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostCommentMutationResult = NonNullable<Awaited<ReturnType<typeof postComment>>>
+    export type PostCommentMutationBody = BodyType<CommentInput>
+    export type PostCommentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Post a comment
+ */
+export const usePostComment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postComment>>, TError,{data: BodyType<CommentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof postComment>>,
+        TError,
+        {data: BodyType<CommentInput>},
+        TContext
+      > => {
+      return useMutation(getPostCommentMutationOptions(options));
     }
 

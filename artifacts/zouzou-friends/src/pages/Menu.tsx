@@ -14,6 +14,7 @@ import { Star, Zap, Coffee, Skull, Edit2, Flame, Lightbulb } from 'lucide-react'
 import { DailyLeaderboard } from '../components/DailyLeaderboard';
 import { PersonalStats } from '../components/PersonalStats';
 import { RecentPlayers } from '../components/RecentPlayers';
+import { TrashTalk } from '../components/TrashTalk';
 import { DailyResults } from '../components/DailyResults';
 import { NewsButton } from '../components/NewsButton';
 import { useState } from 'react';
@@ -172,6 +173,9 @@ export function Menu() {
 
           <div className="mt-8">
             <DailyLeaderboard />
+          </div>
+          <div className="mt-4">
+            <TrashTalk />
           </div>
           <div className="mt-4">
             <PersonalStats />

@@ -1,8 +1,11 @@
 import { Hono } from "hono";
 import {
+  GetCommentsResponse,
   GetDailyLeaderboardResponse,
   GetRecentPlayersResponse,
   HealthCheckResponse,
+  PostCommentBody,
+  PostCommentResponse,
   RecordPlayerGameBody,
   RecordPlayerGameResponse,
   SubmitDailyScoreBody,
@@ -13,6 +16,7 @@ import {
 const app = new Hono<{ Bindings: Env }>().basePath("/api");
 
 const maximumEntries = 10;
+const maximumComments = 100;
 
 /** Same normalisation as the Express server: trim + collapse whitespace. */
 const normalizeName = (name: string): string => name.trim().replace(/\s+/g, " ");
@@ -161,6 +165,37 @@ app.post("/players/games", async (c) => {
     .run();
 
   return c.json(RecordPlayerGameResponse.parse(entry));
+});
+
+app.get("/comments", async (c) => {
+  const { results } = await c.env.DB.prepare(
+    "SELECT id, name, message, created_at AS createdAt FROM comments ORDER BY id DESC LIMIT ?1",
+  )
+    .bind(maximumComments)
+    .all();
+  return c.json(GetCommentsResponse.parse({ entries: results }));
+});
+
+app.post("/comments", async (c) => {
+  const parsed = PostCommentBody.safeParse(await readJson(c.req.raw));
+  if (!parsed.success) {
+    return c.json({ error: parsed.error.message }, 400);
+  }
+
+  const name = normalizeName(parsed.data.name);
+  const message = parsed.data.message.trim();
+  if (!name || !message) {
+    return c.json({ error: "Name and message are required." }, 400);
+  }
+
+  const createdAt = new Date().toISOString();
+  const row = await c.env.DB.prepare(
+    "INSERT INTO comments (name_key, name, message, created_at) VALUES (?1, ?2, ?3, ?4) RETURNING id",
+  )
+    .bind(nameKey(name), name, message, createdAt)
+    .first<{ id: number }>();
+
+  return c.json(PostCommentResponse.parse({ id: row!.id, name, message, createdAt }));
 });
 
 app.notFound((c) => c.json({ error: "Not found" }, 404));

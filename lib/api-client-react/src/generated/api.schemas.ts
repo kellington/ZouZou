@@ -125,6 +125,31 @@ export interface RecentPlayersResponse {
   entries: RecentPlayer[];
 }
 
+export interface CommentInput {
+  /**
+     * @minLength 1
+     * @maxLength 24
+     */
+  name: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  message: string;
+}
+
+export interface Comment {
+  id: number;
+  name: string;
+  message: string;
+  /** ISO 8601 UTC timestamp. */
+  createdAt: string;
+}
+
+export interface CommentsResponse {
+  entries: Comment[];
+}
+
 export interface ErrorResponse {
   error: string;
 }
