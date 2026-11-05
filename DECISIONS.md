@@ -103,3 +103,10 @@ friends' names findable via /api/players/recent.
 **Why:** The data already exists and it's the same source Results uses. No server change needed.
 **Trade-off:** Stats are per device and only go back to 2026-09-27. Cross-device stats would need the D1 route (TASKS Later).
 **Impact:** Front-end-only change (PR #15). Same formulas as Results so the two screens agree.
+
+## [2026-11-05] — Trash Talk: open comments with no auth and no in-app delete
+
+**Decision:** Ship one running comment chat where anyone with the URL can post under any name. Rob accepted the moderation risk. Comments are kept permanently; a bad one is removed by hand with `wrangler d1 execute … --remote`.
+**Why:** It's a friends' game with no accounts (PROJECT non-goal), and posting works the same way as the leaderboard.
+**Trade-off:** Friends can be impersonated, and abuse stays visible until Rob removes it. The rate-limit rule slows spam on the custom domain only; `workers.dev` isn't covered.
+**Impact:** API contract addition plus migration `0005` (PR #22). `/api/comments` added to the `zouzou-api` rule. The next migration is `0006`.

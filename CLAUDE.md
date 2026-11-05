@@ -178,8 +178,9 @@ name, date, game, seconds)` — every game. `seconds` CHECK: integer, 1–36000.
 lowercased, whitespace-normalised name. `0002_daily_attempts.sql` adds `daily_scores.attempts`
 (integer 1–1000, default 1). `0003_daily_lives_lost.sql` adds nullable `daily_scores.lives_lost`
 (integer 0–10; NULL = saved before tracking). `0004_daily_streak.sql` adds nullable `daily_scores.streak`
-(integer 1–100000; NULL = saved before tracking). `0001`–`0003` are applied remotely (`0004` pending) — schema changes need
-`0005_*.sql`, applied `--remote` (from a checkout that has the file) **before** the Worker that reads them deploys.
+(integer 1–100000; NULL = saved before tracking). `0005_comments.sql` adds `comments (id, name_key, name, message 1–200 chars, created_at ISO UTC)` — one running chat, every
+comment kept. `0001`–`0005` are applied remotely — schema changes need
+`0006_*.sql`, applied `--remote` (from a checkout that has the file) **before** the Worker that reads them deploys.
 
 Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store` /
 `zouzou-best-times`): best times per mode, `daily`, `lastDailyDate`, `playerName`,
@@ -194,6 +195,8 @@ Client-side (cookie `zouzou-player`, 400 days; legacy localStorage `zouzou-store
   → updated board (entries are `{name, seconds, attempts, livesLost: number|null, streak: number|null}`)
 - `GET /players/recent` → latest game per named player, newest date first
 - `POST /players/games` `{name, game: daily|easy|medium|hard, seconds}` → entry
+- `GET /comments` → `{entries: [{id, name, message, createdAt}]}` newest 100, newest first
+- `POST /comments` `{name 1–24, message 1–200}` → the saved comment
 
 ### User roles
 
@@ -206,7 +209,8 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
    diagonally. Tap = mark no-cat / clear; double-tap = cat. Wrong cat costs a life.
 3. Win → best time saved in cookie; named player POSTs to `/players/games` (and
    `/daily/leaderboard` for daily).
-4. Menu shows shared daily leaderboard (time + hearts lost), Personal Stats (cookie) and recent
+4. Menu shows shared daily leaderboard (time + hearts lost), Trash Talk (newest 3; tap for popup with all + post box),
+   Personal Stats (cookie) and recent
    players (polled ~60 s). Win modal offers "Show Reward" (random critter image). Pause button hides
    the board and stops the timer.
 
@@ -232,6 +236,8 @@ None. No auth — a player is just a typed name. Anyone with the URL can play an
   (`(🔥 N Day Streak)`, from their cookie at win time); neither affects ranking.
 - Rewards: only Rob-approved images (Unsplash/Pexels licence, MIT/CC0 or public-domain art), self-hosted, credited in
   `public/rewards/CREDITS.md`; no live third-party image APIs.
+- Trash Talk: one running chat that never resets; no auth, so anyone can post under any name (accepted). No in-app
+  delete — remove a comment with `wrangler d1 execute … --remote` (Rob's OK).
 - News: menu "📣 News!" messages live in `artifacts/zouzou-friends/src/lib/news.ts` (newest first).
 
 ### Commands
