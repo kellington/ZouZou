@@ -3,6 +3,7 @@
 export type NewsItem = { date: string; message: string };
 
 export const NEWS: NewsItem[] = [
+  { date: '2026-11-05', message: 'Jesse got darker footprints' },
   { date: '2026-11-05', message: 'New: Trash Talk under the Top 10 💬' },
   { date: '2026-10-08', message: 'New Teach Me mode — a Medium board with hints to learn the logic' },
   { date: '2026-10-08', message: 'Puzzles never need a guess — always solvable by logic' },

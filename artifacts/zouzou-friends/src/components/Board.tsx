@@ -234,7 +234,7 @@ export function Board({
                   <CritterMarkIcon critter={critter} className="w-[40%] h-[40%] text-board opacity-45" />
                 )}
                 {state === 'note' && (
-                  <CritterMarkIcon critter={critter} className="w-[40%] h-[40%] text-board opacity-25 animate-zoomIn" />
+                  <CritterMarkIcon critter={critter} className="w-[40%] h-[40%] text-board opacity-55 animate-zoomIn" />
                 )}
 
                 {isPrefilled && (
