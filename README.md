@@ -31,6 +31,8 @@ Play the original at https://zouzou.minus1over12.com, or host your own copy (see
   running out of lives on the daily, resets it.
 - **Leaderboard:** keeps each player's best time for the day and shows the top 10. Names match
   case-insensitively.
+- **Trash Talk:** one running comment chat under the top 10 (max 200 characters). Posts use your
+  player name; there is no in-app delete.
 - **Your data:** best times, streak and player name live in a browser cookie (`zouzou-player`).
   Shared scores and game history live in D1.
 
@@ -85,11 +87,14 @@ All routes live under `/api` and return JSON.
 | POST | `/api/daily/leaderboard` | `{ name, seconds }` | the updated board; keeps the player's best time |
 | GET | `/api/players/recent` | | `{ entries: [{ name, date, game, seconds }] }`: latest game per player, newest first |
 | POST | `/api/players/games` | `{ name, game, seconds }` | the recorded entry |
+| GET | `/api/comments` | | `{ entries: [{ id, name, message, createdAt }] }`: newest 100, newest first |
+| POST | `/api/comments` | `{ name, message }` | the saved comment |
 
 Limits:
 - `name`: 1–24 characters. Whitespace is collapsed, and names are matched case-insensitively.
 - `seconds`: a whole number from 1 to 36000.
 - `game`: one of `daily`, `easy`, `medium`, `hard`.
+- `message`: 1–200 characters.
 
 Invalid input gets a `400 { "error": … }` response, and an unknown route gets `404`.
 

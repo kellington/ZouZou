@@ -1,12 +1,14 @@
 # State
 
-*Last updated: 2026-10-17 (unattended refresh: no open handoffs, status page current, no app changes; PR #20 docs merged → `main` @ `8bec6cf`). Previous: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
+*Last updated: 2026-11-05 (Trash Talk shipped, PR #22, `main` @ `3758ab3`). Previous: 2026-10-17 (unattended refresh: no open handoffs, status page current, no app changes; PR #20 docs merged → `main` @ `8bec6cf`). Previous: 2026-10-09 (2026-10-08 session: Top 10 + streaks, no-guess puzzles, Teach Me + hints, dino rewards — PR #19). Previous: 2026-09-29 evening (Pause, lives on Top 5, Show Reward, Personal Stats, Reset fix); 2026-09-29 daily tries + News. Previous: 2026-09-27 (Results + Share), 2026-09-24 (repo public), 2026-09-24 (Replit project deleted)*
 
 ## Summary
 
 ZouZou is live on Cloudflare at **https://zouzou.minus1over12.com**: one Worker serves the static
 assets and a Hono API, backed by D1. Replit project deleted 2026-09-24; repo public (MIT) at
-https://github.com/kellington/ZouZou. **2026-10-08: PR #19 shipped (supersedes #18), live ~60 s after
+https://github.com/kellington/ZouZou. **2026-11-05: Trash Talk shipped (PR #22)** — comment card under Today's
+Top 10, popup with newest 100 and a post box, migration 0005, two new routes. Rob confirmed it works on production.
+**2026-10-08: PR #19 shipped (supersedes #18), live ~60 s after
 merge** — Today's Top 10 + daily streak next to names (migration 0004), no-guess puzzle generator, new
 **Teach Me** mode with hints, 6 public-domain baby-dino rewards, 4 News entries. Built in the main session
 (no Wren/Quincy); verified by typecheck, local wrangler dev + local D1, solver simulations and Chrome on
@@ -20,14 +22,17 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 
 ## What's working
 
-- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `8bec6cf`, PR #20 docs-only; last app change `c58ed88`).
+- **Production:** Worker `zouzou`, deployed by Workers Builds on push to `main` (now `3758ab3`, PR #22).
   - Custom domain `zouzou.minus1over12.com`; `zouzou.rob-kellington.workers.dev` kept as a fallback.
   - pnpm 10.34.5 and Node 24.21.0 are picked up from `packageManager` and `.nvmrc`.
-- **D1 `zouzou` (WNAM):** `0001`–`0004` applied (0002 and 0003 by Rob 2026-09-29; `0004_daily_streak.sql`
+- **D1 `zouzou` (WNAM):** `0001`–`0005` applied (`0005_comments.sql` was already applied when checked 2026-11-05, before the merge; who ran it isn't recorded. 0002 and 0003 by Rob 2026-09-29; `0004_daily_streak.sql`
   by Claude with Rob's OK 2026-10-08, before the merge; existing rows got `attempts = 1`,
-  `lives_lost = NULL`, `streak = NULL`). Next migration is `0005_*`. Note: run `migrations apply --remote` from a checkout
+  `lives_lost = NULL`, `streak = NULL`). Next migration is `0006_*`. Note: run `migrations apply --remote` from a checkout
   that *has* the new file — the first 0003 attempt ran from `vscode` and found nothing to apply. Phase 0 backup imported (62 games,
   4 players, 25 daily rows) plus 1 `zz-test` daily game kept by Rob's choice.
+- **Trash Talk (2026-11-05, PR #22):** `src/components/TrashTalk.tsx`, `GET`/`POST /api/comments`. Card polls every 60 s and
+  refreshes after a post; a failed background refresh keeps the cached comments on screen. Verified by typecheck, build,
+  local wrangler + D1 API checks and Rob's post on production.
 - **Top 10 + streaks (2026-10-08, PR #19, commit `5cec1d8`):** board shows 10 (server already returned 10).
   Daily POST takes optional `streak` (1–100000); entries carry `streak: number|null`, shown after the name
   as `(🔥 N Day Streak)`. `recordDailyWin` now returns the streak incl. today's win. Rows saved before the
@@ -82,7 +87,7 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
     was fixed before commit; that fix wasn't re-tested by QA. Live curl showed `attempts: 1` on
     today's 3 entries.
 - **Zone `minus1over12.com`:** Always Use HTTPS on; rate-limit rule `zouzou-api` (10 req/10 s per IP).
-  As of 2026-10-17 the rule matches only `/api/daily*`, `/api/players*`, `/api/healthz` — **any new
+  As of 2026-11-05 the rule matches paths starting `/api/daily`, `/api/players`, `/api/comments`, plus `/api/healthz` — **any new
   `/api` route must be added to it** (Cloudflare dashboard, Rob's change).
 - **Results + Share (2026-09-27, `304d288`):**
   - Once today's daily is done, the Menu's Daily button reads **Results** and opens a modal; the
@@ -111,9 +116,6 @@ Built by Wren, verified by Quincy, share sheet tested by Rob on device, deployed
 
 ## Known issues
 
-- **2026-10-08 features not device-tested:** Teach Me / hints / streak badge / new dinos checked in desktop
-  Chrome on localhost + live asset checks only; no Quincy pass. In Chrome automation the first Hint tap right
-  after page load showed nothing (second worked) — probably the tool; unconfirmed on a phone.
 - **Hint highlight can be busy:** a "confined" hint early on can flash 20+ squares (correct, just noisy).
 - **10-08 daily changed mid-day** with the generator deploy; anyone mid-try got a new board.
 
@@ -155,13 +157,20 @@ Local smoke: pnpm --filter @workspace/zouzou-friends run build && pnpm exec wran
 - **PLAN drift (growing):** "Settle in" lists new gameplay features and API contract changes as out of
   scope. Shipped anyway (Rob's call): Results + Share (09-27); daily tries (09-29, contract + 0002); hearts
   lost (contract + 0003), Pause, Show Reward, Personal Stats (all 09-29); Top 10 + streaks (contract +
-  0004), no-guess generator, Teach Me, dino rewards (all 10-08). The milestone is now really
+  0004), no-guess generator, Teach Me, dino rewards (all 10-08); Trash Talk (11-05, contract + 0005). The milestone is now really
   "friend-feedback features". Rewrite PLAN.md at the next milestone.
 - **Stats are per-device** (cookie). If friends ask for cross-device stats, that's the D1 route:
   `0002` migration recording losses + a `/players/{name}/stats` endpoint (contract change). Not planned.
 - **AI+PROCESS.md** snapshot still says "moving to Cloudflare"; there's no HTML version.
 - **Any friend blocked by the rate limit?** Unknown until people play; raise to 20 req/10 s if so.
 - Replit account closes once conforma is off it (tracked in the conforma repo).
+
+## Resolved 2026-11-05
+
+- Reviewed and shipped Trash Talk (PR #22). Two fixes before merge: popup no longer closes on a failed
+  background refresh; News entry re-dated. `/api/comments` added to the rate-limit rule. Rob accepted the
+  moderation risk (DECISIONS).
+- Rob's real-phone check of the 10-08 release passed: Teach Me, streak badge and dino rewards all work.
 
 ## Resolved this session (2026-10-08)
 

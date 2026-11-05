@@ -11,14 +11,12 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Now
 
-- [ ] Rob: real-phone check of the 10-08 release — Teach Me (Hint on first tap, highlights, wording), streak badge on Top 10, a dino reward
 - [ ] Rob is polling friends on the new bits (tries, hearts, Pause, Show Reward, Personal Stats, Teach Me, no-guess puzzles); record results + whether anyone wants cross-device stats
 
 ## Next
 
-- [ ] PR `vscode` → `main` for `f54abea` (status page) + 2026-10-17 refresh commit — docs only; push + merge are Rob's
 - [ ] ~2026-09-24: one-week usage check (Worker requests/day, D1 rows read/written, rate-limit rule hits) vs Free limits → report to SKYresearch §11.10
-- [ ] Standing: any new `/api` route → Rob adds it to the `zouzou-api` rate-limit rule (dashboard; rule now lists only `/api/daily*`, `/api/players*`, `/api/healthz`, 2026-10-17)
+- [ ] Standing: any new `/api` route → Rob adds it to the `zouzou-api` rate-limit rule (dashboard; rule now lists `/api/daily`, `/api/players`, `/api/comments` (starts with) and `/api/healthz`, 2026-11-05)
 - [ ] Watch for friends hitting 429s; if any, raise the rule to 20 req/10 s → SKYresearch §11.8
 - [ ] Capture friends' reaction to the move (one line) → SKYresearch §11.9
 - [ ] Ask friends how the critter choice lands
@@ -48,6 +46,8 @@ is the real record. Don't let this file become the project's second STATE.md.
 
 ## Done (recent)
 
+- [x] 2026-11-05 — Rob: real-phone check of the 10-08 release passed (Teach Me, streak badge, dino reward)
+- [x] 2026-11-05 — PR #22 live: Trash Talk comments under Today's Top 10 (0005 applied remote, `/api/comments` in rate-limit rule, News entry); Rob confirmed on production
 - [x] 2026-10-17 — CLAUDE.md: stale Replit-migration wording replaced (Cloudflare Workers, Workers Builds); rate-limit route list recorded (handoffs H-20261016-05, H-20261017-06)
 - [x] 2026-10-08 — PR #19 live: Top 10 + daily streak on board (0004 applied remote), no-guess generator, Teach Me + hints, 6 public-domain dino rewards, News ×4, diary
 
