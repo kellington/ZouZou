@@ -147,9 +147,13 @@ export function Game() {
   const [reward, setReward] = useState<Reward | null>(null);
   const [showReward, setShowReward] = useState(false);
   const [tempName, setTempName] = useState(store.playerName);
-  // Hints only in Teach Me — never on the daily or the scored modes.
-  const hintsAllowed = safeMode === 'teach';
+  // Teach Me has unlimited hints; Easy/Medium/Hard get one per puzzle
+  // (Reset Board doesn't give it back). Never on the daily.
+  const hintsAllowed = safeMode !== 'daily';
+  const hintLimit = safeMode === 'teach' ? Infinity : 1;
   const [hint, setHint] = useState<Hint | null>(null);
+  const [hintsUsed, setHintsUsed] = useState(0);
+  const hintsLeft = hintLimit - hintsUsed;
 
   const initGrid = useCallback(() => {
     const size = puzzle.size || 6;
@@ -166,8 +170,10 @@ export function Game() {
   useEffect(() => setHint(null), [grid]);
 
   const handleHint = () => {
-    if (gameState !== 'playing' || paused) return;
-    setHint(getHint(puzzle.regionMap, puzzle.solution, grid, config.logic, critterNoun.singular));
+    if (gameState !== 'playing' || paused || hintsLeft <= 0) return;
+    const next = getHint(puzzle.regionMap, puzzle.solution, grid, config.logic, critterNoun.singular);
+    setHint(next);
+    if (next) setHintsUsed((used) => used + 1);
   };
 
   useEffect(() => {
@@ -185,6 +191,7 @@ export function Game() {
     setPaused(false);
     setReward(null);
     setShowReward(false);
+    setHintsUsed(0);
   }, [puzzle, config.lives, initGrid]);
 
   useEffect(() => {
@@ -417,8 +424,9 @@ export function Game() {
       {hintsAllowed && (
         <div className="mb-4">
           <div className="flex justify-center">
-            <ActionButton variant="board" onClick={handleHint} className="px-6 bg-white" disabled={gameState !== 'playing' || paused}>
-              <Lightbulb size={20} /> Hint
+            <ActionButton variant="board" onClick={handleHint} className="px-6 bg-white" disabled={gameState !== 'playing' || paused || hintsLeft <= 0}>
+              <Lightbulb size={20} />
+              {hintLimit === Infinity ? 'Hint' : hintsLeft > 0 ? 'Hint (1 left)' : 'Hint used'}
             </ActionButton>
           </div>
           {hint && (
